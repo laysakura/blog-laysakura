@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>真・SSEを使って8flops/clockを実現する | 俺とお前とlaysakura</title>
+  
+  <link rel="canonical" href="https://laysakura.github.io/2012/01/06/sse-8flops-clock/"/>
+  <meta name="viewport" content="width=device-width">
+  <meta name="description" content="カーネル／VM Advent Calendar の34日目として書きます．記事の内容自体はこのイベントと関係ありませんので，どなたでもお楽しみ下さいませ． 今回は 自分の前回の記事 で見つけた誤りを訂正しつつ，Intelの一部CPUがサポートするSSE(Streaming SIMD Extensions)命令により1clockで8個の単精度浮動小数点演算を行なう方法を紹介します． なるべく前回の記">
+<meta property="og:type" content="article">
+<meta property="og:title" content="真・SSEを使って8flops&#x2F;clockを実現する">
+<meta property="og:url" content="https://laysakura.github.io/2012/01/06/sse-8flops-clock/index.html">
+<meta property="og:site_name" content="俺とお前とlaysakura">
+<meta property="og:description" content="カーネル／VM Advent Calendar の34日目として書きます．記事の内容自体はこのイベントと関係ありませんので，どなたでもお楽しみ下さいませ． 今回は 自分の前回の記事 で見つけた誤りを訂正しつつ，Intelの一部CPUがサポートするSSE(Streaming SIMD Extensions)命令により1clockで8個の単精度浮動小数点演算を行なう方法を紹介します． なるべく前回の記">
+<meta property="og:locale" content="ja_JP">
+<meta property="article:published_time" content="2012-01-06T03:43:46.000Z">
+<meta property="article:modified_time" content="2020-02-10T05:06:21.000Z">
+<meta property="article:author" content="Sho Nakatani a.k.a. laysakura">
+<meta property="article:tag" content="High Performance Computing">
+<meta name="twitter:card" content="summary">
+
+  <!-- favicon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+  <link rel="icon" href="/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+  <link rel="manifest" href="/favicon/site.webmanifest">
+  <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#5bbad5">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="theme-color" content="#ffffff">
+
+  
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-22289437-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+  <!-- MathJax -->
+  <script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+  <div id="container">
+    <div class="mobile-nav-panel">
+	<i class="icon-reorder icon-large"></i>
+</div>
+<header id="header">
+	<h1 class="blog-title">
+		<a href="/">俺とお前とlaysakura</a>
+	</h1>
+	<nav class="nav">
+		<ul>
+			<li><a href="/archives">過去の投稿</a></li>
+			<li><a id="nav-search-btn" class="nav-icon" title="Search"></a></li>
+			<li><a href="http://cloud.feedly.com/#subscription%2Ffeed%2Fhttps%3A%2F%2Flaysakura.github.io%2Fatom.xml" target="_blank" rel="noopener" id="nav-rss-link" class="nav-icon" title="RSS Feed"></a></li>
+		</ul>
+	</nav>
+	<div id="search-form-wrap">
+		<form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://laysakura.github.io"></form>
+	</div>
+</header>
+    <div id="main">
+      <article id="post-真・SSEを使って8flops-clockを実現する" class="post">
+	<footer class="entry-meta-header">
+		<span class="meta-elements date">
+			<a href="/2012/01/06/sse-8flops-clock/" class="article-date">
+  <time datetime="2012-01-06T03:43:46.000Z" itemprop="datePublished">2012-01-06</time>
+</a>
+		</span>
+	</footer>
+	
+	<header class="entry-header">
+		
+  
+    <h1 class="article-title entry-title" itemprop="name">
+      真・SSEを使って8flops/clockを実現する
+    </h1>
+  
+
+	</header>
+	<div class="entry-content">
+		
+    	<p><a href="http://atnd.org/events/21910" target="_blank" rel="noopener">カーネル／VM Advent Calendar</a> の34日目として書きます．<br>記事の内容自体はこのイベントと関係ありませんので，どなたでもお楽しみ下さいませ．</p>
+<p>今回は <a href="http://d.hatena.ne.jp/laysakura/20111113/1321155826" target="_blank" rel="noopener">自分の前回の記事</a> で見つけた誤りを訂正しつつ，<br>Intelの一部CPUがサポートするSSE(Streaming SIMD Extensions)命令により1clockで8個の単精度浮動小数点演算を行なう方法を紹介します．</p>
+<p>なるべく前回の記事とは独立した記述を心がけます．</p>
+<a id="more"></a>
+
+<!-- toc -->
+
+<ul>
+<li><a href="#関連した記事">関連した記事</a></li>
+<li><a href="#使用したcpu">使用したCPU</a></li>
+<li><a href="#乗算と加算を並列に行なって-8flopsclock-を実現">乗算と加算を並列に行なって 8flops/clock を実現</a></li>
+<li><a href="#8flopsclock-を出すための制約">8flops/clock を出すための制約</a></li>
+<li><a href="#ロードシャッフル命令を使いつつも8flopsclock近く出るコード">ロード，シャッフル命令を使いつつも8flops/clock近く出るコード</a></li>
+<li><a href="#すぐに実験できるコードと実験方法">すぐに実験できるコードと実験方法</a></li>
+<li><a href="#前回の記事の欠陥">前回の記事の欠陥</a></li>
+<li><a href="#測定環境についての注意">測定環境についての注意</a></li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="関連した記事">関連した記事</span></h2><p>@takeoka さんが，カーネル／VM Advent Calendarの24日目の記事として，<a href="http://ameblo.jp/takeoka/entry-11116148541.html" target="_blank" rel="noopener">AVXの効き目について</a>書かれています．<br>SSEが128bitレジスタを使って4つの単精度浮動小数をパックするのに対し，AVXは256bitで8個パックできます．<br>とはいえ，まだまだAVX命令はないけどSSE命令を積んでいるCPUも現役ですので，この記事も多少お役に立てるかと思います．</p>
+<h2><span id="使用したcpu">使用したCPU</span></h2><p>この記事の内容は，</p>
+<ul>
+<li>Intel Xeon CPU E7540 @ 2.00GHz</li>
+<li>Intel Core2 Duo CPU P9400 @ 2.40GHz</li>
+</ul>
+<p>で調査・実験しています．</p>
+<p>それ以外の環境では，記述が当てはまらないことも考えられます．<br>もしお気づきの点がございましたらコメント頂けたら嬉しいです．</p>
+<h2><span id="乗算と加算を並列に行なって-8flopsclock-を実現">乗算と加算を並列に行なって 8flops/clock を実現</span></h2><p>SSEでは，128-bitのxmmレジスタを使って計算を進めます．<br>例えば，</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">float</span> a[<span class="number">4</span>], b[<span class="number">4</span>];</span><br><span class="line">b[<span class="number">0</span>] += a[<span class="number">0</span>];</span><br><span class="line">b[<span class="number">1</span>] += a[<span class="number">1</span>];</span><br><span class="line">b[<span class="number">2</span>] += a[<span class="number">2</span>];</span><br><span class="line">b[<span class="number">3</span>] += a[<span class="number">3</span>];</span><br></pre></td></tr></table></figure>
+
+<p>という計算であれば，</p>
+<ol>
+<li>a[0]をxmm0番レジスタの0-31bit目に， … , a[3]をxmm0番レジスタの96-127bit目に格納</li>
+<li>b[0]をxmm1番レジスタの0-31bit目に， … , b[3]をxmm1番レジスタの96-127bit目に格納</li>
+<li>xmm1 += xmm0</li>
+</ol>
+<p>とします．この xmm1 += xmm0 が1clockでできてしまうのがSSEの強みです．</p>
+<p>さて，SSEでは掛算と足し算は同時にできてしまいます．<br>つまり，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">xmm1 +&#x3D; xmm0; 4つの単精度浮動小数の足し算</span><br><span class="line">xmm3 *&#x3D; xmm2; 4つの単精度浮動小数の掛算</span><br></pre></td></tr></table></figure>
+
+<p>が1clockでできるので，8flops/clockが実現できます．<br>(※ flops: FLoating-point OPerationS の意で使っています．<br>似ていますがFLOPSと大文字で書くときは，FLoating-point Operations Per Secondの意ですので，<br>ごっちゃにしないように注意してください．)</p>
+<p>SSEの実際の命令を使って掛算と足し算を表現すると，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">addps %xmm0, %xmm1</span><br><span class="line">mulps %xmm2, %xmm3</span><br></pre></td></tr></table></figure>
+
+<p>と書けます．</p>
+<p>(この記事でのアセンブリの表記は，GCCのインラインアセンブラと同じです．<br>“Op Reg1, Reg2” だと，結果は Reg2 に格納されると考えてください．)</p>
+<h2><span id="8flopsclock-を出すための制約">8flops/clock を出すための制約</span></h2><p><a href="http://sc.tamu.edu/systems/eos/nehalem.pdf" target="_blank" rel="noopener">The Architecture of the Nehalem Processor and Nehalem-EP SMP Platforms</a> (PDF)<br>の14ページ目に，Nehalemアーキテクチャにおけるアウトオブオーダ実行の概要が図示されています．<br>これによると，SSE関係の命令については，</p>
+<ul>
+<li>ロード/ストア</li>
+<li>足し算</li>
+<li>掛算</li>
+<li>シャッフル</li>
+</ul>
+<p>の4種類の命令は1clockで行えるようです．<br>実際のアプリケーションでSSE命令を使うとなると，xmmレジスタとメモリのやりとりでロード/ストア命令は使いますし，<br>xmmレジスタ内部の浮動小数の並び順を入れ替えるシャッフル命令がほしくなるときもあります．</p>
+<p>SSEで高速な処理を記述するには，まず1clockで同時に行える命令を明確にしましょう．</p>
+<p>同時に実行できる演算の種類が限られているのは演算器の都合でしょうが，レジスタの都合に起因する制約もあります．<br>例えば，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">addps %xmm0, %xmm8</span><br><span class="line">mulps %xmm1, %xmm8</span><br></pre></td></tr></table></figure>
+
+<p>のようなコードで，同じレジスタに同時に値を書き込むことはできません．</p>
+<p>その一方で，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">addps %xmm8, %xmm0</span><br><span class="line">mulps %xmm8, %xmm1</span><br></pre></td></tr></table></figure>
+
+<p>のようなコードで，同じレジスタから同時に値を読み出すことはできます．</p>
+<p>この辺りの詳しい条件は筆者は把握していません．</p>
+<h2><span id="ロードシャッフル命令を使いつつも8flopsclock近く出るコード">ロード，シャッフル命令を使いつつも8flops/clock近く出るコード</span></h2><p>(この記事の終わりに，コンパイルしてすぐに実行できるフルのコードも掲載します)</p>
+<p>実際に，</p>
+<ul>
+<li>ロード</li>
+<li>足し算</li>
+<li>掛算</li>
+<li>シャッフル</li>
+</ul>
+<p>を1clock(近く)で行なうコードを書いてみます．</p>
+<p>ざっくり読む上での注意点も述べておきます．</p>
+<ul>
+<li>movupsは(今回の使い方では)メモリからxmmレジスタに値をロードする命令</li>
+<li>shufpsはxmmレジスタの値をシャッフルする命令</li>
+<li>print_GFLOPS, print_throughput は計測結果を出力する関数</li>
+<li>rdtsc() は，CPUのRDTSC命令を用いて，(ほぼ)CPUクロックベースで時間を計測するための関数</li>
+<li>mulps SRC, DEST で，ソースにメモリ上のデータを使う場合，そのデータは16バイト境界にアラインされている必要がある</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span></span><br><span class="line">sse_mulps_addps_movups_shufps_fromL1()</span><br><span class="line">&#123;</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">"-- sse_mulps_addps_movups_shufps_fromL1 --\n"</span>);</span><br><span class="line"> </span><br><span class="line">  <span class="keyword">unsigned</span> <span class="keyword">long</span> <span class="keyword">long</span> clk0, clk1, cycles;</span><br><span class="line"> </span><br><span class="line">  zero_all_xmm();</span><br><span class="line"> </span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">int</span> instructions_per_loop = <span class="number">16</span>;</span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">int</span> flops_per_instruction = <span class="number">4</span>;</span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">double</span> flops = flops_per_instruction * instructions_per_loop * LOOP;</span><br><span class="line">  <span class="keyword">int</span> i;</span><br><span class="line"> </span><br><span class="line">  <span class="keyword">float</span> __attribute__ ((aligned(<span class="number">16</span>))) a[<span class="number">4</span>] = &#123;<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>&#125;;</span><br><span class="line">  <span class="keyword">float</span> __attribute__ ((aligned(<span class="number">16</span>))) b[<span class="number">4</span>] = &#123;<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>&#125;;</span><br><span class="line">  <span class="keyword">float</span> __attribute__ ((aligned(<span class="number">16</span>))) c[<span class="number">4</span>] = &#123;<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>&#125;;</span><br><span class="line">  <span class="keyword">float</span> __attribute__ ((aligned(<span class="number">16</span>))) d[<span class="number">4</span>] = &#123;<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>&#125;;</span><br><span class="line"> </span><br><span class="line">  clk0 = rdtsc();</span><br><span class="line">  <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; LOOP; ++i) &#123;</span><br><span class="line">    <span class="keyword">asm</span> <span class="keyword">volatile</span></span><br><span class="line">      (</span><br><span class="line">       <span class="string">"movups %0, %%xmm4\n\t"</span></span><br><span class="line">       <span class="string">"shufps $0, %%xmm4, %%xmm4\n\t"</span></span><br><span class="line">       <span class="string">"mulps %%xmm4, %%xmm0\n\t"</span></span><br><span class="line">       <span class="string">"addps %%xmm0, %%xmm8\n\t"</span></span><br><span class="line"> </span><br><span class="line">       <span class="string">"movups %1, %%xmm5\n\t"</span></span><br><span class="line">       <span class="string">"shufps $0, %%xmm5, %%xmm5\n\t"</span></span><br><span class="line">       <span class="string">"mulps %%xmm5, %%xmm1\n\t"</span></span><br><span class="line">       <span class="string">"addps %%xmm1, %%xmm9\n\t"</span></span><br><span class="line"> </span><br><span class="line">       <span class="string">"movups %2, %%xmm6\n\t"</span></span><br><span class="line">       <span class="string">"shufps $0, %%xmm6, %%xmm6\n\t"</span></span><br><span class="line">       <span class="string">"mulps %%xmm6, %%xmm2\n\t"</span></span><br><span class="line">       <span class="string">"addps %%xmm2, %%xmm10\n\t"</span></span><br><span class="line"> </span><br><span class="line">       <span class="string">"movups %3, %%xmm7\n\t"</span></span><br><span class="line">       <span class="string">"shufps $0, %%xmm7, %%xmm7\n\t"</span></span><br><span class="line">       <span class="string">"mulps %%xmm7, %%xmm3\n\t"</span></span><br><span class="line">       <span class="string">"addps %%xmm3, %%xmm11\n\t"</span></span><br><span class="line"> </span><br><span class="line">       <span class="string">"movups %0, %%xmm4\n\t"</span></span><br><span class="line">       <span class="string">"shufps $0, %%xmm4, %%xmm4\n\t"</span></span><br><span class="line">       <span class="string">"mulps %%xmm4, %%xmm0\n\t"</span></span><br><span class="line">       <span class="string">"addps %%xmm0, %%xmm8\n\t"</span></span><br><span class="line"> </span><br><span class="line">       <span class="string">"movups %1, %%xmm5\n\t"</span></span><br><span class="line">       <span class="string">"shufps $0, %%xmm5, %%xmm5\n\t"</span></span><br><span class="line">       <span class="string">"mulps %%xmm5, %%xmm1\n\t"</span></span><br><span class="line">       <span class="string">"addps %%xmm1, %%xmm9\n\t"</span></span><br><span class="line"> </span><br><span class="line">       <span class="string">"movups %2, %%xmm6\n\t"</span></span><br><span class="line">       <span class="string">"shufps $0, %%xmm6, %%xmm6\n\t"</span></span><br><span class="line">       <span class="string">"mulps %%xmm6, %%xmm2\n\t"</span></span><br><span class="line">       <span class="string">"addps %%xmm2, %%xmm10\n\t"</span></span><br><span class="line"> </span><br><span class="line">       <span class="string">"movups %3, %%xmm7\n\t"</span></span><br><span class="line">       <span class="string">"shufps $0, %%xmm7, %%xmm7\n\t"</span></span><br><span class="line">       <span class="string">"mulps %%xmm7, %%xmm3\n\t"</span></span><br><span class="line">       <span class="string">"addps %%xmm3, %%xmm11\n\t"</span></span><br><span class="line">       :</span><br><span class="line">       :<span class="string">"m"</span>(a[<span class="number">0</span>]), <span class="string">"m"</span>(b[<span class="number">0</span>]), <span class="string">"m"</span>(c[<span class="number">0</span>]), <span class="string">"m"</span>(d[<span class="number">0</span>])</span><br><span class="line">       );</span><br><span class="line">  &#125;</span><br><span class="line">  clk1 = rdtsc();</span><br><span class="line">  cycles = clk1 - clk0;</span><br><span class="line">  print_GFLOPS(flops, cycles);</span><br><span class="line">  print_throughput(instructions_per_loop * LOOP, cycles);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>xmmレジスタが8本しかないCPUではコンパイルエラーになりますので，xmm8 - xmm15を適宜置き換えてください．</p>
+<h2><span id="すぐに実験できるコードと実験方法">すぐに実験できるコードと実験方法</span></h2><p>以下のコードをコピペし， “sse_8flops_per_clock.c” など適当なファイルを作ってください．<br>コンパイル方法は，</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gcc -O3 -funroll-loops sse_8flops_per_clock.c -o sse_8flops_per_clock</span><br></pre></td></tr></table></figure>
+
+<p>辺りだと性能が出るはずです．<br>特にループ・アンローリングのための “-funroll-loops” は性能に直結します．</p>
+<p>実行すると，8flops/clock程度出ていることが確認できるかと思います．</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ ./sse_8flops_per_clock</span><br><span class="line">-- sse_mulps_addps_movss_shufps_fromL1 --</span><br><span class="line">GFLOPS @ 2.00GHz:</span><br><span class="line">  7.408 [flops/clock] = 14.816 [GFLOPS]  (134217728 flops <span class="keyword">in</span> 18117460 clock = 0.009059 sec)</span><br><span class="line">Throughput:</span><br><span class="line">  1.852 [instructions/clock]   (33554432 instrucions <span class="keyword">in</span> 18117460 clock)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;time.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/time.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdint.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;inttypes.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> GHz 2.00</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">inline</span> <span class="keyword">uint64_t</span></span><br><span class="line">rdtsc()</span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">uint64_t</span> ret;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> defined _LP64</span></span><br><span class="line">  <span class="keyword">asm</span> <span class="keyword">volatile</span></span><br><span class="line">    (</span><br><span class="line">     <span class="string">"rdtsc\n\t"</span></span><br><span class="line">     <span class="string">"mov $32, %%rdx\n\t"</span></span><br><span class="line">     <span class="string">"orq %%rdx, %%rax\n\t"</span></span><br><span class="line">     <span class="string">"mov %%rax, %0\n\t"</span></span><br><span class="line">     :<span class="string">"=m"</span>(ret)</span><br><span class="line">     :</span><br><span class="line">     :<span class="string">"%rax"</span>, <span class="string">"%rdx"</span></span><br><span class="line">     );</span><br><span class="line"><span class="meta">#<span class="meta-keyword">else</span></span></span><br><span class="line">  <span class="keyword">asm</span> <span class="keyword">volatile</span></span><br><span class="line">    (</span><br><span class="line">     <span class="string">"rdtsc\n\t"</span></span><br><span class="line">     <span class="string">"mov %%eax, %0\n\t"</span></span><br><span class="line">     <span class="string">"mov %%edx, %1\n\t"</span></span><br><span class="line">     :<span class="string">"=m"</span>(((<span class="keyword">uint32_t</span>&lt;span style=<span class="string">"font-weight:bold;"</span>&gt;)&amp;ret)[<span class="number">0</span>]), <span class="string">"=m"</span>(((<span class="keyword">uint32_t</span>&lt;/span&gt;)&amp;ret)[<span class="number">1</span>])</span><br><span class="line">     :</span><br><span class="line">     :<span class="string">"%eax"</span>, <span class="string">"%edx"</span></span><br><span class="line">     );</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">  <span class="keyword">return</span> ret;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span></span><br><span class="line">print_GFLOPS(<span class="keyword">double</span> flops, <span class="keyword">uint64_t</span> cycles)</span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">double</span> GFLOPS = flops * GHz / cycles;</span><br><span class="line">  <span class="keyword">double</span> sec = (<span class="keyword">double</span>)cycles * <span class="number">1e-9</span> / GHz;</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">"GFLOPS @ %.2fGHz:\n  %.3f [flops/clock] = %.3f [GFLOPS]  (%.0f flops in %"</span>PRIu64<span class="string">" clock = %f sec)\n"</span>,</span><br><span class="line">         GHz, flops / (<span class="keyword">double</span>)cycles, GFLOPS, flops, cycles, sec);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span></span><br><span class="line">print_throughput(<span class="keyword">uint64_t</span> instructions, <span class="keyword">uint64_t</span> cycles)</span><br><span class="line">&#123;</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">"Throughput:\n  %.3f [instructions/clock]   (%"</span>PRIu64<span class="string">" instrucions in %"</span>PRIu64<span class="string">" clock)\n"</span>,</span><br><span class="line">         (<span class="keyword">double</span>)instructions / (<span class="keyword">double</span>)cycles, instructions, cycles);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> zero_all_xmm() \</span></span><br><span class="line">  <span class="keyword">do</span> &#123; \</span><br><span class="line">    <span class="keyword">asm</span> <span class="keyword">volatile</span> \</span><br><span class="line">      (<span class="string">"xorps %xmm0, %xmm0\n\t"</span> \</span><br><span class="line">       <span class="string">"xorps %xmm1, %xmm1\n\t"</span> \</span><br><span class="line">       <span class="string">"xorps %xmm2, %xmm2\n\t"</span> \</span><br><span class="line">       <span class="string">"xorps %xmm3, %xmm3\n\t"</span> \</span><br><span class="line">       <span class="string">"xorps %xmm4, %xmm4\n\t"</span> \</span><br><span class="line">       <span class="string">"xorps %xmm5, %xmm5\n\t"</span> \</span><br><span class="line">       <span class="string">"xorps %xmm6, %xmm6\n\t"</span> \</span><br><span class="line">       <span class="string">"xorps %xmm7, %xmm7\n\t"</span> \</span><br><span class="line">       ); \</span><br><span class="line">  &#125; <span class="keyword">while</span> (<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> LOOP (1 &lt;&lt; 21)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span></span><br><span class="line">sse_mulps_addps_movups_shufps_fromL1()</span><br><span class="line">&#123;</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">"-- sse_mulps_addps_movups_shufps_fromL1 --\n"</span>);</span><br><span class="line"> </span><br><span class="line">  <span class="keyword">unsigned</span> <span class="keyword">long</span> <span class="keyword">long</span> clk0, clk1, cycles;</span><br><span class="line"> </span><br><span class="line">  zero_all_xmm();</span><br><span class="line"> </span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">int</span> instructions_per_loop = <span class="number">16</span>;</span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">int</span> flops_per_instruction = <span class="number">4</span>;</span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">double</span> flops = flops_per_instruction * instructions_per_loop * LOOP;</span><br><span class="line">  <span class="keyword">int</span> i;</span><br><span class="line"> </span><br><span class="line">  <span class="keyword">float</span> __attribute__ ((aligned(<span class="number">16</span>))) a[<span class="number">4</span>] = &#123;<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>&#125;;</span><br><span class="line">  <span class="keyword">float</span> __attribute__ ((aligned(<span class="number">16</span>))) b[<span class="number">4</span>] = &#123;<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>&#125;;</span><br><span class="line">  <span class="keyword">float</span> __attribute__ ((aligned(<span class="number">16</span>))) c[<span class="number">4</span>] = &#123;<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>&#125;;</span><br><span class="line">  <span class="keyword">float</span> __attribute__ ((aligned(<span class="number">16</span>))) d[<span class="number">4</span>] = &#123;<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>&#125;;</span><br><span class="line"> </span><br><span class="line">  clk0 = rdtsc();</span><br><span class="line">  <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; LOOP; ++i) &#123;</span><br><span class="line">    <span class="keyword">asm</span> <span class="keyword">volatile</span></span><br><span class="line">      (</span><br><span class="line">       <span class="string">"movups %0, %%xmm4\n\t"</span></span><br><span class="line">       <span class="string">"shufps $0, %%xmm4, %%xmm4\n\t"</span></span><br><span class="line">       <span class="string">"mulps %%xmm4, %%xmm0\n\t"</span></span><br><span class="line">       <span class="string">"addps %%xmm0, %%xmm8\n\t"</span></span><br><span class="line"> </span><br><span class="line">       <span class="string">"movups %1, %%xmm5\n\t"</span></span><br><span class="line">       <span class="string">"shufps $0, %%xmm5, %%xmm5\n\t"</span></span><br><span class="line">       <span class="string">"mulps %%xmm5, %%xmm1\n\t"</span></span><br><span class="line">       <span class="string">"addps %%xmm1, %%xmm9\n\t"</span></span><br><span class="line"> </span><br><span class="line">       <span class="string">"movups %2, %%xmm6\n\t"</span></span><br><span class="line">       <span class="string">"shufps $0, %%xmm6, %%xmm6\n\t"</span></span><br><span class="line">       <span class="string">"mulps %%xmm6, %%xmm2\n\t"</span></span><br><span class="line">       <span class="string">"addps %%xmm2, %%xmm10\n\t"</span></span><br><span class="line"> </span><br><span class="line">       <span class="string">"movups %3, %%xmm7\n\t"</span></span><br><span class="line">       <span class="string">"shufps $0, %%xmm7, %%xmm7\n\t"</span></span><br><span class="line">       <span class="string">"mulps %%xmm7, %%xmm3\n\t"</span></span><br><span class="line">       <span class="string">"addps %%xmm3, %%xmm11\n\t"</span></span><br><span class="line"> </span><br><span class="line">       <span class="string">"movups %0, %%xmm4\n\t"</span></span><br><span class="line">       <span class="string">"shufps $0, %%xmm4, %%xmm4\n\t"</span></span><br><span class="line">       <span class="string">"mulps %%xmm4, %%xmm0\n\t"</span></span><br><span class="line">       <span class="string">"addps %%xmm0, %%xmm8\n\t"</span></span><br><span class="line"> </span><br><span class="line">       <span class="string">"movups %1, %%xmm5\n\t"</span></span><br><span class="line">       <span class="string">"shufps $0, %%xmm5, %%xmm5\n\t"</span></span><br><span class="line">       <span class="string">"mulps %%xmm5, %%xmm1\n\t"</span></span><br><span class="line">       <span class="string">"addps %%xmm1, %%xmm9\n\t"</span></span><br><span class="line"> </span><br><span class="line">       <span class="string">"movups %2, %%xmm6\n\t"</span></span><br><span class="line">       <span class="string">"shufps $0, %%xmm6, %%xmm6\n\t"</span></span><br><span class="line">       <span class="string">"mulps %%xmm6, %%xmm2\n\t"</span></span><br><span class="line">       <span class="string">"addps %%xmm2, %%xmm10\n\t"</span></span><br><span class="line"> </span><br><span class="line">       <span class="string">"movups %3, %%xmm7\n\t"</span></span><br><span class="line">       <span class="string">"shufps $0, %%xmm7, %%xmm7\n\t"</span></span><br><span class="line">       <span class="string">"mulps %%xmm7, %%xmm3\n\t"</span></span><br><span class="line">       <span class="string">"addps %%xmm3, %%xmm11\n\t"</span></span><br><span class="line">       :</span><br><span class="line">       :<span class="string">"m"</span>(a[<span class="number">0</span>]), <span class="string">"m"</span>(b[<span class="number">0</span>]), <span class="string">"m"</span>(c[<span class="number">0</span>]), <span class="string">"m"</span>(d[<span class="number">0</span>])</span><br><span class="line">       );</span><br><span class="line">  &#125;</span><br><span class="line">  clk1 = rdtsc();</span><br><span class="line">  cycles = clk1 - clk0;</span><br><span class="line">  print_GFLOPS(flops, cycles);</span><br><span class="line">  print_throughput(instructions_per_loop * LOOP, cycles);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span></span><br><span class="line">main()</span><br><span class="line">&#123;</span><br><span class="line">  sse_mulps_addps_movups_shufps_fromL1();</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2><span id="前回の記事の欠陥">前回の記事の欠陥</span></h2><p>前回の記事では，足し算と掛算を1clockで行なうための条件を「フォワーディングが重要です(どやぁ」と宣っていたのですが，<br>色々コードを書いてみたり <a href="http://sc.tamu.edu/systems/eos/nehalem.pdf" target="_blank" rel="noopener">The Architecture of the Nehalem Processor and Nehalem-EP SMP Platforms</a> を<br>ざっと見た感じ，もっとアーキテクチャに根ざした複雑な問題なようです．</p>
+<h2><span id="測定環境についての注意">測定環境についての注意</span></h2><p>測定は，RDTSC命令を用いて行っています．<br>この命令で読み取るカウンタは，CPUの通常動作時の速度で更新されます(自分はそう理解しています)．<br>従って，CPUの動作周波数を動的に変化させる DVFS (Dynamic Voltage and Frequency Scaling) や TurboBoost が有効になっているマシンだと，正確な測定はできません(8flops/clockを超えるように見えたりする)．<br>どちらもBIOSでオフにできる機能なはずですので，正確な測定環境を求める方はご検討ください．</p>
+
+    
+	</div>
+	<footer class="entry-footer">
+		<div class="entry-meta-footer">
+			<span class="category">
+				
+			</span>
+			<span class="tags">
+				
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/High-Performance-Computing/" rel="tag">High Performance Computing</a></li></ul>
+
+			</span>
+		</div>
+	</footer>
+    
+    <footer class="author-info clearfix">
+      <img class="author-picture circle" src="https://www.gravatar.com/avatar/cb02a2b3f429b7c938d1fe2665e8e342">
+      <div class="author-content right">
+        <div class="author-caption">
+          <span class="label">author</span>
+          Sho Nakatani a.k.a. laysakura
+        </div>
+        <p class="author-description">
+          東京大学大学院 情報理工学系研究科 電子情報学専攻 修士課程で並列分散処理・ストリーム処理・データベースを研究。<br>
+          2014年4月に株式会社ディー・エヌ・エーにエンジニアスペシャリストとして入社し、ソーシャルゲームのサーバサイド共通基盤の開発に従事。<br>
+          2016年8月より、オンライン証券会社<a href="https://folio-sec.com" target="_blank" rel="noopener">株式会社FOLIO</a>に入社。バックエンドシステム開発・プロジェクトマネージメント・Engineering Managementに従事。<br>
+          2020年3月より<a href="https://idein.jp" target="_blank" rel="noopener">Idein株式会社</a>所属。<br>
+          随時副業募集中です: <a href="https://github.com/laysakura/resume-jp-for-side-job" target="_blank" rel="noopener">職務経歴書や募集職種</a>
+        </p>
+        <ul class="author-social-buttons">
+          <li class="author-social-button"><a class="fa fa-lg fa-twitter-square" href="https://twitter.com/laysakura" target="_blank" rel="noopener"></a></li>
+          <li class="author-social-button"><a class="fa fa-lg fa-github-square" href="https://github.com/laysakura" target="_blank" rel="noopener"></a></li>
+          <li class="author-social-button"><a class="fa fa-lg fa-facebook-square" href="https://www.facebook.com/lay.sakura" target="_blank" rel="noopener"></a></li>
+        </ul>
+      </div>
+    </footer>
+    
+	
+    
+<nav id="article-nav">
+  
+    <a href="/2013/02/10/mysql5.6-storage-engine-template/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          MySQL 5.6 で動くストレージエンジン・テンプレート
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2011/10/15/perf-stat-L1-L2-L3-cache-miss/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          perf statでL1,L2(,L3)キャッシュミス測定
+        
+      </div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+
+
+<section id="comments">
+  <div id="disqus_thread">
+
+  <!-- comment service provided by disqus -->
+  <script>
+    /**
+     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+     */
+    var disqus_config = function () {
+        this.page.url = https://laysakura.github.io/2012/01/06/sse-8flops-clock/;  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = https://laysakura.github.io/2012/01/06/sse-8flops-clock/; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    (function() {  // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        
+        s.src = '//laysakura.disqus.com/embed.js';
+        
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript" target="_blank" rel="noopener">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+    </div>
+    <div class="mb-search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:laysakura.github.io">
+  </form>
+</div>
+<footer id="footer">
+	<h1 class="footer-blog-title">
+		<a href="/">俺とお前とlaysakura</a>
+	</h1>
+	<span class="copyright">
+		&copy; 2020 Sho Nakatani a.k.a. laysakura<br>
+		Modify from <a href="https://sanographix.github.io/tumblr/apollo/" target="_blank">Apollo</a> theme, designed by <a href="https://www.sanographix.net/" target="_blank">SANOGRAPHIX.NET</a><br>
+		Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+	</span>
+</footer>
+
+    
+<script>
+  var disqus_shortname = 'laysakura';
+  
+  var disqus_url = 'https://laysakura.github.io/2012/01/06/sse-8flops-clock/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+
+  <!-- https://github.com/vfeskov/vanilla-back-to-top -->
+  <script src="https://unpkg.com/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js"></script>
+  <script>addBackToTop({
+    diameter: 50,
+    backgroundColor: '#33a6b880',
+    textColor: '#fff'
+  })</script>
+
+</body>
+</html>

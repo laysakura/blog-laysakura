@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>perf stat でパフォーマンスカウンタの値を直接指定し表示 | 俺とお前とlaysakura</title>
+  
+  <link rel="canonical" href="https://laysakura.github.io/2011/10/11/perf-stat-performance-counters/"/>
+  <meta name="viewport" content="width=device-width">
+  <meta name="description" content="perfについて少し最近のLinuxでは，perfという便利なパフォーマンス解析ツールが使えます．aptやyumなどのパッケージ管理ツールで入れられると思いますが(Debian系だとlinux-tools*って名前のパッケージのはず)，詳しい使い方はここでは解説しません． さて，このperfには色々な使い方がありますが，中でもperf statはプログラム実行中に起こるハードウェア的なイベントを取">
+<meta property="og:type" content="article">
+<meta property="og:title" content="perf stat でパフォーマンスカウンタの値を直接指定し表示">
+<meta property="og:url" content="https://laysakura.github.io/2011/10/11/perf-stat-performance-counters/index.html">
+<meta property="og:site_name" content="俺とお前とlaysakura">
+<meta property="og:description" content="perfについて少し最近のLinuxでは，perfという便利なパフォーマンス解析ツールが使えます．aptやyumなどのパッケージ管理ツールで入れられると思いますが(Debian系だとlinux-tools*って名前のパッケージのはず)，詳しい使い方はここでは解説しません． さて，このperfには色々な使い方がありますが，中でもperf statはプログラム実行中に起こるハードウェア的なイベントを取">
+<meta property="og:locale" content="ja_JP">
+<meta property="article:published_time" content="2011-10-11T04:13:30.000Z">
+<meta property="article:modified_time" content="2020-02-10T05:06:21.000Z">
+<meta property="article:author" content="Sho Nakatani a.k.a. laysakura">
+<meta property="article:tag" content="High Performance Computing">
+<meta property="article:tag" content="Linux Kernel">
+<meta property="article:tag" content="Linuxオペレーション">
+<meta name="twitter:card" content="summary">
+
+  <!-- favicon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+  <link rel="icon" href="/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+  <link rel="manifest" href="/favicon/site.webmanifest">
+  <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#5bbad5">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="theme-color" content="#ffffff">
+
+  
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-22289437-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+  <!-- MathJax -->
+  <script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+  <div id="container">
+    <div class="mobile-nav-panel">
+	<i class="icon-reorder icon-large"></i>
+</div>
+<header id="header">
+	<h1 class="blog-title">
+		<a href="/">俺とお前とlaysakura</a>
+	</h1>
+	<nav class="nav">
+		<ul>
+			<li><a href="/archives">過去の投稿</a></li>
+			<li><a id="nav-search-btn" class="nav-icon" title="Search"></a></li>
+			<li><a href="http://cloud.feedly.com/#subscription%2Ffeed%2Fhttps%3A%2F%2Flaysakura.github.io%2Fatom.xml" target="_blank" rel="noopener" id="nav-rss-link" class="nav-icon" title="RSS Feed"></a></li>
+		</ul>
+	</nav>
+	<div id="search-form-wrap">
+		<form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://laysakura.github.io"></form>
+	</div>
+</header>
+    <div id="main">
+      <article id="post-perf-stat-でパフォーマンスカウンタの値を直接指定し表示" class="post">
+	<footer class="entry-meta-header">
+		<span class="meta-elements date">
+			<a href="/2011/10/11/perf-stat-performance-counters/" class="article-date">
+  <time datetime="2011-10-11T04:13:30.000Z" itemprop="datePublished">2011-10-11</time>
+</a>
+		</span>
+	</footer>
+	
+	<header class="entry-header">
+		
+  
+    <h1 class="article-title entry-title" itemprop="name">
+      perf stat でパフォーマンスカウンタの値を直接指定し表示
+    </h1>
+  
+
+	</header>
+	<div class="entry-content">
+		
+    	<h2><span id="perfについて少し">perfについて少し</span></h2><p>最近のLinuxでは，perfという便利なパフォーマンス解析ツールが使えます．<br>aptやyumなどのパッケージ管理ツールで入れられると思いますが(Debian系だとlinux-tools*って名前のパッケージのはず)，詳しい使い方はここでは解説しません．</p>
+<p>さて，このperfには色々な使い方がありますが，中でもperf statはプログラム実行中に起こるハードウェア的なイベントを取得できるものです．<br>使用例はこんな感じ．</p>
+<a id="more"></a>
+
+<!-- toc -->
+
+<ul>
+<li><a href="#パフォーマンスカウンタ">パフォーマンスカウンタ</a></li>
+<li><a href="#そのイベントは何を見ている">そのイベントは何を見ている?</a></li>
+<li><a href="#見たいハードウェアイベントを生で指定する">見たいハードウェアイベントを生で指定する</a></li>
+<li><a href="#測定の基本">測定の基本</a></li>
+<li><a href="#perf-statの出力を分かりやすく">perf statの出力を分かりやすく</a></li>
+</ul>
+<!-- tocstop -->
+
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">$ perf <span class="built_in">stat</span> ./a.out 100000</span><br><span class="line"></span><br><span class="line"> Performance counter stats <span class="keyword">for</span> <span class="string">'./a.out 100000'</span>:</span><br><span class="line"></span><br><span class="line">       2.799156  task-clock-msecs         <span class="comment">#      0.777 CPUs </span></span><br><span class="line">              0  context-switches         <span class="comment">#      0.000 M/sec</span></span><br><span class="line">              0  CPU-migrations           <span class="comment">#      0.000 M/sec</span></span><br><span class="line">            136  page-faults              <span class="comment">#      0.049 M/sec</span></span><br><span class="line">        3067818  cycles                   <span class="comment">#   1095.980 M/sec</span></span><br><span class="line">        1599297  instructions             <span class="comment">#      0.521 IPC  </span></span><br><span class="line">         522095  cache-references         <span class="comment">#    186.519 M/sec</span></span><br><span class="line">           6703  cache-misses             <span class="comment">#      2.395 M/sec</span></span><br><span class="line"></span><br><span class="line">    0.003604058  seconds time elapsed</span><br></pre></td></tr></table></figure>
+
+<p>取得できるイベントの一覧は，perf listで表示できます．</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$ perf list</span><br><span class="line"></span><br><span class="line">List of pre-defined events (to be used <span class="keyword">in</span> -e):</span><br><span class="line"></span><br><span class="line">  cpu-cycles OR cycles                       [Hardware event]</span><br><span class="line">  instructions                               [Hardware event]</span><br><span class="line">  cache-references                           [Hardware event]</span><br><span class="line">  cache-misses                               [Hardware event]</span><br><span class="line">  (中略)</span><br><span class="line"></span><br><span class="line">  rNNN                                       [raw hardware event descriptor]</span><br></pre></td></tr></table></figure>
+
+<p>例えば，L1データキャッシュのload回数とCPUのクロック数を見たい時には，</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ perf <span class="built_in">stat</span> -e L1-dcache-loads -e cpu-clock ./a.out 100000</span><br><span class="line"></span><br><span class="line"> Performance counter stats <span class="keyword">for</span> <span class="string">'./a.out 100000'</span>:</span><br><span class="line"></span><br><span class="line">         979394  L1-dcache-loads          <span class="comment">#      0.000 M/sec</span></span><br><span class="line">       2.755833  cpu-clock-msecs         </span><br><span class="line"></span><br><span class="line">    0.003518612  seconds time elapsed</span><br></pre></td></tr></table></figure>
+
+<p>という風にします．</p>
+<h2><span id="パフォーマンスカウンタ">パフォーマンスカウンタ</span></h2><p>L1-dcache-loadsなどのイベントが実際に見ているのは， <span style="font-weight:bold;">パフォーマンスカウンタ(ハードウェアカウンタ)</span> というものです．<br>最近のCPUには，ハードウェアのイベント回数を記録するためのレジスタ(パフォーマンスモニタレジスタ)が備わっています．<br>このレジスタの値 = パフォーマンスカウンタを見るのが，perf statというツールだと言えます．</p>
+<p>お使いのCPUが取得できるパフォーマンスカウンタの種類は，CPUベンダの発行しているCPUファミリーごとのマニュアルを見ると分かります．<br>例として，</p>
+<ul>
+<li>Intelの(Nehalemを含む)各種アーキテクチャのCPUのパフォーマンスカウンタは，<br><a href="http://www.intel.com/content/dam/doc/manual/64-ia-32-architectures-software-developer-vol-3b-part-2-manual.pdf" target="_blank" rel="noopener">Intel&#174; 64 and IA-32 Architectures Software Developer’s Manual Volume 3B: System Programming Guide, Part 2</a><br>のAppendix Aに載っています</li>
+<li>AMDのFamily 10hに属するCPUのPerformanceCounterは，<br><a href="http://support.amd.com/us/Processor_TechDocs/31116.pdf" target="_blank" rel="noopener">BIOS and Kernel Developer’s Guide (BKDG) For AMD Family 10h Processors</a><br>の “3.14 Performance Counter Events” に載っています．</li>
+</ul>
+<h2><span id="そのイベントは何を見ている">そのイベントは何を見ている?</span></h2><p>perf statのL1-dcache-loadsなどのイベントは，名前が直感的で，どのCPUを使っていても「このイベント指定しとけばL1データキャッシュアクセス見れるな」と分かって便利です．<br>しかし，研究用途などで使う際には，直接見たいパフォーマンスカウンタを，上述したCPUのマニュアルと照らし合わせながら見たいようなこともあります．<br>或いは，perf listの一覧では提供されていないけど，CPUのマニュアルには書いてあるハードウェアイベントを取得したいこともあるでしょう．</p>
+<h2><span id="見たいハードウェアイベントを生で指定する">見たいハードウェアイベントを生で指定する</span></h2><p>このような要望があるので，perf statは数値で直接見たいハードウェアイベントを選択できるようなオプションを備えています．<br>perf listでも表示される，<br>“rNNN  [raw hardware event descriptor]”<br>というやつです．</p>
+<p>CPUのマニュアルに記載されている， “UnitMask(Umask)” の値と “EventSelect(EventCode)” の値を使って，次のように指定します．</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ perf <span class="built_in">stat</span> -e r&lt;UnitMask(16進数)&gt;&lt;EventSelect(16進数)&gt; ./a.out 100000</span><br></pre></td></tr></table></figure>
+
+<p>例えば，AMDのFamily 10hに属するCPUの “Data Cache Refills from the Northbridge” を “Modified” 属性以外のラインについて見たいなら，<br><a href="http://support.amd.com/us/Processor_TechDocs/31116.pdf" target="_blank" rel="noopener">BIOS and Kernel Developer’s Guide (BKDG) For AMD Family 10h Processors</a> の445ページを参考にして，</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ perf <span class="built_in">stat</span> -e rf43 ./a.out 100000</span><br><span class="line"></span><br><span class="line"> Performance counter stats <span class="keyword">for</span> <span class="string">'./a.out 100000'</span>:</span><br><span class="line"></span><br><span class="line">           2886  raw 0xf43                <span class="comment">#      0.000 M/sec</span></span><br><span class="line"></span><br><span class="line">    0.003496994  seconds time elapsed</span><br></pre></td></tr></table></figure>
+
+<p>とします．<br>先頭の ‘f’ がUnitMaskで，その後の ‘43’ がEventSelectです．</p>
+<p>“Data Cache Misses” も一緒に見たいなら，444ページも参考にして，</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ perf <span class="built_in">stat</span> -e rf43 -e r41 ./a.out 100000</span><br><span class="line"></span><br><span class="line"> Performance counter stats <span class="keyword">for</span> <span class="string">'./a.out 100000'</span>:</span><br><span class="line"></span><br><span class="line">           2728  raw 0xf43                <span class="comment">#      0.000 M/sec</span></span><br><span class="line">           7624  raw 0x41                 <span class="comment">#      0.000 M/sec</span></span><br><span class="line"></span><br><span class="line">    0.003468212  seconds time elapsed</span><br></pre></td></tr></table></figure>
+
+<p>ですね．</p>
+<h2><span id="測定の基本">測定の基本</span></h2><p>これでハードウェアカウンタを直接読むことができるようになりました．<br>しかし，「何を読むか」，「どう解釈するか」が分からなければ意味がありません．</p>
+<p>AMDの発行している， <a href="http://developer.amd.com/Assets/intro_to_ca_v3_final.pdf" target="_blank" rel="noopener">Basic Performance Measurements for AMD Athlon 64, AMD Opteron and AMD Phenom Processors</a> は，それを理解するのにとても役立ちます．<br>AMDの一部のプロセッサを対象とした計測手法が詳しく書かれていますが，基本的な考え方は他のプロセッサにも応用できると思います．是非ご一読を．</p>
+<h2><span id="perf-statの出力を分かりやすく">perf statの出力を分かりやすく</span></h2><p>これはおまけです．<br>ハードウェアイベントを生で指定したら，perf statの出力が分かりづらくなりますね．<br>“2886  raw 0xf43”<br>とか言われても，CPUマニュアルとにらめっこしないと意味が分からないわけです．</p>
+<p>そこで，出力を分かりやすくするための簡単なPythonスクリプトを作りましたので，良かったら改良しつつお使いください．<br>`events’ という辞書をリストにしたデータ構造を適当に変更してください．</p>
+<p>適当な名前で保存して，</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ chmod +x hoge.py</span><br><span class="line">$ ./hoge.py ./a.out 100000</span><br><span class="line">   1563561   Retired Instructions</span><br><span class="line">    987532   Data Cache Accesses</span><br><span class="line">      6178   Data Cache Refills from L2</span><br><span class="line">      7056   Data Cache Refills from System (Northbridge)</span><br></pre></td></tr></table></figure>
+
+<p>と使います．</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python                                                                                                                                                                                                                        </span></span><br><span class="line"> </span><br><span class="line"><span class="comment"># This script is written referring to                                                                                                                                                                                                        </span></span><br><span class="line"><span class="comment">#   Basic Performance Measurements for AMD Athlon 64,                                                                                                                                                                                        </span></span><br><span class="line"><span class="comment">#   AMD Opteron and AMD Phenom Processors                                                                                                                                                                                                    </span></span><br><span class="line"><span class="comment">#   http://developer.amd.com/Assets/intro_to_ca_v3_final.pdf                                                                                                                                                                                 </span></span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">import</span> re</span><br><span class="line"><span class="keyword">import</span> subprocess</span><br><span class="line"> </span><br><span class="line"><span class="comment"># Modify this list as you like.                                                                                                                                                                                                              </span></span><br><span class="line"><span class="comment"># The format of each element is:                                                                                                                                                                                                             </span></span><br><span class="line"><span class="comment">#   select: `NNN' for "perf stat -e rNNN"                                                                                                                                                                                                    </span></span><br><span class="line"><span class="comment">#   name:   Event name used in output                                                                                                                                                                                                        </span></span><br><span class="line">events = [</span><br><span class="line">    &#123;<span class="string">"select"</span>: <span class="string">"c0"</span>, <span class="string">"name"</span>: <span class="string">"Retired Instructions"</span>&#125;,</span><br><span class="line">    &#123;<span class="string">"select"</span>: <span class="string">"40"</span>, <span class="string">"name"</span>: <span class="string">"Data Cache Accesses"</span>&#125;,</span><br><span class="line">    &#123;<span class="string">"select"</span>: <span class="string">"1e42"</span>, <span class="string">"name"</span>: <span class="string">"Data Cache Refills from L2"</span>&#125;,</span><br><span class="line">    &#123;<span class="string">"select"</span>: <span class="string">"1e43"</span>, <span class="string">"name"</span>: <span class="string">"Data Cache Refills from System (Northbridge)"</span>&#125;</span><br><span class="line">    ]</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">event_list</span><span class="params">()</span>:</span></span><br><span class="line">    ret = <span class="string">""</span></span><br><span class="line">    <span class="keyword">for</span> event <span class="keyword">in</span> events:</span><br><span class="line">        ret += <span class="string">"-e r"</span> + event[<span class="string">"select"</span>] + <span class="string">"   "</span></span><br><span class="line">    <span class="keyword">return</span> ret</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">store_count_to_events</span><span class="params">(fd_perf_output)</span>:</span></span><br><span class="line">    <span class="comment"># Sample perf-stat output line</span></span><br><span class="line">    <span class="comment">#        1565650  raw 0xc0                 #      0.000 M/sec</span></span><br><span class="line">    pat = re.compile(<span class="string">"^ *([0-9]+).*"</span>)</span><br><span class="line"></span><br><span class="line">    lines = fd_perf_output.readlines()</span><br><span class="line">    <span class="keyword">for</span> event <span class="keyword">in</span> events:</span><br><span class="line">        search_str = <span class="string">"raw 0x"</span> + event[<span class="string">"select"</span>]</span><br><span class="line">        event_line = [line <span class="keyword">for</span> line <span class="keyword">in</span> lines <span class="keyword">if</span> line.find(search_str) != <span class="number">-1</span>]</span><br><span class="line">        mat = pat.match(<span class="string">""</span>.join(event_line))</span><br><span class="line">        event[<span class="string">"count"</span>] = int(mat.group(<span class="number">1</span>))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">print_events</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">for</span> event <span class="keyword">in</span> events:</span><br><span class="line">        <span class="keyword">print</span> <span class="string">"%10s   %s"</span> % (str(event[<span class="string">"count"</span>]), event[<span class="string">"name"</span>])</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">()</span>:</span></span><br><span class="line">    command = <span class="string">"perf stat "</span> + event_list() + <span class="string">" "</span>.join(sys.argv[<span class="number">1</span>:])</span><br><span class="line">    p = subprocess.Popen(command, shell=<span class="literal">True</span>,</span><br><span class="line">                         stderr=subprocess.PIPE)</span><br><span class="line">    fd_perf_output = p.stderr</span><br><span class="line">    store_count_to_events(fd_perf_output)</span><br><span class="line">    print_events()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
+
+    
+	</div>
+	<footer class="entry-footer">
+		<div class="entry-meta-footer">
+			<span class="category">
+				
+			</span>
+			<span class="tags">
+				
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/High-Performance-Computing/" rel="tag">High Performance Computing</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux-Kernel/" rel="tag">Linux Kernel</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux%E3%82%AA%E3%83%9A%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3/" rel="tag">Linuxオペレーション</a></li></ul>
+
+			</span>
+		</div>
+	</footer>
+    
+    <footer class="author-info clearfix">
+      <img class="author-picture circle" src="https://www.gravatar.com/avatar/cb02a2b3f429b7c938d1fe2665e8e342">
+      <div class="author-content right">
+        <div class="author-caption">
+          <span class="label">author</span>
+          Sho Nakatani a.k.a. laysakura
+        </div>
+        <p class="author-description">
+          東京大学大学院 情報理工学系研究科 電子情報学専攻 修士課程で並列分散処理・ストリーム処理・データベースを研究。<br>
+          2014年4月に株式会社ディー・エヌ・エーにエンジニアスペシャリストとして入社し、ソーシャルゲームのサーバサイド共通基盤の開発に従事。<br>
+          2016年8月より、オンライン証券会社<a href="https://folio-sec.com" target="_blank" rel="noopener">株式会社FOLIO</a>に入社。バックエンドシステム開発・プロジェクトマネージメント・Engineering Managementに従事。<br>
+          2020年3月より<a href="https://idein.jp" target="_blank" rel="noopener">Idein株式会社</a>所属。<br>
+          随時副業募集中です: <a href="https://github.com/laysakura/resume-jp-for-side-job" target="_blank" rel="noopener">職務経歴書や募集職種</a>
+        </p>
+        <ul class="author-social-buttons">
+          <li class="author-social-button"><a class="fa fa-lg fa-twitter-square" href="https://twitter.com/laysakura" target="_blank" rel="noopener"></a></li>
+          <li class="author-social-button"><a class="fa fa-lg fa-github-square" href="https://github.com/laysakura" target="_blank" rel="noopener"></a></li>
+          <li class="author-social-button"><a class="fa fa-lg fa-facebook-square" href="https://www.facebook.com/lay.sakura" target="_blank" rel="noopener"></a></li>
+        </ul>
+      </div>
+    </footer>
+    
+	
+    
+<nav id="article-nav">
+  
+    <a href="/2011/10/15/perf-stat-L1-L2-L3-cache-miss/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          perf statでL1,L2(,L3)キャッシュミス測定
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2011/01/25/linux-scheduling-low-prio-process/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          Linux のスケジューリング調査と超低優先度プロセスの実装
+        
+      </div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+
+
+<section id="comments">
+  <div id="disqus_thread">
+
+  <!-- comment service provided by disqus -->
+  <script>
+    /**
+     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+     */
+    var disqus_config = function () {
+        this.page.url = https://laysakura.github.io/2011/10/11/perf-stat-performance-counters/;  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = https://laysakura.github.io/2011/10/11/perf-stat-performance-counters/; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    (function() {  // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        
+        s.src = '//laysakura.disqus.com/embed.js';
+        
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript" target="_blank" rel="noopener">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+    </div>
+    <div class="mb-search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:laysakura.github.io">
+  </form>
+</div>
+<footer id="footer">
+	<h1 class="footer-blog-title">
+		<a href="/">俺とお前とlaysakura</a>
+	</h1>
+	<span class="copyright">
+		&copy; 2020 Sho Nakatani a.k.a. laysakura<br>
+		Modify from <a href="https://sanographix.github.io/tumblr/apollo/" target="_blank">Apollo</a> theme, designed by <a href="https://www.sanographix.net/" target="_blank">SANOGRAPHIX.NET</a><br>
+		Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+	</span>
+</footer>
+
+    
+<script>
+  var disqus_shortname = 'laysakura';
+  
+  var disqus_url = 'https://laysakura.github.io/2011/10/11/perf-stat-performance-counters/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+
+  <!-- https://github.com/vfeskov/vanilla-back-to-top -->
+  <script src="https://unpkg.com/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js"></script>
+  <script>addBackToTop({
+    diameter: 50,
+    backgroundColor: '#33a6b880',
+    textColor: '#fff'
+  })</script>
+
+</body>
+</html>

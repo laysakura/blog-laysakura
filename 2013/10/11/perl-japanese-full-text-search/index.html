@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Perlで日本語全文検索できるCPANモジュール作りました | 俺とお前とlaysakura</title>
+  
+  <link rel="canonical" href="https://laysakura.github.io/2013/10/11/perl-japanese-full-text-search/"/>
+  <meta name="viewport" content="width=device-width">
+  <meta name="description" content="Perlで全文検索を手軽にできるようにするCPANモジュール，Search::Fulltext をリリースしました．これ単品だと英語での全文検索ができるのですが，これまた拙作の Search::Fulltext::Tokenizer::MeCab と組み合わせて使うと 日本語全文検索 ができるようになります． ここでは日本語全文検索をするためのインストール方法と簡単な使い方などについて記述します．">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Perlで日本語全文検索できるCPANモジュール作りました">
+<meta property="og:url" content="https://laysakura.github.io/2013/10/11/perl-japanese-full-text-search/index.html">
+<meta property="og:site_name" content="俺とお前とlaysakura">
+<meta property="og:description" content="Perlで全文検索を手軽にできるようにするCPANモジュール，Search::Fulltext をリリースしました．これ単品だと英語での全文検索ができるのですが，これまた拙作の Search::Fulltext::Tokenizer::MeCab と組み合わせて使うと 日本語全文検索 ができるようになります． ここでは日本語全文検索をするためのインストール方法と簡単な使い方などについて記述します．">
+<meta property="og:locale" content="ja_JP">
+<meta property="article:published_time" content="2013-10-11T07:41:06.000Z">
+<meta property="article:modified_time" content="2020-02-10T05:06:21.000Z">
+<meta property="article:author" content="Sho Nakatani a.k.a. laysakura">
+<meta property="article:tag" content="データベース">
+<meta name="twitter:card" content="summary">
+
+  <!-- favicon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+  <link rel="icon" href="/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+  <link rel="manifest" href="/favicon/site.webmanifest">
+  <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#5bbad5">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="theme-color" content="#ffffff">
+
+  
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-22289437-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+  <!-- MathJax -->
+  <script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+  <div id="container">
+    <div class="mobile-nav-panel">
+	<i class="icon-reorder icon-large"></i>
+</div>
+<header id="header">
+	<h1 class="blog-title">
+		<a href="/">俺とお前とlaysakura</a>
+	</h1>
+	<nav class="nav">
+		<ul>
+			<li><a href="/archives">過去の投稿</a></li>
+			<li><a id="nav-search-btn" class="nav-icon" title="Search"></a></li>
+			<li><a href="http://cloud.feedly.com/#subscription%2Ffeed%2Fhttps%3A%2F%2Flaysakura.github.io%2Fatom.xml" target="_blank" rel="noopener" id="nav-rss-link" class="nav-icon" title="RSS Feed"></a></li>
+		</ul>
+	</nav>
+	<div id="search-form-wrap">
+		<form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://laysakura.github.io"></form>
+	</div>
+</header>
+    <div id="main">
+      <article id="post-Perlで日本語全文検索できるCPANモジュール作りました" class="post">
+	<footer class="entry-meta-header">
+		<span class="meta-elements date">
+			<a href="/2013/10/11/perl-japanese-full-text-search/" class="article-date">
+  <time datetime="2013-10-11T07:41:06.000Z" itemprop="datePublished">2013-10-11</time>
+</a>
+		</span>
+	</footer>
+	
+	<header class="entry-header">
+		
+  
+    <h1 class="article-title entry-title" itemprop="name">
+      Perlで日本語全文検索できるCPANモジュール作りました
+    </h1>
+  
+
+	</header>
+	<div class="entry-content">
+		
+    	<p>Perlで全文検索を手軽にできるようにするCPANモジュール，<a href="http://search.cpan.org/perldoc?Search::Fulltext" target="_blank" rel="noopener">Search::Fulltext</a> をリリースしました．<br>これ単品だと英語での全文検索ができるのですが，これまた拙作の <a href="http://search.cpan.org/perldoc?Search::Fulltext::Tokenizer::MeCab" target="_blank" rel="noopener">Search::Fulltext::Tokenizer::MeCab</a> と組み合わせて使うと <span style="font-weight:bold;">日本語全文検索</span> ができるようになります．</p>
+<p>ここでは日本語全文検索をするためのインストール方法と簡単な使い方などについて記述します．<br>尚，この記事を書いている時点での最新版は Search::Fulltext-1.02, Search::Fulltext::Tokenizer::MeCab-1.04 です．<br>最新の情報についてはperldocで確認するようにしてください．</p>
+<a id="more"></a>
+
+<!-- toc -->
+
+<ul>
+<li><a href="#セールスポイントまとめ">セールスポイントまとめ</a></li>
+<li><a href="#まずは英文全文検索">まずは英文全文検索</a><ul>
+<li><a href="#searchfulltextのインストール">Search::Fulltextのインストール</a></li>
+<li><a href="#searchfulltextの動作チェック-または使い方の確認">Search::Fulltextの動作チェック (または使い方の確認)</a></li>
+</ul>
+</li>
+<li><a href="#いよいよ日本語全文検索">いよいよ日本語全文検索</a><ul>
+<li><a href="#mecabのインストール">MeCabのインストール</a></li>
+<li><a href="#searchfulltexttokenizermecab-のインストール">Search::Fulltext::Tokenizer::MeCab のインストール</a></li>
+<li><a href="#searchfulltexttokenizermecab-の動作確認-使い方">Search::Fulltext::Tokenizer::MeCab の動作確認 &amp; 使い方</a></li>
+</ul>
+</li>
+<li><a href="#仕組み">仕組み</a></li>
+<li><a href="#おわりに">おわりに</a></li>
+</ul>
+<!-- tocstop -->
+
+<h1><span id="セールスポイントまとめ">セールスポイントまとめ</span></h1><ul>
+<li>すごくシンプルに使える．メイン部分はこれだけ．<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">my</span> $fts = Search::Fulltext-&gt;new(&#123;</span><br><span class="line">    <span class="string">docs      =&gt;</span> \@docs,</span><br><span class="line">    <span class="string">tokenizer =&gt;</span> <span class="string">"perl 'Search::Fulltext::Tokenizer::MeCab::tokenizer'"</span>,</span><br><span class="line">&#125;);</span><br><span class="line"><span class="keyword">my</span> $results = $fts-&gt;search($query);</span><br><span class="line">is_deeply($results, [<span class="number">0</span>, <span class="number">2</span>]);</span><br></pre></td></tr></table></figure></li>
+<li>AND, OR, NOT, NEAR 検索などをサポート</li>
+<li>メモリをはみ出しても大丈夫．SQLiteがバックエンドなので．</li>
+<li>トーカナイザがPerlだけでプラガブル開発できる．</li>
+</ul>
+<p>詳しくはperldocを参照してください．この記事では導入方法までを説明します．</p>
+<h1><span id="まずは英文全文検索">まずは英文全文検索</span></h1><h2><span id="searchfulltextのインストール">Search::Fulltextのインストール</span></h2><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ cpanm Search::Fulltext</span><br></pre></td></tr></table></figure>
+
+<h2><span id="searchfulltextの動作チェック-または使い方の確認">Search::Fulltextの動作チェック (または使い方の確認)</span></h2><p>以下のファイルを “check.t” という名前で保存して，</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ prove check.t</span><br></pre></td></tr></table></figure>
+
+<p>でテストしてみてください．</p>
+<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> strict;</span><br><span class="line"><span class="keyword">use</span> warnings;</span><br><span class="line"><span class="keyword">use</span> utf8;</span><br><span class="line"><span class="keyword">use</span> Test::More;</span><br><span class="line"></span><br><span class="line"><span class="keyword">use</span> Search::Fulltext;</span><br><span class="line"><span class="keyword">use</span> Search::Fulltext::TestSupport;</span><br><span class="line"></span><br><span class="line">plan <span class="string">tests =&gt;</span> <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">my</span> $query = <span class="string">'beer'</span>;</span><br><span class="line"><span class="keyword">my</span> @docs = (</span><br><span class="line">    <span class="string">'I like beer the best'</span>,</span><br><span class="line">    <span class="string">'Wine makes people saticefied'</span>,  <span class="comment"># does not include beer</span></span><br><span class="line">    <span class="string">'Beer makes people happy'</span>,</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment"># Common usage</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">my</span> $fts = Search::Fulltext-&gt;new(&#123;</span><br><span class="line">        <span class="string">docs =&gt;</span> \@docs,</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">my</span> $results = $fts-&gt;search($query);</span><br><span class="line">    is_deeply($results, [<span class="number">0</span>, <span class="number">2</span>]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>この例では，’beer’ という単語を含む0番目と2番目の文字列がヒットしています．</p>
+<h1><span id="いよいよ日本語全文検索">いよいよ日本語全文検索</span></h1><h2><span id="mecabのインストール">MeCabのインストール</span></h2><p>MeCabのライブラリと実行ファイルをインストールします．<br>もしかしたらライブラリだけでいいのかもしれませんが，よく調べてません．</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo apt-get install mecab libmecab2</span><br></pre></td></tr></table></figure>
+
+<h2><span id="searchfulltexttokenizermecab-のインストール">Search::Fulltext::Tokenizer::MeCab のインストール</span></h2><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ cpanm Search::Fulltext::Tokenizer::MeCab</span><br></pre></td></tr></table></figure>
+
+<h2><span id="searchfulltexttokenizermecab-の動作確認-amp-使い方">Search::Fulltext::Tokenizer::MeCab の動作確認 &amp; 使い方</span></h2><p>以下のファイルを “check-jp.t” という名前で <span style="FONT-WEIGHT:BOLD;">UTF-8</span> で保存して，</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ prove check-jp.t</span><br></pre></td></tr></table></figure>
+
+<p>でテストしてみてください．</p>
+<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> strict;</span><br><span class="line"><span class="keyword">use</span> warnings;</span><br><span class="line"><span class="keyword">use</span> utf8;</span><br><span class="line"><span class="keyword">use</span> Test::More;</span><br><span class="line"></span><br><span class="line"><span class="keyword">use</span> Search::Fulltext;</span><br><span class="line"><span class="keyword">use</span> Search::Fulltext::Tokenizer::MeCab;</span><br><span class="line"></span><br><span class="line">plan <span class="string">tests =&gt;</span> <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">my</span> $query = <span class="string">'猫'</span>;</span><br><span class="line"><span class="keyword">my</span> @docs = (</span><br><span class="line">    <span class="string">'我輩は猫である'</span>,</span><br><span class="line">    <span class="string">'犬も歩けば棒に当る'</span>,</span><br><span class="line">    <span class="string">'実家でてんちゃんって猫を飼ってまして，ものすっごい可愛いんですよほんと'</span>,</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">my</span> $fts = Search::Fulltext-&gt;new(&#123;</span><br><span class="line">        <span class="string">docs      =&gt;</span> \@docs,</span><br><span class="line">        <span class="string">tokenizer =&gt;</span> <span class="string">"perl 'Search::Fulltext::Tokenizer::MeCab::tokenizer'"</span>,</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">my</span> $results = $fts-&gt;search($query);</span><br><span class="line">    is_deeply($results, [<span class="number">0</span>, <span class="number">2</span>]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>動きましたか?</p>
+<h1><span id="仕組み">仕組み</span></h1><p>DBD::SQLiteを通してSQLiteのFTS4という全文検索機能を使用しています．<br>単なるSQLiteのラッパーだと言うこともできます．</p>
+<p>また，日本語トークンはMeCabの形態素解析で拾ってます．<br>MeCab形態素解析なトーカナイザの開発は，DBD::SQLiteの機能のPerl Tokenizerを使ってPerlだけで行えました．<br>詳しくは，’perldoc Search::Fulltext’ の ‘CUSTOM TOKENIZERS’ のセクションを参照してください．</p>
+<h1><span id="おわりに">おわりに</span></h1><p>気に入っていただけたでしょうか?<br>バグ報告やpullreqは</p>
+<ul>
+<li><a href="https://github.com/laysakura/Search-Fulltext" target="_blank" rel="noopener">https://github.com/laysakura/Search-Fulltext</a></li>
+<li><a href="https://github.com/laysakura/Search-Fulltext-Tokenizer-MeCab" target="_blank" rel="noopener">https://github.com/laysakura/Search-Fulltext-Tokenizer-MeCab</a></li>
+</ul>
+<p>でウェルカムです!</p>
+
+    
+	</div>
+	<footer class="entry-footer">
+		<div class="entry-meta-footer">
+			<span class="category">
+				
+			</span>
+			<span class="tags">
+				
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E3%83%87%E3%83%BC%E3%82%BF%E3%83%99%E3%83%BC%E3%82%B9/" rel="tag">データベース</a></li></ul>
+
+			</span>
+		</div>
+	</footer>
+    
+    <footer class="author-info clearfix">
+      <img class="author-picture circle" src="https://www.gravatar.com/avatar/cb02a2b3f429b7c938d1fe2665e8e342">
+      <div class="author-content right">
+        <div class="author-caption">
+          <span class="label">author</span>
+          Sho Nakatani a.k.a. laysakura
+        </div>
+        <p class="author-description">
+          東京大学大学院 情報理工学系研究科 電子情報学専攻 修士課程で並列分散処理・ストリーム処理・データベースを研究。<br>
+          2014年4月に株式会社ディー・エヌ・エーにエンジニアスペシャリストとして入社し、ソーシャルゲームのサーバサイド共通基盤の開発に従事。<br>
+          2016年8月より、オンライン証券会社<a href="https://folio-sec.com" target="_blank" rel="noopener">株式会社FOLIO</a>に入社。バックエンドシステム開発・プロジェクトマネージメント・Engineering Managementに従事。<br>
+          2020年3月より<a href="https://idein.jp" target="_blank" rel="noopener">Idein株式会社</a>所属。<br>
+          随時副業募集中です: <a href="https://github.com/laysakura/resume-jp-for-side-job" target="_blank" rel="noopener">職務経歴書や募集職種</a>
+        </p>
+        <ul class="author-social-buttons">
+          <li class="author-social-button"><a class="fa fa-lg fa-twitter-square" href="https://twitter.com/laysakura" target="_blank" rel="noopener"></a></li>
+          <li class="author-social-button"><a class="fa fa-lg fa-github-square" href="https://github.com/laysakura" target="_blank" rel="noopener"></a></li>
+          <li class="author-social-button"><a class="fa fa-lg fa-facebook-square" href="https://www.facebook.com/lay.sakura" target="_blank" rel="noopener"></a></li>
+        </ul>
+      </div>
+    </footer>
+    
+	
+    
+<nav id="article-nav">
+  
+    <a href="/2013/12/05/python-rainbow-logging-handler/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Pythonで色つきログを - rainbow_logging_handler をPyPIにリリースしました
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2013/02/10/mysql5.6-storage-engine-template/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          MySQL 5.6 で動くストレージエンジン・テンプレート
+        
+      </div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+
+
+<section id="comments">
+  <div id="disqus_thread">
+
+  <!-- comment service provided by disqus -->
+  <script>
+    /**
+     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+     */
+    var disqus_config = function () {
+        this.page.url = https://laysakura.github.io/2013/10/11/perl-japanese-full-text-search/;  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = https://laysakura.github.io/2013/10/11/perl-japanese-full-text-search/; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    (function() {  // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        
+        s.src = '//laysakura.disqus.com/embed.js';
+        
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript" target="_blank" rel="noopener">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+    </div>
+    <div class="mb-search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:laysakura.github.io">
+  </form>
+</div>
+<footer id="footer">
+	<h1 class="footer-blog-title">
+		<a href="/">俺とお前とlaysakura</a>
+	</h1>
+	<span class="copyright">
+		&copy; 2020 Sho Nakatani a.k.a. laysakura<br>
+		Modify from <a href="https://sanographix.github.io/tumblr/apollo/" target="_blank">Apollo</a> theme, designed by <a href="https://www.sanographix.net/" target="_blank">SANOGRAPHIX.NET</a><br>
+		Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+	</span>
+</footer>
+
+    
+<script>
+  var disqus_shortname = 'laysakura';
+  
+  var disqus_url = 'https://laysakura.github.io/2013/10/11/perl-japanese-full-text-search/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+
+  <!-- https://github.com/vfeskov/vanilla-back-to-top -->
+  <script src="https://unpkg.com/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js"></script>
+  <script>addBackToTop({
+    diameter: 50,
+    backgroundColor: '#33a6b880',
+    textColor: '#fff'
+  })</script>
+
+</body>
+</html>

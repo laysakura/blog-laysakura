@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>『コンピュータの構成と設計 第5版』演習問題解答集 第3章 | 俺とお前とlaysakura</title>
+  
+  <link rel="canonical" href="https://laysakura.github.io/2020/01/19/Patterson-Hennessy-5th-Excersise03/"/>
+  <meta name="viewport" content="width=device-width">
+  <meta name="description" content="“パタヘネ本” でおなじみの『コンピュータの構成と設計 第5版』の解答集です。読者は書籍を保有していることを前提として解答・解説を記載します。訂正案などありましたら本ブログ記事のリポジトリ へPull-Requestくだされば幸いです😊 この記事3章の内容は、  加算と減算 乗算器 除算器 浮動小数点数 SIMD  です。 各章の解答集 『コンピュータの構成と設計 第5版』演習問題">
+<meta property="og:type" content="article">
+<meta property="og:title" content="『コンピュータの構成と設計 第5版』演習問題解答集 第3章">
+<meta property="og:url" content="https://laysakura.github.io/2020/01/19/Patterson-Hennessy-5th-Excersise03/index.html">
+<meta property="og:site_name" content="俺とお前とlaysakura">
+<meta property="og:description" content="“パタヘネ本” でおなじみの『コンピュータの構成と設計 第5版』の解答集です。読者は書籍を保有していることを前提として解答・解説を記載します。訂正案などありましたら本ブログ記事のリポジトリ へPull-Requestくだされば幸いです😊 この記事3章の内容は、  加算と減算 乗算器 除算器 浮動小数点数 SIMD  です。 各章の解答集 『コンピュータの構成と設計 第5版』演習問題">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:image" content="https://laysakura.github.io/img/2020/01-14-3.13.png">
+<meta property="og:image" content="https://laysakura.github.io/img/2020/01-14-3.19.png">
+<meta property="article:published_time" content="2020-01-19T00:19:24.000Z">
+<meta property="article:modified_time" content="2020-02-10T05:06:21.000Z">
+<meta property="article:author" content="Sho Nakatani a.k.a. laysakura">
+<meta property="article:tag" content="『コンピュータの構成と設計』">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://laysakura.github.io/img/2020/01-14-3.13.png">
+
+  <!-- favicon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+  <link rel="icon" href="/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+  <link rel="manifest" href="/favicon/site.webmanifest">
+  <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#5bbad5">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="theme-color" content="#ffffff">
+
+  
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-22289437-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+  <!-- MathJax -->
+  <script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+  <div id="container">
+    <div class="mobile-nav-panel">
+	<i class="icon-reorder icon-large"></i>
+</div>
+<header id="header">
+	<h1 class="blog-title">
+		<a href="/">俺とお前とlaysakura</a>
+	</h1>
+	<nav class="nav">
+		<ul>
+			<li><a href="/archives">過去の投稿</a></li>
+			<li><a id="nav-search-btn" class="nav-icon" title="Search"></a></li>
+			<li><a href="http://cloud.feedly.com/#subscription%2Ffeed%2Fhttps%3A%2F%2Flaysakura.github.io%2Fatom.xml" target="_blank" rel="noopener" id="nav-rss-link" class="nav-icon" title="RSS Feed"></a></li>
+		</ul>
+	</nav>
+	<div id="search-form-wrap">
+		<form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://laysakura.github.io"></form>
+	</div>
+</header>
+    <div id="main">
+      <article id="post-『コンピュータの構成と設計-第5版』演習問題回答集-第3章" class="post">
+	<footer class="entry-meta-header">
+		<span class="meta-elements date">
+			<a href="/2020/01/19/Patterson-Hennessy-5th-Excersise03/" class="article-date">
+  <time datetime="2020-01-19T00:19:24.000Z" itemprop="datePublished">2020-01-19</time>
+</a>
+		</span>
+	</footer>
+	
+	<header class="entry-header">
+		
+  
+    <h1 class="article-title entry-title" itemprop="name">
+      『コンピュータの構成と設計 第5版』演習問題解答集 第3章
+    </h1>
+  
+
+	</header>
+	<div class="entry-content">
+		
+    	<iframe style="width:120px;height:240px;display:block;margin:0px auto;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="https://rcm-fe.amazon-adsystem.com/e/cm?ref=qf_sp_asin_til&t=laysakura-22&m=amazon&o=9&p=8&l=as1&IS2=1&detail=1&asins=B01M5FMGDL&linkId=93bb4e3be4ca3abe7e74716873f1aec2&bc1=000000&lt1=_top&fc1=333333&lc1=0066c0&bg1=ffffff&f=ifr">
+    </iframe>
+
+<p>“パタヘネ本” でおなじみの『コンピュータの構成と設計 第5版』の解答集です。読者は書籍を保有していることを前提として解答・解説を記載します。<br>訂正案などありましたら<a href="https://github.com/laysakura/laysakura.github.io/tree/ready/source/_posts" target="_blank" rel="noopener">本ブログ記事のリポジトリ</a> へPull-Requestくだされば幸いです😊</p>
+<p>この記事3章の内容は、</p>
+<ul>
+<li>加算と減算</li>
+<li>乗算器</li>
+<li>除算器</li>
+<li>浮動小数点数</li>
+<li>SIMD</li>
+</ul>
+<p>です。</p>
+<h2><span id="各章の解答集">各章の解答集</span></h2><ol>
+<li>『コンピュータの構成と設計 第5版』演習問題解答集 第1章 （執筆中）</li>
+<li><a href="/2020/01/10/Patterson-Hennessy-5th-Excersise02">『コンピュータの構成と設計 第5版』演習問題解答集 第2章</a></li>
+<li><a href="/2020/01/19/Patterson-Hennessy-5th-Excersise03">『コンピュータの構成と設計 第5版』演習問題解答集 第3章</a> （この記事）</li>
+<li><a href="/2020/01/28/Patterson-Hennessy-5th-Excersise04">『コンピュータの構成と設計 第5版』演習問題解答集 第4章</a></li>
+<li>『コンピュータの構成と設計 第5版』演習問題解答集 第5章 （執筆中）</li>
+<li>『コンピュータの構成と設計 第5版』演習問題解答集 第6章 （執筆中）</li>
+</ol>
+<a id="more"></a>
+
+<h2><span id="問題解答解説へジャンプ">問題・解答・解説へジャンプ</span></h2><!-- toc -->
+
+<ul>
+<li><a href="#31">3.1</a></li>
+<li><a href="#32">3.2</a></li>
+<li><a href="#33">3.3</a></li>
+<li><a href="#34">3.4</a></li>
+<li><a href="#35">3.5</a></li>
+<li><a href="#36">3.6</a></li>
+<li><a href="#37">3.7</a></li>
+<li><a href="#38">3.8</a></li>
+<li><a href="#39">3.9</a></li>
+<li><a href="#310">3.10</a></li>
+<li><a href="#311">3.11</a></li>
+<li><a href="#312">3.12</a></li>
+<li><a href="#313">3.13</a></li>
+<li><a href="#314">3.14</a></li>
+<li><a href="#315">3.15</a></li>
+<li><a href="#316">3.16</a></li>
+<li><a href="#317">3.17</a></li>
+<li><a href="#318">3.18</a></li>
+<li><a href="#319">3.19</a></li>
+<li><a href="#320">3.20</a></li>
+<li><a href="#321">3.21</a></li>
+<li><a href="#322">3.22</a></li>
+<li><a href="#323">3.23</a></li>
+<li><a href="#324">3.24</a></li>
+<li><a href="#325">3.25</a></li>
+<li><a href="#326-未回答">3.26 (未回答)</a></li>
+<li><a href="#327">3.27</a></li>
+<li><a href="#328-未回答">3.28 (未回答)</a></li>
+<li><a href="#329">3.29</a></li>
+<li><a href="#330">3.30</a></li>
+<li><a href="#331">3.31</a></li>
+<li><a href="#332">3.32</a></li>
+<li><a href="#333">3.33</a></li>
+<li><a href="#334">3.34</a></li>
+<li><a href="#335">3.35</a></li>
+<li><a href="#336">3.36</a></li>
+<li><a href="#337">3.37</a></li>
+<li><a href="#338-未回答">3.38 (未回答)</a></li>
+<li><a href="#339-未回答">3.39 (未回答)</a></li>
+<li><a href="#340-未回答">3.40 (未回答)</a></li>
+<li><a href="#341">3.41</a></li>
+<li><a href="#342">3.42</a></li>
+<li><a href="#343">3.43</a></li>
+<li><a href="#344">3.44</a></li>
+<li><a href="#345">3.45</a></li>
+<li><a href="#346">3.46</a></li>
+<li><a href="#347">3.47</a></li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="31">3.1</span></h2><h5><span id="問題">問題</span></h5><p>符号なし16進数の5ED4－07A4はいくつか．計算の過程と，16進数の結果を示せ．</p>
+<h5><span id="解答">解答</span></h5><p>\[<br>\begin{array}{rr}<br>     &amp; {\texttt 5}{\texttt E}{\texttt D}{\texttt 4} \\<br>  - &amp; {\texttt 0}{\texttt 7}{\texttt A}{\texttt 4} \\<br>  \hline<br>     &amp; {\texttt 5}{\texttt 7}{\texttt 3}{\texttt 0}<br>\end{array}<br>\]</p>
+<h5><span id="解説">解説</span></h5><p>特になし</p>
+<h2><span id="32">3.2</span></h2><h5><span id="問題">問題</span></h5><p>符号拡張形式で格納されている符号付き16進数の5ED4－07A4はいくつか．計算の過程と，16進数の結果を示せ．</p>
+<h5><span id="解答">解答</span></h5><p>32ビット整数と解釈する。符号拡張形式であってもともに正の数。<br>3.1と経過も変わらず、</p>
+<p>\[<br>\begin{array}{rr}<br>     &amp; {\texttt 5}{\texttt E}{\texttt D}{\texttt 4} \\<br>  - &amp; {\texttt 0}{\texttt 7}{\texttt A}{\texttt 4} \\<br>  \hline<br>     &amp; {\texttt 5}{\texttt 7}{\texttt 3}{\texttt 0}<br>\end{array}<br>\]</p>
+<h5><span id="解説">解説</span></h5><p>16ビットの符号拡張形式であっても、先頭ビットがともに0なので、全く同じ。</p>
+<h2><span id="33">3.3</span></h2><h5><span id="問題">問題</span></h5><p>5ED4を2進数に変換せよ．コンピュータ内で値を表現するのに，基数を16（16進数）にすると都合が良いのは，どのような点か．</p>
+<h5><span id="解答">解答</span></h5><p>\(0101\ 1110\ 1101\ 0100_2\)</p>
+<p>16進数は、「1桁が2進数4桁に対応」という特徴を持つので、2進数との相互変換性が高く、2進数よりも少ない桁数で表現できるのが良い点。<br>かつ、2進数8桁が1バイトなので、16進数2桁でちょうど1バイトを表すことができる。コンピュータではバイト単位の処理が多いのでこれも利便性が高い。</p>
+<h5><span id="解説">解説</span></h5><p>特になし。</p>
+<h2><span id="34">3.4</span></h2><h5><span id="問題">問題</span></h5><p>12ビットの符号なし８進数の4365－3412はいくつか．計算の過程と，8進数の結果を示せ．</p>
+<h5><span id="解答">解答</span></h5><p>\[<br>\begin{array}{rr}<br>     &amp; {\texttt 4}{\texttt 3}{\texttt 6}{\texttt 5} \\<br>  - &amp; {\texttt 3}{\texttt 4}{\texttt 1}{\texttt 2} \\<br>  \hline<br>     &amp; {\texttt 0}{\texttt 7}{\texttt 5}{\texttt 3}<br>\end{array}<br>\]</p>
+<h5><span id="解説">解説</span></h5><p>右から3~4桁目で繰り下げが発生している点に注意。</p>
+<h2><span id="35">3.5</span></h2><h5><span id="問題">問題</span></h5><p>符号拡張形式で格納されている符号付き12ビットの8進数の4365－3412はいくつか．計算の過程と，8進数の結果を示せ．</p>
+<h5><span id="解答">解答</span></h5><p>3.4と同様に、</p>
+<p>\[<br>\begin{array}{rr}<br>     &amp; {\texttt 4}{\texttt 3}{\texttt 6}{\texttt 5} \\<br>  - &amp; {\texttt 3}{\texttt 4}{\texttt 1}{\texttt 2} \\<br>  \hline<br>     &amp; {\texttt 0}{\texttt 7}{\texttt 5}{\texttt 3}<br>\end{array}<br>\]</p>
+<p>ただし、オーバーフローが発生していることに注意。</p>
+<h5><span id="解説">解説</span></h5><p>\(4365_8\) は、先頭ビットが1なので、負の数である。\(3412_8\) は先頭ビットが0なので、正の数である。<br>“負の数 - 正の数” の計算なので、オーバーフローが発生する可能性がある。</p>
+<p>解答とは別の方式で検算してみる。まずは、第2項の2の補数表現 \(-3412_8 = -011\ 100\ 001\ 010_2 = 100\ 011\ 110\ 110_2 = 4366_8\) と、第1項を加算する。</p>
+<p>\[<br>\begin{array}{rr}<br>     &amp; {\texttt 4}{\texttt 3}{\texttt 6}{\texttt 5} \\<br>  + &amp; {\texttt 4}{\texttt 3}{\texttt 6}{\texttt 6} \\<br>  \hline<br>     &amp; {\texttt 1}{\texttt 0}{\texttt 7}{\texttt 5}{\texttt 3}<br>\end{array}<br>\]</p>
+<p>先頭の桁はオーバーフローで落ちるので、 \(0753_8\) を得る。</p>
+<p>今度は第1項の2の補数表現 \(4365_8 = 100\ 011\ 110\ 101_2 = -011\ 100\ 001\ 011_2 = -3413_8\) と、第1項を加算したものを符号反転する。まずは加算。</p>
+<p>\[<br>\begin{array}{rr}<br>     &amp; {\texttt 3}{\texttt 4}{\texttt 1}{\texttt 3} \\<br>  + &amp; {\texttt 3}{\texttt 4}{\texttt 1}{\texttt 2} \\<br>  \hline<br>     &amp; {\texttt 7}{\texttt 0}{\texttt 2}{\texttt 5}<br>\end{array}<br>\]</p>
+<p>ここまでで、 \(4365_8 - 3412_8 = -3413_8 - 3412_8 = -(3413_8 + 3412_8) = -7025_8\) と計算できた。更に進めて、 \(-7025_8 = -111\ 000\ 010\ 101_2 = 000\ 111\ 101\ 011_2 = 0753_8\) と、解答の8進数を得る。</p>
+<h2><span id="36">3.6</span></h2><h5><span id="問題">問題</span></h5><p>8ビットの符号なし10進整数の185と122があるとする．185－122を計算せよ．オーバフローまたはアンダフローが発生するか，それともどちらも発生しないか．</p>
+<h5><span id="解答">解答</span></h5><p>\(185_{10} - 122_{10} = 63_{10}\)</p>
+<p>オーバーフローもアンダーフローも発生しない。</p>
+<h5><span id="解説">解説</span></h5><p>アンダーフローは整数演算ではなく浮動小数点演算で出てくる概念。負の整数が絡む演算で桁あふれした場合もオーバーフロー。</p>
+<h2><span id="37">3.7</span></h2><h5><span id="問題">問題</span></h5><p>8ビットの符号付き10進整数の185と122があるとする．185＋122を計算せよ．オーバフローまたはアンダフローが発生するか，それともどちらも発生しないか．</p>
+<h5><span id="解答">解答</span></h5><p>\(185_{10} + 122_{10} = 51_{10}\)</p>
+<p>オーバーフローもアンダーフローも発生しない。</p>
+<h5><span id="解説">解説</span></h5><p>\(185_{10}\) は負の数、 \(122_{10}\) は正の数なので、これらの加算はオーバーフローしない。</p>
+<p>\(185_{10}\) の2の補数を \(\overline{185_{10}}\) とすると、</p>
+<p>\[<br>\begin{eqnarray}<br>  185_{10} + \overline{185_{10}} &amp;=&amp; 256_{10} \<br>  \overline{185_{10}} &amp;=&amp; 256_{10} - 185_{10} = 71_{10}<br>\end{eqnarray}<br>\]</p>
+<p>よって、 \(185_{10} + 122_{10} = -71_{10} + 122_{10} = 51_{10}\)</p>
+<h2><span id="38">3.8</span></h2><h5><span id="問題">問題</span></h5><p>符号拡張形式で格納されている8ビットの符号付き10進整数の185と122があるとする．185－122を計算せよ．オーバフローまたはアンダフローが発生するか，それともどちらも発生しないか．</p>
+<h5><span id="解答">解答</span></h5><p>63</p>
+<p>オーバーフローが発生している。</p>
+<h5><span id="解説">解説</span></h5><p>\(185_{10}\) は負の数、 \(122_{10}\) は正の数なので、これらの減算はオーバーフローの可能性がある。</p>
+<p>\[<br>\begin{eqnarray}<br>185_{10} - 122_{10} &amp;=&amp; 1011\ 1001_2 - 0111\ 1010_2 \\<br>                    &amp;=&amp; 1011\ 1001_2 + 1000\ 0110_2 \\<br>                    &amp;=&amp; 1\ 0011\ 1111_2<br>\end{eqnarray}<br>\]</p>
+<p>オーバーフローしていて、 \(0011\ 1111_2 = 63_{10}\) と評価される。<br>この値は、符号なし整数として \(185_{10} - 122_{10}\) を計算した結果と同じである。</p>
+<h2><span id="39">3.9</span></h2><h5><span id="問題">問題</span></h5><p>2の補数形式で格納されている8ビットの符号付き10進整数の151と214があるとする．飽和演算を用いて，151＋214を計算せよ．計算の過程と，10進数の結果を示せ．</p>
+<h5><span id="解答">解答</span></h5><p>\(151_{10} + 214_{10} = -105_{10} + (-42_{10}) = -128_{10}\)</p>
+<h5><span id="解説">解説</span></h5><p>最後の式変形で飽和している。</p>
+<h2><span id="310">3.10</span></h2><h5><span id="問題">問題</span></h5><p>2の補数形式で格納されている8ビットの符号付き10進整数の151と214があるとする．飽和演算を用いて，151－214を計算せよ．計算の過程と，10進数の結果を示せ．</p>
+<h5><span id="解答">解答</span></h5><p>\(151_{10} - 214_{10} = -105_{10} - (-42_{10}) = -63_{10}\)</p>
+<h5><span id="解説">解説</span></h5><p>特になし</p>
+<h2><span id="311">3.11</span></h2><h5><span id="問題">問題</span></h5><p>8ビットの符号なし整数の151と214があるとする．飽和演算を用いて，151＋214を計算せよ．計算の過程と，10進数の結果を示せ．</p>
+<h5><span id="解答">解答</span></h5><p>\(151_{10} + 214_{10} = 255_{10}\)</p>
+<h5><span id="解説">解説</span></h5><p>飽和している。</p>
+<h2><span id="312">3.12</span></h2><h5><span id="問題">問題</span></h5><p>図3.6に示されているのに似た表を使用し，図3.3に記述されているハードウエアを使用して，6ビットの符号なし8進数の整数の62と12の積を計算せよ．ステップごとに，各レジスタの内容を示せ．</p>
+<h5><span id="解答">解答</span></h5><table>
+<thead>
+<tr>
+<th>処理サイクル</th>
+<th>ステップ</th>
+<th>乗数</th>
+<th>被乗数</th>
+<th>積</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>初期値</td>
+<td>\(001\ 01{\underline 0}\)</td>
+<td>\(000\ 000\ 110\ 010\)</td>
+<td>\(000\ 000\ 000\ 000\)</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1. 0: 演算なし</td>
+<td>\(001\ 010\)</td>
+<td>\(000\ 000\ 110\ 010\)</td>
+<td>\(000\ 000\ 000\ 000\)</td>
+</tr>
+<tr>
+<td>1</td>
+<td>2. 被乗数を左へシフト</td>
+<td>\(001\ 010\)</td>
+<td>\(\textcolor{red}{000\ 001\ 100\ 100}\)</td>
+<td>\(000\ 000\ 000\ 000\)</td>
+</tr>
+<tr>
+<td>1</td>
+<td>3. 乗数を右へシフト</td>
+<td>\(\textcolor{red}{000\ 10{\underline 1}}\)</td>
+<td>\(000\ 001\ 100\ 100\)</td>
+<td>\(000\ 000\ 000\ 000\)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>1a. 1: 積 += 被乗数</td>
+<td>\(000\ 101\)</td>
+<td>\(000\ 001\ 100\ 100\)</td>
+<td>\(\textcolor{red}{000\ 001\ 100\ 100}\)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>2. 被乗数を左へシフト</td>
+<td>\(000\ 101\)</td>
+<td>\(\textcolor{red}{000\ 011\ 001\ 000}\)</td>
+<td>\(000\ 001\ 100\ 100\)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>3. 乗数を右へシフト</td>
+<td>\(\textcolor{red}{000\ 01{\underline 0}}\)</td>
+<td>\(000\ 011\ 001\ 000\)</td>
+<td>\(000\ 001\ 100\ 100\)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>1. 0: 演算なし</td>
+<td>\(000\ 010\)</td>
+<td>\(000\ 011\ 001\ 000\)</td>
+<td>\(000\ 001\ 100\ 100\)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>2. 被乗数を左へシフト</td>
+<td>\(000\ 010\)</td>
+<td>\(\textcolor{red}{000\ 110\ 010\ 000}\)</td>
+<td>\(000\ 001\ 100\ 100\)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>3. 乗数を右へシフト</td>
+<td>\(\textcolor{red}{000\ 00{\underline 1}}\)</td>
+<td>\(000\ 110\ 010\ 000\)</td>
+<td>\(000\ 001\ 100\ 100\)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>1a. 1: 積 += 被乗数</td>
+<td>\(000\ 001\)</td>
+<td>\(000\ 110\ 010\ 000\)</td>
+<td>\(\textcolor{red}{000\ 111\ 110\ 100}\)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+</tbody></table>
+<p>サイクル4のステップ1aまで計算した時点で、あとは乗数が0のビットしか残っていないので、積への加算がないことがわかる。</p>
+<p>したがって \(62_8\) と \(12_8\) の積は \(000\ 111\ 110\ 100_2 = 764_8\)</p>
+<h5><span id="解説">解説</span></h5><ul>
+<li>被乗数, 乗数ともに6ビットなので、被乗数レジスタを12ビット, 乗数レジスタを6ビット, 積レジスタを12ビットとすれば十分。</li>
+</ul>
+<h2><span id="313">3.13</span></h2><h5><span id="問題">問題</span></h5><p>図3.6に示されているのに似た表を使用し，図3.5に記述されているハードウエアを使用して，8ビットの符号なし16進数の整数の62と12の積を計算せよ．ステップごとに，各レジスタの内容を示せ．</p>
+<h5><span id="解答">解答</span></h5><table>
+<thead>
+<tr>
+<th>処理サイクル</th>
+<th>ステップ</th>
+<th>乗数</th>
+<th>被乗数</th>
+<th>積</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>初期値</td>
+<td>\(0001\ 001{\underline 0}\)</td>
+<td>\(0110\ 0010\)</td>
+<td>\(0000\ 0000\)</td>
+</tr>
+<tr>
+<td>1</td>
+<td>演算なし</td>
+<td>\(0001\ 0010\)</td>
+<td>\(0110\ 0010\)</td>
+<td>\(0000\ 0000\)</td>
+</tr>
+<tr>
+<td>1</td>
+<td>右シフト</td>
+<td>\(\textcolor{red}{000\ 100\underline{1}}\)</td>
+<td>\(0110\ 0010\)</td>
+<td>\(\textcolor{red}{0000\ 0000\ 0}\)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>積(上位) += 被乗数</td>
+<td>\(000\ 1001\)</td>
+<td>\(0110\ 0010\)</td>
+<td>\(\textcolor{red}{0110\ 0010}\ 0\)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>右シフト</td>
+<td>\(\textcolor{red}{00\ 010\underline{0}}\)</td>
+<td>\(0110\ 0010\)</td>
+<td>\(\textcolor{red}{0011\ 0001\ 00}\)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>演算なし</td>
+<td>\(00\ 0100\)</td>
+<td>\(0110\ 0010\)</td>
+<td>\(0011\ 0001\ 00)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>右シフト</td>
+<td>\(\textcolor{red}{0\ 001\underline{0}}\)</td>
+<td>\(0110\ 0010\)</td>
+<td>\(\textcolor{red}{0001\ 1000\ 100}\)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>演算なし</td>
+<td>\(0\ 0010\)</td>
+<td>\(0110\ 0010\)</td>
+<td>\(0001\ 1000\ 100\)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>右シフト</td>
+<td>\(\textcolor{red}{000\underline{1}}\)</td>
+<td>\(0110\ 0010\)</td>
+<td>\(\textcolor{red}{0000\ 1100\ 0100}\)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>積(上位) += 被乗数</td>
+<td>\(0001\)</td>
+<td>\(0110\ 0010\)</td>
+<td>\(\textcolor{red}{0110\ 1110}\ 0100\)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>右シフト</td>
+<td>\(\textcolor{red}{00\underline{0}}\)</td>
+<td>\(0110\ 0010\)</td>
+<td>\(\textcolor{red}{0011\ 0111\ 0010\ 0}\)</td>
+</tr>
+<tr>
+<td>6</td>
+<td>演算なし</td>
+<td>\(000\)</td>
+<td>\(0110\ 0010\)</td>
+<td>\(0011\ 0111\ 0010\ 0\)</td>
+</tr>
+<tr>
+<td>6</td>
+<td>右シフト</td>
+<td>\(\textcolor{red}{0\underline{0}}\)</td>
+<td>\(0110\ 0010\)</td>
+<td>\(\textcolor{red}{0001\ 1011\ 1001\ 00}\)</td>
+</tr>
+<tr>
+<td>7</td>
+<td>演算なし</td>
+<td>\(00\)</td>
+<td>\(0110\ 0010\)</td>
+<td>\(0001\ 1011\ 1001\ 00\)</td>
+</tr>
+<tr>
+<td>7</td>
+<td>右シフト</td>
+<td>\(\textcolor{red}{\underline{0}}\)</td>
+<td>\(0110\ 0010\)</td>
+<td>\(\textcolor{red}{0000\ 1101\ 1100 100}\)</td>
+</tr>
+<tr>
+<td>8</td>
+<td>演算なし</td>
+<td>\(0\)</td>
+<td>\(0110\ 0010\)</td>
+<td>\(0000\ 1101\ 1100 100\)</td>
+</tr>
+<tr>
+<td>8</td>
+<td>右シフト</td>
+<td></td>
+<td>\(0110\ 0010\)</td>
+<td>\(\textcolor{red}{0000\ 0110\ 1110\ 0100}\)</td>
+</tr>
+</tbody></table>
+<h5><span id="解説">解説</span></h5><p>前問が \(62_8 \times 12_8\) の計算だったの対し、本文は \(62_{16} \times 12_{16}\) の計算であることに注意（悪意を感じる🙄）。</p>
+<p>初期状態から計算結果を出すまでの乗数レジスタ（8ビット）、加算キャリー・積・被乗数レジスタ（17ビット）の値を下記に図示する。</p>
+<img src="/img/2020/01-14-3.13.png" alt="ハードウェア乗算アルゴリズム" width="500" height="auto">
+
+<p>これを表形式に合わせて解答を得る。</p>
+<h2><span id="314">3.14</span></h2><h5><span id="問題">問題</span></h5><p>図3.3および図3.4に示されている方法に従い，整数の長さが8ビットで，各ステップの処理に4単位時間かかるとして，乗算を行うのに必要な時間を計算せよ．ステップ1においては，必ず加算が行われる，と想定する．つまり，被乗数またはゼロが加算される．また，レジスタは既に初期化されている，と想定する（乗算ループを回る回数を数えるだけでよい）．この処理をハードウエアで行う場合は，被乗数と乗数のシフトを同時に実行できる．この処理をソフトウエアで行う場合は，被乗数と乗数のシフトを順に実行しなければならない．両方の場合について，問題を解け．</p>
+<h5><span id="解答">解答</span></h5><ul>
+<li>図3.3:<ul>
+<li>ハードウェア処理: 128単位時間</li>
+<li>ソフトウェア処理: 160単位時間</li>
+</ul>
+</li>
+<li>図3.4:<ul>
+<li>ハードウェア処理: 160単位時間</li>
+<li>ソフトウェア処理: 160単位時間</li>
+</ul>
+</li>
+</ul>
+<h5><span id="解説">解説</span></h5><ul>
+<li>図3.3の形式について:<ul>
+<li>乗数レジスタを右シフトする1サイクルの間に下記のステップを実行する。<ul>
+<li>乗数レジスタの最下位ビットの0/1を判定。</li>
+<li>積レジスタに被乗数レジスタ(最下位ビットが1のとき)または0(最下位ビットが0のとき)を加える。</li>
+<li>被乗数レジスタを左シフト。</li>
+<li>乗数レジスタを右シフト。</li>
+<li>繰り返し回数が8回に達したか判定。</li>
+</ul>
+</li>
+<li>ハードウェア処理ならば、被乗数レジスタの左シフトと乗数レジスタの右シフトが同一ステップで実行できるので、ハードウェア処理は4ステップ、ソフトウェア処理は5ステップ。</li>
+<li>この処理は、8ビットなので8回繰り返される。</li>
+<li>したがって、ハードウェア処理は32ステップ、ソフトウェア処理は40ステップ。</li>
+</ul>
+</li>
+<li>図3.4の形式について:<ul>
+<li>乗数レジスタを右シフトする1サイクルの間に下記のステップを実行する。<ul>
+<li>積・乗数レジスタの最下位ビットの0/1を判定。</li>
+<li>積・乗数レジスタに被乗数レジスタ(最下位ビットが1のとき)または0(最下位ビットが0のとき)を加える。</li>
+<li>積・乗数レジスタを右シフト。</li>
+<li>繰り返し回数が8回に達したか判定。</li>
+</ul>
+</li>
+<li>この処理は、8ビットなので8回繰り返される。</li>
+<li>したがって、ハードウェア処理でもソフトウェア処理でも32ステップ。</li>
+</ul>
+</li>
+</ul>
+<h2><span id="315">3.15</span></h2><h5><span id="問題">問題</span></h5><p>本文に記述されている方法（縦に積み上げられた31個の加算器）に従い，整数の長さが8ビットで，加算器の処理に4単位時間かかるとして，乗算を行うのに必要な時間を計算せよ．</p>
+<h5><span id="解答">解答</span></h5><p>問題文に指定されていないので、乗数の各ビットに応じて</p>
+<ul>
+<li>0ならば、0を加算器への入力値にする</li>
+<li>1ならば、被乗数を加算器への入力値にする</li>
+</ul>
+<p>という処理には、 \(n\) 単位時間 かかるものとする。乗数31~0ビット目はそれぞれ独立に判定できるので、上記の処理を32ビット分並列に行えば \(n\) 単位時間で済む。</p>
+<p>あとは、逐次的に32ステップかけて加算器の結果を足し合わせていくので、合計で \(n + 32 \times 4 = n + 128\) 単位時間を要する。</p>
+<h5><span id="解説">解説</span></h5><p>特になし。</p>
+<h2><span id="316">3.16</span></h2><h5><span id="問題">問題</span></h5><p>図3.7に示されている方法に従い，整数の長さが8ビットで，加算器の処理に4単位時間かかるとして，乗算を行うのに必要な時間を計算せよ．</p>
+<h5><span id="解答">解答</span></h5><p>3.15と同様の \(n\) を導入。</p>
+<p>加算器の適用は5ステップで済むので、 \(n + 5 \times 4 = n + 20\) 単位時間を要する。</p>
+<h5><span id="解説">解説</span></h5><p>特になし。</p>
+<h2><span id="317">3.17</span></h2><h5><span id="問題">問題</span></h5><p>本文に記述されているように，性能を向上させる1つの可能性は，実際の乗算の代わりに，シフトと加算を行うことである．たとえば，9×6＝（2×2×2＋1）×6である．したがって，6を左に3回シフトし，その結果に6を加えることにより，9×6を計算できる．シフトと加算を用いて，0x33×0x55を計算する，最善の方法を示せ．入力データは共に，8ビットの符号なし整数であるものとする．</p>
+<h5><span id="解答">解答</span></h5><p>\(33_{16} \times 55_{16} = ((2^5)_{10} + 1_{10}) \times 55_{16} = 55_{16} &lt;&lt; 5 + 55_{16}\)</p>
+<h5><span id="解説">解説</span></h5><ul>
+<li><code>0x33</code> を2のべき乗にした場合、 \(33_{16} \times 55_{16} = ((2^5)_{10} + 1_{10}) \times 55_{16}\) なので、 \(55_{16} &lt;&lt; 5 + 55_{16}\) と計算できる。</li>
+<li><code>0x55</code> を2のべき乗にした場合、 \(33_{16} \times 55_{16} = 33_{16} \times ((2^5)_{10} + 23_{10}\) なので、 \(33_{16} &lt;&lt; 5 + (33_{16} + … (23回))\) と計算できる。</li>
+</ul>
+<p>前者のほうが加算の回数が少なくベター。</p>
+<h2><span id="318">3.18</span></h2><h5><span id="問題">問題</span></h5><p>図3.10に示されているのに似た表を使用し，図3.8に記述されているハードウエアを使用して，74割る21を計算せよ．ステップごとに，各レジスタの内容を示せ．入力データは共に，6ビットの符号なし整数であるものとする．</p>
+<h5><span id="解答">解答</span></h5><table>
+<thead>
+<tr>
+<th>処理サイクル</th>
+<th>ステップ</th>
+<th>商</th>
+<th>除数</th>
+<th>剰余</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>初期値</td>
+<td>\(000000\)</td>
+<td>\(010101\ 000000\)</td>
+<td>\(000001\ 001010\)</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1. 剰余 -= 除数</td>
+<td>\(000000\)</td>
+<td>\(010101\ 000000\)</td>
+<td>\(\textcolor{red}{\underline{1}01100\ 001010}\)</td>
+</tr>
+<tr>
+<td>1</td>
+<td>2b. 剰余 &lt; 0: <br>剰余を戻し、商を左シフト。商最右=0</td>
+<td>\(000000\)</td>
+<td>\(010101\ 000000\)</td>
+<td>\(\textcolor{blue}{000001\ 001010}\)</td>
+</tr>
+<tr>
+<td>1</td>
+<td>3. 除数を右シフト</td>
+<td>\(000000\)</td>
+<td>\(\textcolor{red}{001010\ 100000}\)</td>
+<td>\(000001\ 001010\)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>1. 剰余 -= 除数</td>
+<td>\(000000\)</td>
+<td>\(001010\ 100000\)</td>
+<td>\(\textcolor{red}{\underline{1}10110\ 101010}\)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>2b. 剰余 &lt; 0: <br>剰余を戻し、商を左シフト。商最右=0</td>
+<td>\(000000\)</td>
+<td>\(001010\ 100000\)</td>
+<td>\(\textcolor{blue}{000001\ 001010}\)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>3. 除数を右シフト</td>
+<td>\(000000\)</td>
+<td>\(\textcolor{red}{000101\ 010000}\)</td>
+<td>\(000001\ 001010\)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>1. 剰余 -= 除数</td>
+<td>\(000000\)</td>
+<td>\(000101\ 010000\)</td>
+<td>\(\textcolor{red}{\underline{1}11011\ 111010}\)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>2b. 剰余 &lt; 0: <br>剰余を戻し、商を左シフト。商最右=0</td>
+<td>\(000000\)</td>
+<td>\(000101\ 010000\)</td>
+<td>\(\textcolor{blue}{111011\ 111010}\)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>3. 除数を右シフト</td>
+<td>\(000000\)</td>
+<td>\(\textcolor{red}{000010\ 101000}\)</td>
+<td>\(000001\ 001010\)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>1. 剰余 -= 除数</td>
+<td>\(000000\)</td>
+<td>\(000010\ 101000\)</td>
+<td>\(\textcolor{red}{\underline{1}11110\ 100010}\)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>2b. 剰余 &lt; 0: <br>剰余を戻し、商を左シフト。商最右=0</td>
+<td>\(000000\)</td>
+<td>\(000010\ 101000\)</td>
+<td>\(\textcolor{blue}{000001\ 001010}\)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>3. 除数を右シフト</td>
+<td>\(000000\)</td>
+<td>\(\textcolor{red}{000001\ 010100}\)</td>
+<td>\(000001\ 001010\)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>1. 剰余 -= 除数</td>
+<td>\(000000\)</td>
+<td>\(000001\ 010100\)</td>
+<td>\(\textcolor{red}{\underline{1}11111\ 110110}\)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>2b. 剰余 &lt; 0: <br>剰余を戻し、商を左シフト。商最右=0</td>
+<td>\(000000\)</td>
+<td>\(000001\ 010100\)</td>
+<td>\(\textcolor{blue}{000001\ 001010}\)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>3. 除数を右シフト</td>
+<td>\(000000\)</td>
+<td>\(\textcolor{red}{000000\ 101010}\)</td>
+<td>\(000001\ 001010\)</td>
+</tr>
+<tr>
+<td>6</td>
+<td>1. 剰余 -= 除数</td>
+<td>\(000000\)</td>
+<td>\(000000\ 101010\)</td>
+<td>\(\textcolor{red}{\underline{0}00000\ 100000}\)</td>
+</tr>
+<tr>
+<td>6</td>
+<td>2a. 剰余 &gt;= 0: <br>商を左シフト。商最右=1</td>
+<td>\(\textcolor{red}{000001}\)</td>
+<td>\(000000\ 101010\)</td>
+<td>\(000000\ 100000\)</td>
+</tr>
+<tr>
+<td>6</td>
+<td>3. 除数を右シフト</td>
+<td>\(000001\)</td>
+<td>\(\textcolor{red}{000000\ 010101}\)</td>
+<td>\(000000\ 100000\)</td>
+</tr>
+<tr>
+<td>7</td>
+<td>1. 剰余 -= 除数</td>
+<td>\(000001\)</td>
+<td>\(000000\ 010101\)</td>
+<td>\(\textcolor{red}{\underline{0}00000\ 001011}\)</td>
+</tr>
+<tr>
+<td>7</td>
+<td>2a. 剰余 &gt;= 0: <br>商を左シフト。商最右=1</td>
+<td>\(\textcolor{red}{000011}\)</td>
+<td>\(000000\ 010101\)</td>
+<td>\(000000\ 001011\)</td>
+</tr>
+<tr>
+<td>7</td>
+<td>3. 除数を右シフト</td>
+<td>\(000011\)</td>
+<td>\(\textcolor{red}{000000\ 001010}\)</td>
+<td>\(000000\ 001011\)</td>
+</tr>
+</tbody></table>
+<p>したがって、商 \(000011_2 = 3_{10}\)、剰余 \(001011_2 = 7_{10}\)</p>
+<h5><span id="解説">解説</span></h5><ul>
+<li>被除数が6ビット整数なので、処理サイクルは7回になる。</li>
+</ul>
+<h2><span id="319">3.19</span></h2><h5><span id="問題">問題</span></h5><p>図3.10に示されているのに似た表を使用し，図3.11に記述されているハードウエアを使用して，74割る21を計算せよ．ステップごとに，各レジスタの内容を示せ．AおよびBは6ビットの符号なし整数であるものとする．このアルゴリズムでは，図3.9に示されているのとは，少し違ったアプローチが必要である．よく考えて，1回か2回，試してみるとよいだろう．あるいは，インターネットから参考情報を検索する手もある（ヒント：図3.11に，剰余レジスタをどちらの方向にもシフトできる，と示唆されている．それを利用できる可能性がある．）．</p>
+<h5><span id="解答">解答</span></h5><p>表形式は割愛し、図示する。</p>
+<img src="/img/2020/01-14-3.19.png" alt="ハードウェア乗算アルゴリズム" width="550" height="auto">
+
+<h5><span id="解説">解説</span></h5><ul>
+<li>処理サイクル数は “被除数のビット数 + 1” と設計すれば正しく計算できる。</li>
+<li>除数レジスタを6ビット、剰余・商レジスタを12ビットとする（加算キャリー合わせて12ビット）。</li>
+<li>初期値は、 “剰余・商” のレジスタに除数（左を0パディング）を格納。</li>
+</ul>
+<h2><span id="320">3.20</span></h2><h5><span id="問題">問題</span></h5><p>ビット・パターン0×0C000000が2の補数の整数であるならば，10進数では何を表すか．符号なしの整数であったならば，どうか．</p>
+<h5><span id="解答">解答</span></h5><p>\(201326592_{10}\)</p>
+<h5><span id="解説">解説</span></h5><ul>
+<li>32ビット整数だと仮定する。最上位ビットが0なので、符号付きでも符号なしでも同じ正の値を指す。</li>
+</ul>
+<h2><span id="321">3.21</span></h2><h5><span id="問題">問題</span></h5><p>ビット・パターン0×0C000000を命令レジスタに入れたならば，MIPSのどの命令が実行されるか．</p>
+<h5><span id="解答">解答</span></h5><p><code>jal 0</code></p>
+<h5><span id="解説">解説</span></h5><p>\(\rm{0C000000}_{16} = 0000\ 1100\ 0000\ 0000\ 0000\ 0000\ 0000\ 0000_2\)</p>
+<ul>
+<li>opcode部分の上位6ビットが \(3_{16}\) なので、 <code>jal</code> (J形式) である。</li>
+<li>J形式は下位26ビットがアドレス値を指す。今回は0番地。<ul>
+<li>図2.13によると、0番地はテキストセグメントの範囲外であるので、CPUのメモリ保護機構でメモリアクセスエラーになると思われる。</li>
+</ul>
+</li>
+</ul>
+<h2><span id="322">3.22</span></h2><h5><span id="問題">問題</span></h5><p>ビット・パターン0×0C000000が浮動小数点数であるならば，10進数では何を表すか．IEEE754規格に従え．</p>
+<h5><span id="解答">解答</span></h5><p>\(1 \times 2^{-103}\)</p>
+<h5><span id="解説">解説</span></h5><p>\(\rm{0C000000}_{16} = 0000\ 1100\ 0000\ 0000\ 0000\ 0000\ 0000\ 0000_2\)</p>
+<ul>
+<li>最初の1ビット <code>0</code> は符号。正の数。</li>
+<li>次の8ビット <code>0001 1000</code> は指数部。実際の指数部の値値は、バイアス <code>-127</code> を考慮して、 \((2^{00011000_2 - 127_{10}})_{10} = (2^{-103})_{10}\) 。</li>
+<li>最後の23ビット <code>00...0</code> は仮数部。ただし、先頭の <code>1.</code> は勝手についているとみなすので、実際の仮数部の値は \(1.00000000000000000000000_2 = 1_{10}\) 。</li>
+<li>以上より、 \(1 \times 2^{-103}\) 。</li>
+</ul>
+<h2><span id="323">3.23</span></h2><h5><span id="問題">問題</span></h5><p>IEEE754の単精度形式であるとして，10進数63.25を2進数で表現せよ．</p>
+<h5><span id="解答">解答</span></h5><p><code>0　10000100　11111010 00000000 0000000</code></p>
+<h5><span id="解説">解説</span></h5><ul>
+<li>2進数に変換して \(63.25_{10} = (111111.01)_{2}\) 。<ul>
+<li>\(0.25_{10} = (\frac{1}{4})_{10} = 0.01_2\)</li>
+</ul>
+</li>
+<li>正規化して、 \((1.1111101 \times 2^5)_2\) 。</li>
+<li>バイアスを考慮して、 \((1.1111101 \times 2^{132 - 127})_2 = (1.1111101 \times 2^{10000100_2 - 127_{10}})_2\) 。</li>
+<li>以上より、符号は <code>0</code>, 指数部は <code>10000100</code>, 仮数部は（最初の <code>1.</code> は不要で） <code>11111010 00000000 0000000</code></li>
+</ul>
+<h2><span id="324">3.24</span></h2><h5><span id="問題">問題</span></h5><p>IEEE754の倍精度形式であるとして，10進数63.25を2進数で表現せよ．</p>
+<h5><span id="解答">解答</span></h5><p><code>0　100 0000 0100　11111010 00000000 00000000 00000000 00000000 00000000 0000</code></p>
+<h5><span id="解説">解説</span></h5><ul>
+<li>倍精度が単精度と異なるのは、以下の点。<ul>
+<li>指数部: 11ビットに拡張され、バイアスは1023。</li>
+<li>仮数部: 52ビットに拡張。</li>
+</ul>
+</li>
+<li>指数部について、 \(2^5 = 2^{1028 - 1023} = 2^{100\ 0000\ 0100_2 - 1023}\) なので、指数部の値は <code>100 0000 0100</code> 。</li>
+<li>仮数部については、単精度のものの下位ビットにゼロが多く連なるだけ。</li>
+</ul>
+<h2><span id="325">3.25</span></h2><h5><span id="問題">問題</span></h5><p>IBMの単精度形式（基数は2でなくて16，指数部は7ビット）で格納されているとして，10進数63.25を2進数で表現せよ．</p>
+<h5><span id="解答">解答</span></h5><p><code>0　100 0100　11111101 00000000 00000000</code></p>
+<h5><span id="解説">解説</span></h5><p>IBM単精度形式の符号化に関する情報は本書には不足しているので、 <a href="http://www.vision.is.tohoku.ac.jp/files/1814/9359/7662/3rd.pdf" target="_blank" rel="noopener">http://www.vision.is.tohoku.ac.jp/files/1814/9359/7662/3rd.pdf</a> を参照する。</p>
+<p>\[<br>(-1)^{符号(1bit)} \times 16^{指数部(7bit) - 64} \times 仮数部(24bit, 1以下)<br>\]</p>
+<p>という符号化らしい。</p>
+<ul>
+<li>正の数なので符号は 0 。</li>
+<li>1以下の仮数部を得るように正規化して、 \(63.25_{10} = (0.11111101 \times 2^6)_{2}\) 。</li>
+<li>+64 のバイアスを考慮して、 \((0.11111101 \times 2^{70 - 64} = 0.11111101 \times 2^{1000100_2 - 6}\) なので、指数部の値は <code>100 0100</code> 。</li>
+<li>仮数部の値は <code>11111101 00000000 00000000</code> 。</li>
+</ul>
+<h2><span id="326-未回答">3.26 (未回答)</span></h2><h5><span id="問題">問題</span></h5><p>DECのPDP-8で採用されたのと同様の形式（左側の12ビットは2の補数として格納される指数，右側の24ビットは2の補数として格納される仮数）を用いて，－1.5625×10－1を表すビット・パターンを示せ．暗黙の1は用いない．IEEE754規格の単精度および倍精度と比べて，この36ビット・パターンの範囲と精度について述べよ．</p>
+<h2><span id="327">3.27</span></h2><h5><span id="問題">問題</span></h5><p>IEEE 754-2008規格には，長さがたった16ビットの半精度がある．左端のビットはやはり符号ビットであり，指数部は長さが5ビットで15のゲタを履いており，仮数部の長さは10ビットである．暗黙の1を用いる．excess-16形式で指数を格納するこの形式を用いて，－1.5625×10－1を表すビット・パターンを示せ．IEEE754規格の単精度と比べて，この16ビットの浮動小数点形式の範囲と精度について述べよ．</p>
+<h5><span id="解答">解答</span></h5><p><code>1　01100　01 00000000</code></p>
+<p>IEEE754の単精度形式と比較して、表せる範囲は絶対値として \(2^{-113}\) 倍小さく、精度は 2^{-112} 倍劣る。</p>
+<h5><span id="解説">解説</span></h5><p>ビットパターンを考える。</p>
+<ul>
+<li>負の数なので符号ビットは1。</li>
+<li>絶対値を2進数で正規化して、 \(0.15625_{10} = 0.00101_2 = 1.01 \times 2^{-3}\)<ul>
+<li>\(0.15625_{10} = 0 \times \frac{1}{2} + 0 \times \frac{1}{4} + 1 \times \frac{1}{8} + 0 \times \frac{1}{16} + \frac{1}{32} = 0.00101_2\)</li>
+</ul>
+</li>
+<li>バイアスを考慮し、 \(1.01 \times 2^{12 - 15} = 1.01 \times 2^{01100_2 - 16}\) なので、指数部の値は <code>01100</code></li>
+<li>暗黙の1があるので、仮数部の値は <code>01 00000000</code></li>
+</ul>
+<p>範囲を考える。</p>
+<ul>
+<li>IEEE 754 の単精度浮動小数点数と同様に、指数部が全ビット0または1の数は特別な数として予約されている。有効な指数部の値は \([00001_2, 11110_2] = [1_{10}, 30_{10}]\) 。バイアスを考慮し、 \([-14_{10}, 15_{10}]\) 。</li>
+<li>仮数部で表現できる最大値は、暗黙の1も考慮し、 \((1.11… (小数点以下23桁))_2\) 。約2と言ってよい。</li>
+<li>したがって、表せる範囲は \((-2 \times 2^{15}, 2 \times 2^{15})\) 。</li>
+<li>IEEE 754 の単精度浮動小数点数の表せる範囲は \((-2 \times 2^{128}, 2 \times 2^{128})\) なので、絶対値にして \(\frac{2^{128}}{2^{15}} = 2^{113}\) 倍大きな数値が扱える。</li>
+</ul>
+<p>精度を考える。</p>
+<ul>
+<li>指数部の最小値が-14なので、 \(2^{-14}\) 刻みの値を表現できる。</li>
+<li>IEEE 754 の単精度浮動小数点数の指数部の最小値は-126なので、 \(2^{-126}\) 刻みの値を表現できる。比を取ると \(\frac{2^{-14}}{2^{-126}} = 2^{112}\) 。</li>
+</ul>
+<h2><span id="328-未回答">3.28 (未回答)</span></h2><h5><span id="問題">問題</span></h5><p>Hewlett-Packard 2114，2115，2116で使用された形式では，左端16ビットが2の補数として格納される仮数，その後の16ビットのうちの左半分が仮数の拡張部（仮数は全部で24ビットとなる），右半分の8ビットが指数である．ところが，ひとひねり加えられていて，指数は符合付き絶対値形式で格納され，符号ビットは右端に配置された．この形式を用いて，－1.5625×10－1を表すビット・パターンを示せ．暗黙の1は用いない．IEEE754規格の単精度と比べて，この32ビット・パターンの範囲と精度について述べよ．</p>
+<h2><span id="329">3.29</span></h2><h5><span id="問題">問題</span></h5><p>\(2.6125 \times 10^1\) と \(4.150390625 \times 10^{-1}\) との和を手作業で計算せよ．ただし，2つのデータは，問題3.27で説明した，16ビットの半精度形式で格納されているものとする．ガード桁と丸め桁とスティッキー・ビットがそれぞれ1ビットあり，最も近い偶数へ丸めるものとする．すべてのステップを示せ．</p>
+<h5><span id="解答">解答</span></h5><ul>
+<li>10のべき乗部分が残っていると2進数に変換するときに邪魔なのでなくす。<ul>
+<li>\(2.6125 \times 10^1 = 26.125\)</li>
+<li>\(4.150390625 \times 10^{-1} = 0.4150390625\)</li>
+</ul>
+</li>
+<li>2進数に変換する。<ul>
+<li>\(26.125 = 11010.001_2\)</li>
+<li>\(0.4150390625 = 0.0110101001_2\)<ul>
+<li>10進小数を手計算で2進小数に変換するアルゴリズムは <a href="https://mathwords.net/syosuu2sin" target="_blank" rel="noopener">https://mathwords.net/syosuu2sin</a> など参照。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>正規化する。<ul>
+<li>\(11010.001_2 = 1.1010001 \times 2^4\)</li>
+<li>\(0.0110101001_2 = 1.10101001 \times 2^{-1}\)</li>
+</ul>
+</li>
+<li>加算するため、大きい方の指数に小さい方を合わせる。<ul>
+<li>\(1.1010001 \times 2^4\)</li>
+<li>\(0.00000110101001_2 \times 2^4\)</li>
+</ul>
+</li>
+<li>IEEE 754 の16半精度浮動小数点数は、仮数部が10ビットなので、後者の数値は桁落ちして <code>0000011010 101</code> 。ただし、11ビット目はガード桁。12ビット目は丸め桁。13ビット目はスティッキービット（元の13ビット目は0, 14ビット目は1だったので、1が立つ）。</li>
+<li>仮数部を筆算する。</li>
+</ul>
+<p>\[<br>\begin{array}{rr}<br>     &amp; {\texttt 1}{\texttt .}{\texttt 1}{\texttt 0}{\texttt 1}{\texttt 0}{\texttt 0}{\texttt 0}{\texttt 1}{\texttt 0}{\texttt 0}{\texttt 0}{\texttt 0}{\texttt 0}{\texttt 0}  \\<br>  + &amp; {\texttt 0}{\texttt .}{\texttt 0}{\texttt 0}{\texttt 0}{\texttt 0}{\texttt 0}{\texttt 1}{\texttt 1}{\texttt 0}{\texttt 1}{\texttt 0}{\texttt 1}{\texttt 0}{\texttt 1} \\<br>  \hline<br>     &amp; {\texttt 1}{\texttt .}{\texttt 1}{\texttt 0}{\texttt 1}{\texttt 0}{\texttt 1}{\texttt 0}{\texttt 0}{\texttt 0}{\texttt 1}{\texttt 0}{\texttt 1}{\texttt 0}{\texttt 1}<br>\end{array}<br>\]</p>
+<ul>
+<li>丸めを計算する。ulp (unit in the last place) は、小数点以下10桁目の <code>0</code> 。それよりも小さい桁は <code>101</code> なので、 \(1 \times \frac{1}{2} + 0 \times \frac{1}{4} + 1 \times \frac{1}{8} = \frac{5}{8} {\rm ulp}\) 。0.5 ulp よりも大きいので、小数点以下10桁目は桁上げして <code>1</code> となる。</li>
+<li>以上より、和は \(1.1010100011 \times 2^4\) 。</li>
+</ul>
+<h5><span id="解説">解説</span></h5><p>スティッキービットがなければ、ガード桁と丸め桁で \(\frac{1}{2} {\rm ulp}\) となるので、 “最も近い偶数への丸め” が発動し、小数点以下10桁目は <code>0</code> のままになっていた。</p>
+<h2><span id="330">3.30</span></h2><h5><span id="問題">問題</span></h5><p>\(-8.0546875 \times 10^0\) と \(1.79931640625 \times 10^{-1}\) との積を手作業で計算せよ．ただし，2つのデータは，問題3.27で説明した，16ビットの半精度形式で格納されているものとする．ガード桁と丸め桁とスティッキー・ビットがそれぞれ1ビットあり，最も近い偶数へ丸めるものとする．すべてのステップを示せ．ただし，問題3.12から3.14で説明した方法を使用する代わりに，本文中の例で示したように，人が読める形式の乗算を行ってよい．オーバフローまたはアンダフローが発生するかどうかを示せ．答えを，問題3.27で説明した16ビットの浮動小数点形式と，10進数の両方で示せ．結果はどれほど正確か．電卓を使って乗算を行った場合と比べるとどうか．</p>
+<h6><span id="解答">解答</span></h6><ul>
+<li><p>符号は片方が負でもう片方が正なので、積の符号は負になる。</p>
+</li>
+<li><p>10のべき乗部分が残っていると2進数に変換するときに邪魔なのでなくす。</p>
+<ul>
+<li>\(8.0546875 \times 10^0 = 8.0546875\)</li>
+<li>\(1.79931640625 \times 10^{-1} = 0.179931640625\)</li>
+</ul>
+</li>
+<li><p>2進数に変換する。</p>
+<ul>
+<li>\(8.0546875 = 1000.0000111_2\)</li>
+<li>\(0.179931640625 = 0.001011100001_2\)</li>
+</ul>
+</li>
+<li><p>正規化する。</p>
+<ul>
+<li>\(1000.0000111 = 1.0000000111 \times 2^3\)</li>
+<li>\(0.001011100001 = 1.011100001 \times 2^{-3}\)</li>
+</ul>
+</li>
+<li><p>積の指数部は \(2^3 \times 2^{-3} = 2^0\) 。</p>
+</li>
+<li><p>仮数部はともに10ビットに収まる。</p>
+</li>
+<li><p>仮数部の積を筆算する。</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">          1.0000000111</span><br><span class="line">        x 1.011100001</span><br><span class="line">----------------------</span><br><span class="line">         10 000000111</span><br><span class="line">    1000000 0111</span><br><span class="line">   10000000 111</span><br><span class="line">  100000001 11</span><br><span class="line">10000000111</span><br><span class="line">----------------------</span><br><span class="line">10111001100 000100111</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>仮数部10ビット、ガード桁1ビット、丸め桁1ビット、スティッキービット1ビットまで削ると、結果は <code>1.0111001100 001</code> となる。（スティッキービットは、13ビット目以降の <code>0100111</code> に1つ以上1が立っているので1となる。）</p>
+</li>
+<li><p>ガード桁以降は \(\frac{1}{8} {\rm ulp}\) なので切り捨てられ、最終ビットは0のまま。</p>
+</li>
+<li><p>以上より、積は \(- 1.0111001100 \times 2^{0}\) 。</p>
+</li>
+<li><p>指数部は、バイアスを考慮して \(2^{0} = 2^{15 - 15} = 2^{01111_2 - 15}\) なので、 <code>01111</code> と符号化される。</p>
+</li>
+<li><p>全体を符号化して、 <code>1　01111　0111001100</code> 。</p>
+</li>
+<li><p>10進数で表すと \(-1.0111001010_2 = -(1 + \frac{1}{4} + \frac{1}{8} + \frac{1}{16} + \frac{1}{128} + \frac{1}{256}) = -1.44921875_{10}\)</p>
+</li>
+<li><p>電卓で計算すると \(8.0546875 \times 0.179931640625 = 1.4492931365966797\) 。有効数字5桁の範囲で一致。</p>
+</li>
+</ul>
+<h5><span id="解説">解説</span></h5><p>特になし。</p>
+<h2><span id="331">3.31</span></h2><h5><span id="問題">問題</span></h5><p>\(8.625 \times 10^1\) 割る \(-4.875 \times 10^0\) を手作業で計算せよ．答えを得るのに必要なすべてのステップを示せ．ガード桁と丸め桁とスティッキー・ビットがそれぞれ1ビットあり，必要があればそれらを使用するものとする．最終的な答えを，問題3.27で説明した16ビットの浮動小数点形式と，10進数の両方で示せ．また，10進数の答えを，電卓を使った場合の答えと比較せよ．</p>
+<p><strong>入力・計算過程を保持する形式の指定がないが、IEEE 754半精度浮動小数点数を使うものとする。</strong></p>
+<h5><span id="解答">解答</span></h5><ul>
+<li><p>符号は片方が負でもう片方が正なので、商の符号は負になる。</p>
+</li>
+<li><p>10のべき乗部分が残っていると2進数に変換するときに邪魔なのでなくす。</p>
+<ul>
+<li>\(8.625 \times 10^1 = 86.25\)</li>
+<li>\(4.875 \times 10^0 = 4.875\)</li>
+</ul>
+</li>
+<li><p>2進数に変換する。</p>
+<ul>
+<li>\(86.25 = 1010110.01_2\)</li>
+<li>\(4.875 = 100.111_2\)</li>
+</ul>
+</li>
+<li><p>正規化する。</p>
+<ul>
+<li>\(1010110.01 = 1.01011001 \times 2^6\)</li>
+<li>\(100.111 = 1.00111 \times 2^2\)</li>
+</ul>
+</li>
+<li><p>商の指数部は \(\frac{2^6}{2^2} = 2^4\)</p>
+</li>
+<li><p>仮数部はともに10ビットに収まる。</p>
+</li>
+<li><p>仮数部の商を筆算する。予め、除数の \(1.00111\) を整数化するため、被除数も含めて小数点を5個ずらす(左に5シフト)。</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">              1.000110110000...</span><br><span class="line">        -----------</span><br><span class="line">100111 ) 101011.001</span><br><span class="line"></span><br><span class="line">       - 100111</span><br><span class="line">       --------</span><br><span class="line">            100 0010</span><br><span class="line">          -  10 0111</span><br><span class="line">          ----------</span><br><span class="line">              1 10110</span><br><span class="line">            - 1 00111</span><br><span class="line">            ---------</span><br><span class="line">                 111100</span><br><span class="line">               - 100111</span><br><span class="line">               --------</span><br><span class="line">                  101010</span><br><span class="line">                - 100111</span><br><span class="line">                --------</span><br><span class="line">                      110000</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>仮数部10ビット、ガード桁1ビット、丸め桁1ビット、スティッキービット1ビットまでを取ると、結果は <code>1.0001101100 001</code> となる。（スティッキービットは、13ビット目以降にも1が続くので1となる。）</p>
+</li>
+<li><p>ガード桁以降は \(\frac{1}{8} {\rm ulp}\) なので切り捨てられ、最終ビットは0のまま。</p>
+</li>
+<li><p>以上より、商は \(- 1.0001101100 \times 2^4\) 。</p>
+</li>
+<li><p>指数部は、バイアスを考慮して \(2^{4} = 2^{19 - 15} = 2^{10011_2 - 15}\) なので、 <code>10011</code> と符号化される。</p>
+</li>
+<li><p>全体を符号化して、 <code>1　10011　0001101100</code> 。</p>
+</li>
+<li><p>10進数で表すと、 \(- 1.0001101100 \times 2^4 = - 10001.101100 = -(17_{10} + \frac{1}{2} + \frac{1}{8} + \frac{1}{16}) = -17.6875)\) 。</p>
+</li>
+<li><p>電卓で計算すると、 \(8.625 \times 10^1 / (-4.875 \times 10^0) = -17.692307692307693\) 。有効数字3桁の範囲で一致。</p>
+</li>
+</ul>
+<h5><span id="解説">解説</span></h5><p>特になし。</p>
+<h2><span id="332">3.32</span></h2><h5><span id="問題">問題</span></h5><p>\((3.984375 \times 10^{-1} + 3.4375 \times 10^{-1}) + 1.771 \times 10^3\) を手作業で計算せよ．ただし，2つのデータは，問題3.27（および本文）で説明した，16ビットの半精度形式で格納されているものとする．ガード桁と丸め桁とスティッキー・ビットがそれぞれ1ビットあり，最も近い偶数へ丸めるものとする．すべてのステップを示せ．答えを16ビットの浮動小数点形式と10進数の両方で示せ．</p>
+<h5><span id="解答">解答</span></h5><ul>
+<li><p>10のべき乗部分が残っていると2進数に変換するときに邪魔なのでなくす。</p>
+<ul>
+<li>\(3.984375 \times 10^{-1} = 0.3984375\)</li>
+<li>\(3.4375 \times 10^{-1} = 0.34375\)</li>
+<li>\(1.771 \times 10^3 = 1771\)</li>
+</ul>
+</li>
+<li><p>2進数に変換する。</p>
+<ul>
+<li>\(0.3984375 = 0.0110011_2\)</li>
+<li>\(0.34375 = 0.01011_2\)</li>
+<li>\(1771 = 11011101011_2\)</li>
+</ul>
+</li>
+<li><p>正規化する。</p>
+<ul>
+<li>\(0.0110011 = 1.10011 \times 2^{-2}\)</li>
+<li>\(0.01011 = 1.011 \times 2^{-2}\)</li>
+<li>\(11011101011 = 1.1011101011 \times 2^{10}\)</li>
+</ul>
+</li>
+<li><p>まずは \(3.984375 \times 10^{-1} + 3.4375 \times 10^{-1}\) の計算。指数が既に揃っているので、仮数部の筆算をする。</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">  1.10011</span><br><span class="line">+ 1.011</span><br><span class="line">---------</span><br><span class="line"> 10.11111</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>指数部も考慮し、正規化をして、 \(3.984375 \times 10^{-1} + 3.4375 \times 10^{-1} = 10.11111_2 \times 2^{-2} = 1.011111 \times 2^{-1}\) 。</p>
+</li>
+<li><p>次に、この結果と \(1.771 \times 10^3\) の和を取る。大きい方に指数を合わせて、 \((3.984375 \times 10^{-1} + 3.4375 \times 10^{-1}) + 1.771 \times 10^3 = 1.011111_2 \times 2^{-1} + 1.1011101011_2 \times 2^{10} = (0.000000000001011111 + 1.1011101011) \times 2^{10}\)</p>
+</li>
+<li><p>仮数部10ビット、ガード桁1ビット、丸め桁1ビット、スティッキービット1ビットまで削ると、 \((0.0000000000011 + 1.1011101011) \times 2^{10}\)</p>
+</li>
+<li><p>筆算する。</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">  0.0000000000 011</span><br><span class="line">+ 1.1011101011</span><br><span class="line">------------------</span><br><span class="line">  1.1011101011 011</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>ガード桁以降は \(\frac{1}{4} + \frac{1}{8} = \frac{3}{8} {\rm ulp}\) なので切り捨てられ、最終ビットは1のまま。</p>
+</li>
+<li><p>以上より、計算結果は \(1.1011101011 \times 2^{10} = (2^0 + 2^{-1} + 2^{-3} + 2^{-4} + 2^{-5} + 2^{-7} + 2^{-9} + 2^{-10}) \times 2^{10} = 2^{10} + 2^{9} + 2^{7} + 2^{6} + 2^{5} + 2^{3} + 2^{1} + 2^{0} = 1771_{10}\)</p>
+</li>
+<li><p>指数部は、バイアスを考慮して \(2^{10} = 2^{25 - 15} = 2^{11001_2 - 15}\) なので、 <code>11001</code> と符号化される。</p>
+</li>
+</ul>
+<p>IEEE 754半精度浮動小数点数形式: <code>0　11001　1011101011</code><br>10進数: 1771</p>
+<h5><span id="解説">解説</span></h5><p>結果を見ると、IEEE 754半精度浮動小数点数形式も10進数表記も \(1.771 \times 10^3\) の項と一致。正の数同士の浮動小数点の和は、最も大きな値とそれ以外の値の指数部分が離れていると、それ以外の値の寄与が小さくなる。</p>
+<h2><span id="333">3.33</span></h2><h5><span id="問題">問題</span></h5><p>\(3.984375 \times 10^{-1} + (3.4375 \times 10^{-1} + 1.771 \times 10^3)\) を手作業で計算せよ．ただし，2つのデータは，問題3.27（および本文）で説明した，16ビットの半精度形式で格納されているものとする．ガード桁と丸め桁とスティッキー・ビットがそれぞれ1ビットあり，最も近い偶数へ丸めるものとする．すべてのステップを示せ．答えを16ビットの浮動小数点形式と10進数の両方で示せ．</p>
+<h5><span id="解答">解答</span></h5><ul>
+<li><p>3.32と同様に正規化して、</p>
+<ul>
+<li>\(3.984375 \times 10^{-1} = 1.10011_2 \times 2^{-2}\)</li>
+<li>\(3.4375 \times 10^{-1} = 1.011_2 \times 2^{-2}\)</li>
+<li>\(1.771 \times 10^3 = 1.1011101011_2 \times 2^{10}\)</li>
+</ul>
+</li>
+<li><p>まずは \(3.4375 \times 10^{-1} + 1.771 \times 10^3 = 1.011_2 \times 2^{-2} + 1.1011101011_2 \times 2^{10}\) の計算。大きい方に指数を合わせて、 \((0.000000000001011 + 1.1011101011) \times 2^{10}\)</p>
+</li>
+<li><p>仮数部10ビット、ガード桁1ビット、丸め桁1ビット、スティッキービット1ビットまで削ると、 \((0.0000000000011 + 1.1011101011) \times 2^{10}\)</p>
+</li>
+<li><p>仮数部の筆算をする。</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">  0.0000000000 011</span><br><span class="line">+ 1.1011101011</span><br><span class="line">------------------</span><br><span class="line">  1.1011101011 011</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>計算途中なので、ガード桁、丸め桁、スティッキービットは保持できる。指数部も合わせた結果は \(1.1011101011011 \times 2^{10}\)</p>
+</li>
+<li><p>この値を \(3.984375 \times 10^{-1} = 1.10011_2 \times 2^{-2}\) と加える。大きい方に指数を合わせて、 \(1.10011_2 \times 2^{-2} + 1.1011101011011 \times 2^{10} = (0.00000000000110011 + 1.1011101011011) \times 2^{10}\)</p>
+</li>
+<li><p>仮数部10ビット、ガード桁1ビット、丸め桁1ビット、スティッキービット1ビットまで削ると、 \((0.0000000000011 + 1.1011101011011) \times 2^{10}\)</p>
+</li>
+<li><p>仮数部の筆算をする。</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">  0.0000000000 011</span><br><span class="line">+ 1.1011101011 011</span><br><span class="line">------------------</span><br><span class="line">  1.1011101011 110</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>ガード桁以降は \(\frac{1}{2} + \frac{1}{4} = \frac{3}{4} {\rm ulp}\) なので、最終ビットは切り上げられる。したがってこの和の結果は \(1.1011101100\) となる。</p>
+</li>
+<li><p>以上より、計算結果は \(1.1011101100 \times 2^{10} = (2^{0} + 2^{-1} + 2^{-3} + 2^{-4} + 2^{-5} + 2^{-7} + 2^{-8}) \times 2^{10} = 2^{10} + 2^{9} + 2^{7} + 2^{6} + 2^{5} + 2^{3} + 2^{2} = 1772_{10}\)</p>
+</li>
+<li><p>指数部は、バイアスを考慮して \(2^{10} = 2^{25 - 15} = 2^{11001_2 - 15}\) なので、 <code>11001</code> と符号化される。</p>
+</li>
+</ul>
+<p>IEEE 754半精度浮動小数点数形式: <code>0　11001　1011101100</code><br>10進数: 1772</p>
+<h5><span id="解説">解説</span></h5><p>3.32の計算だと、ガード桁以降の <code>011</code> を1度しか加えられなかったが、3.33の計算だと <code>011</code> を2度加えられたので、最後の桁上げに寄与できた。</p>
+<h2><span id="334">3.34</span></h2><h5><span id="問題">問題</span></h5><p>問題3.32および3.33の解答から，\((3.984375 \times 10^{-1} + 3.4375 \times 10^{-1}) + 1.771 \times 10^3 = 3.984375 \times 10^{-1} + (3.4375 \times 10^{-1} + 1.771 \times 10^3)\) は成立するか．</p>
+<h5><span id="解答">解答</span></h5><p>成立しない。</p>
+<h5><span id="解説">解説</span></h5><p>一般に、桁落ちの可能性があるので、浮動小数点数の和には交換法則は成り立たない。</p>
+<h2><span id="335">3.35</span></h2><h5><span id="問題">問題</span></h5><p>\((3.41796875 \times 10^{-3} \times 6.34765625 \times 10^{-3}) \times 1.05625 \times 10^2\) を手作業で計算せよ．ただし，2つのデータは，問題3.27（および本文）で説明した，16ビットの半精度形式で格納されているものとする．ガード桁と丸め桁とスティッキー・ビットがそれぞれ1ビットあり，最も近い偶数へ丸めるものとする．すべてのステップを示せ．答えを16ビットの浮動小数点形式と10進数の両方で示せ．</p>
+<h5><span id="解答">解答</span></h5><ul>
+<li><p>10のべき乗部分が残っていると2進数に変換するときに邪魔なのでなくす。</p>
+<ul>
+<li>\(3.41796875 \times 10^{-3} = 0.00341796875\)</li>
+<li>\(6.34765625 \times 10^{-3} = 0.00634765625\)</li>
+<li>\(1.05625 \times 10^2 = 105.625\)</li>
+</ul>
+</li>
+<li><p>2進数に変換する。</p>
+<ul>
+<li>\(0.00341796875 = 0.00000000111_2\)</li>
+<li>\(0.00634765625 = 0.00000001101_2\)</li>
+<li>\(105.625 = 1101001.101_2\)</li>
+</ul>
+</li>
+<li><p>正規化する。</p>
+<ul>
+<li>\(0.00000000111 = 1.11 \times 2^{-9}\)</li>
+<li>\(0.00000001101 = 1.101 \times 2^{-8}\)</li>
+<li>\(1101001.101 = 1.101001101 \times 2^{6}\)</li>
+</ul>
+</li>
+<li><p>まずは \(3.41796875 \times 10^{-3} \times 6.34765625 \times 10^{-3} = 1.11_2 \times 2^{-9} \times 1.101_2 \times 2^{-8}\) の計算をする。</p>
+</li>
+<li><p>積の指数部は \(2^{-9} \times 2^{-8} = 2^{-17}\)</p>
+</li>
+<li><p>仮数部はともに10ビットに収まる。</p>
+</li>
+<li><p>仮数部の積を筆算する。</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">    1.11</span><br><span class="line">  x 1.101</span><br><span class="line">---------</span><br><span class="line">    1 110</span><br><span class="line">  111 0</span><br><span class="line"> 1110</span><br><span class="line">---------</span><br><span class="line">10110 110</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>結果は \(10.11011 \times 2^{-17} = 1.011011 \times 2^{-16}\) 。仮数部10ビットに収まっている。</p>
+</li>
+<li><p>これと \(105.625 = 1.101001101_ \times 2^{6}\) の積を取る。</p>
+</li>
+<li><p>積の指数部は \(2^{-16} \times 2^{6} = 2^{-10}\) 。</p>
+</li>
+<li><p>仮数部の積を筆算する。</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">          1.0110110</span><br><span class="line">          1.101001101</span><br><span class="line">   ------------------</span><br><span class="line">          1 011011000</span><br><span class="line">        101 1011000</span><br><span class="line">       1011 011000</span><br><span class="line">    1011011 000</span><br><span class="line">  101101100 0</span><br><span class="line"> 1011011000</span><br><span class="line"> --------------------</span><br><span class="line">10010110001 011111000</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>指数部まで含めた結果は \(10.010110001\ 011111000 \times 2^{-10} = 1.0010110001\ 011111000 \times 2^{-9}\) 。</p>
+</li>
+<li><p>仮数部10ビット、ガード桁1ビット、丸め桁1ビット、スティッキービット1ビットまで削ると、結果は \(1.0010110001\ 011 \times 2^{-9}\) となる。（スティッキービットは、13ビット目以降の <code>1111000</code> に1つ以上1が立っているので1となる。）</p>
+</li>
+<li><p>ガード桁以降は \(\frac{1}{4} + \frac{1}{8} = \frac{3}{8} {\rm ulp}\) なので切り捨てられ、最終ビットは1のまま。</p>
+</li>
+<li><p>10進数で表すと \(1.0010110001 \times 2^{-9} = (2^{0} + 2^{-3} + 2^{-5} + 2^{-6} + 2^{-10}) \times 2^{-9} = 2^{-9} + 2^{-12} + 2^{-14} + 2^{-15} + 2^{-19} = 0.0022907257080078125\)</p>
+</li>
+<li><p>指数部は、バイアスを考慮して \(2^{-9} = 2^{6 - 15} = 2^{00110_2 - 15}\) なので、 <code>00110</code> と符号化される。</p>
+</li>
+</ul>
+<p>IEEE 754半精度浮動小数点数形式: <code>0　00110　0010110001</code><br>10進数: 0.0022907257080078125</p>
+<h5><span id="解説">解説</span></h5><p>電卓で計算した場合の結果は 0.0022916495800018307 であり、有効数字3桁の範囲で一致。</p>
+<h2><span id="336">3.36</span></h2><h5><span id="問題">問題</span></h5><p>\(3.41796875 \times 10^{-3} \times (6.34765625 \times 10^{-3} \times 1.05625 \times 10^2)\) を手作業で計算せよ．ただし，2つのデータは，問題3.27（および本文）で説明した，16ビットの半精度形式で格納されているものとする．ガード桁と丸め桁とスティッキー・ビットがそれぞれ1ビットあり，最も近い偶数へ丸めるものとする．すべてのステップを示せ．答えを16ビットの浮動小数点形式と10進数の両方で示せ．</p>
+<h5><span id="解答">解答</span></h5><ul>
+<li><p>3.35と同様に正規化して、</p>
+<ul>
+<li>\(3.41796875 \times 10^{-3} = 1.11_2 \times 2^{-9}\)</li>
+<li>\(6.34765625 \times 10^{-3} = 1.101_2 \times 2^{-8}\)</li>
+<li>\(1.05625 \times 10^2 = 1.101001101_2 \times 2^{6}\)</li>
+</ul>
+</li>
+<li><p>まずは \(6.34765625 \times 10^{-3} \times 1.05625 \times 10^2 = 1.101_2 \times 2^{-8} \times 1.101001101_2 \times 2^{6}\) の計算をする。</p>
+</li>
+<li><p>積の指数部は \(2^{-8} \times 2^{6} = 2^{-2}\)</p>
+</li>
+<li><p>仮数部はともに10ビットに収まる。</p>
+</li>
+<li><p>仮数部の積を筆算する（筆算が縦に長くなると大変なので順序を変えます😅）。</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">          1.101001101</span><br><span class="line">        x 1.101</span><br><span class="line">---------------------</span><br><span class="line">    1101001 101</span><br><span class="line">  110100110 1</span><br><span class="line"> 1101001101</span><br><span class="line">---------------------</span><br><span class="line">10101011101 001</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>結果は \(10.101011101\ 001 \times 2^{-2} 1.0101011101\ 001 \times 2^{-1}\) 。計算途中なので、ガード桁、丸め桁、スティッキービットは保持できる。</p>
+</li>
+<li><p>これと \(3.41796875 \times 10^{-3} = 1.11_2 \times 2^{-9}\) の積を取る。</p>
+</li>
+<li><p>積の指数部は \(2^{-9} \times 2^{-1} = 2^{-10}\) 。</p>
+</li>
+<li><p>仮数部の積を筆算する（また順序を変えます😉 ）。</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">              1.0101011101 001</span><br><span class="line">            x 1.11</span><br><span class="line">------------------------------</span><br><span class="line">   101010111010 01</span><br><span class="line">  1010101110100 1</span><br><span class="line"> 10101011101001</span><br><span class="line">------------------------------</span><br><span class="line">100101100010111 11</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>指数部まで含めた結果は \(10.010110001\ 011111 \times 2^{-10} = 1.0010110001\ 011111 \times 2^{-9}\) 。</p>
+</li>
+<li><p>これは 3.35 と全く同じなので、下記を得る。</p>
+</li>
+</ul>
+<p>IEEE 754半精度浮動小数点数形式: <code>0　00110　0010110001</code><br>10進数: 0.0022907257080078125</p>
+<h5><span id="解説">解説</span></h5><p>乗算の場合、途中で桁数が膨れ上がるが、有効数字外の桁はスティッキービットに1が立っていることでのみ表現できる。</p>
+<h2><span id="337">3.37</span></h2><h5><span id="問題">問題</span></h5><p>問題3.35および3.36の解答から，\((3.41796875 \times 10^{-3} \times 6.34765625 \times 10^{-3}) \times 1.05625 \times 10^2 = 3.41796875 \times 10^{-3} \times (6.34765625 \times 10^{-3} \times 1.05625 \times 10^2)\) は成立するか．</p>
+<h5><span id="解答">解答</span></h5><p>成立する。</p>
+<h5><span id="解説">解説</span></h5><p>特になし。</p>
+<h2><span id="338-未回答">3.38 (未回答)</span></h2><h5><span id="問題">問題</span></h5><p>\(1.666015625 \times 10^0 \times (1.9760 \times 10^4 + -1.9744 \times 10^4)\) を手作業で計算せよ．ただし，2つのデータは，問題3.27（および本文）で説明した，16ビットの半精度形式で格納されているものとする．ガード桁と丸め桁とスティッキー・ビットがそれぞれ1ビットあり，最も近い偶数へ丸めるものとする．すべてのステップを示せ．答えを16ビットの浮動小数点形式と10進数の両方で示せ．</p>
+<h2><span id="339-未回答">3.39 (未回答)</span></h2><h5><span id="問題">問題</span></h5><p>\((1.666015625 \times 10^0 \times 1.9760 \times 10^4) + (1.666015625 \times 10^0 \times -1.9744 \times 10^4)\) を手作業で計算せよ．ただし，2つのデータは，問題3.27（および本文）で説明した，16ビットの半精度形式で格納されているものとする．ガード桁と丸め桁とスティッキー・ビットがそれぞれ1ビットあり，最も近い偶数へ丸めるものとする．すべてのステップを示せ．答えを16ビットの浮動小数点形式と10進数の両方で示せ．</p>
+<h2><span id="340-未回答">3.40 (未回答)</span></h2><h5><span id="問題">問題</span></h5><p>問題3.38および3.39の解答から，\(1.666015625 \times 10^0 \times (1.9760 \times 10^4 + -1.9744 \times 10^4) = (1.666015625 \times 10^0 \times 1.9760 \times 10^4) + (1.666015625 \times 10^0 \times -1.9744 \times 10^4)\) は成立するか．</p>
+<h2><span id="341">3.41</span></h2><h5><span id="問題">問題</span></h5><p>IEEE浮動小数点形式を使用して，－1/4を表すビット・パターンを示せ．－1/4を正確に表すことができるか．</p>
+<p><strong>単精度浮動小数点形式と解釈する。</strong></p>
+<h5><span id="解答">解答</span></h5><p><code>1　01111101　00000000 00000000 0000000</code></p>
+<p>このビットパターンは \(- \frac{1}{4}\) を正確に表している。</p>
+<h5><span id="解説">解説</span></h5><ul>
+<li>符号ビットは1。</li>
+<li>2進数で正規化して、\(\frac{1}{4} = 0.01 = 1.0 \times 2^{-2}\) 。</li>
+<li>指数部は、バイアスを考慮して \(2^{-2} = 2^{125 - 127} = 2^{1111101_2 - 127}\) なので、 <code>1111101</code> と符号化される。</li>
+</ul>
+<h2><span id="342">3.42</span></h2><h5><span id="問題">問題</span></h5><p>－1/4を4回加算したら，どんな答えが得られるか．（－1/4）×4の答えはどうなるか．両者は同じか．両者はどうあるべきか．</p>
+<h5><span id="解答">解答</span></h5><ul>
+<li>\((- \frac{1}{4}) + (- \frac{1}{4}) + (- \frac{1}{4}) + (- \frac{1}{4}) = - 1 \times 2^0\)</li>
+<li>\((- \frac{1}{4}) \times 4 = - 1 \times 2^0\)</li>
+</ul>
+<p>両者は同じ。同じであるべき。</p>
+<h5><span id="解説">解説</span></h5><ul>
+<li>\((- \frac{1}{4}) + (- \frac{1}{4}) + (- \frac{1}{4}) + (- \frac{1}{4})\) の計算:<ul>
+<li>正規化済みの表現は \(1.0 \times 2^{-2}\) 。</li>
+<li>まず2回足して、 \(1.0 \times 2^{-2} + 1.0 \times 2^{-2} = 10.0 \times 2^{-2} = 1.0 \times 2^{-1}\) 。</li>
+<li>もう一度足して、 \(1.0 \times 2^{-1} + 1.0 \times 2^{-2} = (1.0 + 0.1) \times 2^{-1} = 1.1 \times 2^{-1}\) 。</li>
+<li>最後にもう一度足して、 \(1.1 \times 2^{-1} + 1.0 \times 2^{-2} = (1.1 + 0.1) \times 2^{-1} = 10.0 \times 2^{-1} = 1 \times 2^{0}\)</li>
+</ul>
+</li>
+<li>\((- \frac{1}{4}) \times 4\) の計算:<ul>
+<li>4を正規化して、 \(100 = 1.0 \times 2^{2}\)</li>
+<li>\(1.0_2 \times 2^{-2} \times 1.0 \times 2^{2} = 1.0 \times 2^{0}\)</li>
+</ul>
+</li>
+</ul>
+<h2><span id="343">3.43</span></h2><h5><span id="問題">問題</span></h5><p>値1/3の仮数のビット・パターンを示せ．ただし，仮数部の形式は浮動小数点2進数とする．仮数部の長さは24ビットとし，正規化する必要はない．その表現は正確か．</p>
+<p><strong>暗黙の1もないものと解釈する。</strong></p>
+<h5><span id="解答">解答</span></h5><p>仮数のビットパターンは <code>00101010 10101010 10101010</code> 。正確ではない。</p>
+<h5><span id="解説">解説</span></h5><ul>
+<li>2進小数表現を考える。<ul>
+<li>\(\frac{1}{3} = \frac{1}{4} + x\)  としたとき、 \(x = \frac{1}{3} - \frac{1}{4} = \frac{1}{12}\)。</li>
+<li>\(\frac{1}{12} = \frac{1}{16} + x\) としたとき、 \(x = \frac{1}{12} - \frac{1}{16} = \frac{1}{48}\)。</li>
+<li>この要領で繰り返すと、 \(\frac{1}{3} = \frac{1}{4} + \frac{1}{16} + \frac{1}{64} + … = 0.010101…_2\) という循環小数であることがわかる。</li>
+</ul>
+</li>
+<li>循環小数なので、有限のビット数では正確に表すことができない。</li>
+</ul>
+<h2><span id="344">3.44</span></h2><h5><span id="問題">問題</span></h5><p>値1/3の仮数のビット・パターンを示せ．ただし，仮数部には2進数の代わりにバイナリ・コード化した10進数（基数2）を使用するものとする．仮数部の長さは24ビットとし，正規化する必要はない．その表現は正確か．</p>
+<p><strong>先頭に暗黙の 0. が付くものとする。</strong></p>
+<h5><span id="解答">解答</span></h5><p>仮数のビットパターンは <code>0011 0011 0011 0011 0011 0011</code> 。正確ではない。</p>
+<h5><span id="解説">解説</span></h5><p>バイナリコード化した10進数というのは以下の表現形式である。</p>
+<table>
+<thead>
+<tr>
+<th>10進法</th>
+<th>BCD (Binary-coded decimal) 表現</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>0000</td>
+</tr>
+<tr>
+<td>1</td>
+<td>0001</td>
+</tr>
+<tr>
+<td>2</td>
+<td>0010</td>
+</tr>
+<tr>
+<td>3</td>
+<td>0011</td>
+</tr>
+<tr>
+<td>4</td>
+<td>0100</td>
+</tr>
+<tr>
+<td>5</td>
+<td>0101</td>
+</tr>
+<tr>
+<td>6</td>
+<td>0110</td>
+</tr>
+<tr>
+<td>7</td>
+<td>0111</td>
+</tr>
+<tr>
+<td>8</td>
+<td>1000</td>
+</tr>
+<tr>
+<td>9</td>
+<td>1001</td>
+</tr>
+</tbody></table>
+<p>（通貨など、十進数で小数点以下を正確に扱いたい際に使う符号方式である。）</p>
+<p>10進数で表しても \(\frac{1}{3} = 0.33333…\) と循環小数になるので、ビットパターンとしても循環する。</p>
+<h2><span id="345">3.45</span></h2><h5><span id="問題">問題</span></h5><p>値1/3の仮数のビット・パターンを示せ．ただし，仮数部には2進数の代わりに基数が15の数を使用するものとする（基数が16の数では各数字を0～9およびA～Fで表すが，基数が15の数では0～9およびA～Eを使用する）．仮数部の長さは24ビットとし，正規化する必要はない．その表現は正確か．</p>
+<p><strong>先頭に暗黙の 0. が付くものとする。</strong></p>
+<h5><span id="解答">解答</span></h5><p><code>0101 0000 0000 0000 0000 0000</code> 。正確。</p>
+<h5><span id="解説">解説</span></h5><ul>
+<li>15進小数表現を考える。<ul>
+<li>\(\frac{1}{3} = \frac{5}{15}\) なので、 \(0.5_{15}\) と表記できる。</li>
+</ul>
+</li>
+<li>バイナリコード化を考えると、4bitで 0~E を表せるので、先頭に暗黙の 0. があれば <code>0101 0000...</code> と表せる。</li>
+</ul>
+<h2><span id="346">3.46</span></h2><h5><span id="問題">問題</span></h5><p>値1/3の仮数のビット・パターンを示せ．ただし，仮数部には2進数の代わりに基数が30の数を使用するものとする（基数が16の数では各数字を0～9およびA～Fで表すが，基数が30の数では0～9およびA～Tを使用する）．仮数部の長さは20ビットとし，正規化する必要はない．その表現は正確か．</p>
+<p><strong>先頭に暗黙の 0. が付くものとする。</strong></p>
+<h5><span id="解答">解答</span></h5><p><code>01010 00000 00000 00000</code> 。正確。</p>
+<h5><span id="解説">解説</span></h5><ul>
+<li>30進小数表現を考える。<ul>
+<li>\(\frac{1}{3} = \frac{10}{30}\) なので、 \(0.A_{30}\) と表記できる。</li>
+<li>バイナリコード化を考えると、5bitで 0~T を表せるので、先頭に暗黙の 0. があれば <code>01010 00000...</code> と表せる。</li>
+</ul>
+</li>
+</ul>
+<h2><span id="347">3.47</span></h2><h5><span id="問題">問題</span></h5><p>下のＣコードは，入力配列sig_in上で，4項からなる有限インパルス応答を実現する．配列中の値はすべて，16ビットの固定小数点形式であるとする．</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (i = <span class="number">3</span>; i &lt; <span class="number">128</span>; i++)</span><br><span class="line">  sig_out[i] = sig_in[i - <span class="number">3</span>] * f[<span class="number">0</span>] + sig_in[i - <span class="number">2</span>] * f[<span class="number">1</span>] + sig_in[i - <span class="number">1</span>] * f[<span class="number">2</span>] + sig_in[i] * f[<span class="number">3</span>];</span><br></pre></td></tr></table></figure>
+
+<p>SIMD命令と128ビットのレジスタを備えたプロセッサ上で，このコードを最適化したアセンブリ・コードを書くと想定する．ただし，命令セットの詳細は分からないものとする．半語並列性を最大限に活用し，レジスタとメモリの間で移送されるデータ量を最小限に抑えるようにして，このコードをどのように実現したらよいか，簡単に説明せよ．使用する命令に関する，すべての想定を記述せよ．</p>
+<h5><span id="解答">解答</span></h5><ul>
+<li>使用する命令の想定:<ul>
+<li><code>dotph</code> : 1個の入力レジスタ(128ビット)の上位64ビットに4個の半精度固定小数点数から成るベクトル、下位64ビットに別の4個の半精度固定小数点数から成るベクトルが入った状態で、それらの内積を取って、結果の半精度固定小数点数を出力レジスタ(128ビット)の16ビットごと全域に格納する。<ul>
+<li>\(\boldsymbol{\rm{R}}_{in;127-64} \cdot \boldsymbol{\rm{R}}_{in;63-0} = \rm{R}_{out} \)</li>
+<li>\(\boldsymbol{\rm{R}}_{in;127-64} = (a_{1}, a_{2}, a_{3}, a_{4})\)</li>
+<li>\(\boldsymbol{\rm{R}}_{in;63-0} = (b_{1}, b_{2}, b_{3}, b_{4})\)</li>
+<li>\(\boldsymbol{\rm{R}}_{out} = (a_{1} b_{1} + a_{2} b_{2} + a_{3} b_{3} … + a_{4} b_{4}, …)\)</li>
+</ul>
+</li>
+<li><code>loadph</code> : 入力レジスタ(128ビット)に、指定したメモリアドレスから、連続する8個の半精度固定小数点数をロードする。</li>
+<li><code>storesh</code> : 入力レジスタ(128ビット)の末尾16ビットを、指定したメモリアドレスにストアする。</li>
+<li><code>sll</code> : 論理左シフト。</li>
+<li><code>srl</code> : 論理右シフト。</li>
+<li><code>andph</code> : 論理積。</li>
+<li><code>orph</code> : 論理積。</li>
+</ul>
+</li>
+</ul>
+<p>この上で、ベクトル化した擬似コードを示す。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">loadph(R1, f);   <span class="comment">// レジスタR1に (??, ??, ??, ??, f[3], f[2], f[1] f[0]) をロード</span></span><br><span class="line">sll(R1, R1, <span class="number">8</span>);  <span class="comment">// R1 = R1 &lt;&lt; 8byte = (f[3], f[2], f[1], f[0], ??, ??, ??, ??)</span></span><br><span class="line">andph(R1, R1, <span class="number">0xFFFFFFFFFFFFFFFF0000000000000000</span>);  <span class="comment">// R1 = R1 &amp; 0xFFFFFFFFFFFFFFFF0000000000000000 = (f[3], f[2], f[1], f[0], 0, 0, 0, 0)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (i = <span class="number">3</span>; i &lt; <span class="number">128</span>; i += <span class="number">4</span>) &#123;</span><br><span class="line">  loadph(R2, &amp;sig_in[i<span class="number">-3</span>]);  <span class="comment">// レジスタR1に (sig_in[i+4], sig_in[i+3], sig_in[i+2], sig_in[i+1], sig_in[i], sig_in[i-1], sig_in[i-2], sig_in[i-3]) をロード</span></span><br><span class="line"></span><br><span class="line">  srl(R3, R2, <span class="number">2</span>);          <span class="comment">// R3 = R2 &gt;&gt; 2byte = (??, sig_in[i+4], sig_in[i+3], sig_in[i+2], sig_in[i+1], sig_in[i], sig_in[i-1], sig_in[i-2])</span></span><br><span class="line">  andph(R3, R3, <span class="number">0x0000000000000000FFFFFFFFFFFFFFFF</span>);  <span class="comment">// R3 = R3 &amp; 0x0000000000000000FFFFFFFFFFFFFFFF = (0, 0, 0, 0, sig_in[i+1], sig_in[i], sig_in[i-1], sig_in[i-2])</span></span><br><span class="line">  orph(R3, R3, R1);        <span class="comment">// R3 = R3 | R1 = (f[3], f[2], f[1], f[0], sig_in[i+1], sig_in[i], sig_in[i-1], sig_in[i-2]);</span></span><br><span class="line">  dotph(R3, R3);           <span class="comment">// R3 = R3_&#123;127-64&#125; dot R3_&#123;63-0&#125; = f[3] sig_in[i+1] + f[2] sig_in[i] + f[1] sig_in[i-1] + f[0] sig_in[i-2]</span></span><br><span class="line">  storesh(&amp;sig_out[i+<span class="number">1</span>], R3);</span><br><span class="line"></span><br><span class="line">  srl(R4, R2, <span class="number">2</span>);          <span class="comment">// R4 = R2 &gt;&gt; 4byte = (??, ??, sig_in[i+4], sig_in[i+3], sig_in[i+2], sig_in[i+1], sig_in[i], sig_in[i-1])</span></span><br><span class="line">  andph(R4, R4, <span class="number">0x0000000000000000FFFFFFFFFFFFFFFF</span>);  <span class="comment">// R4 = R4 &amp; 0x0000000000000000FFFFFFFFFFFFFFFF = (0, 0, 0, 0, sig_in[i+2], sig_in[i+1], sig_in[i], sig_in[i-1])</span></span><br><span class="line">  orph(R4, R4, R1);        <span class="comment">// R4 = R4 | R1 = (f[3], f[2], f[1], f[0], sig_in[i+2], sig_in[i+1], sig_in[i], sig_in[i-1]);</span></span><br><span class="line">  dotph(R4, R4);           <span class="comment">// R4 = R4_&#123;127-64&#125; dot R4_&#123;63-0&#125; = f[3] sig_in[i+2] + f[2] sig_in[i+1] + f[1] sig_in[i] + f[0] sig_in[i-1]</span></span><br><span class="line">  storesh(&amp;sig_out[i+<span class="number">2</span>], R4);</span><br><span class="line"></span><br><span class="line">  srl(R5, R2, <span class="number">2</span>);          <span class="comment">// R5 = R2 &gt;&gt; 4byte = (??, ??, ??, sig_in[i+4], sig_in[i+3], sig_in[i+2], sig_in[i+1], sig_in[i])</span></span><br><span class="line">  andph(R5, R5, <span class="number">0x0000000000000000FFFFFFFFFFFFFFFF</span>);  <span class="comment">// R5 = R5 &amp; 0x0000000000000000FFFFFFFFFFFFFFFF = (0, 0, 0, 0, sig_in[i+3], sig_in[i+2], sig_in[i+1], sig_in[i])</span></span><br><span class="line">  orph(R5, R5, R1);        <span class="comment">// R5 = R5 | R1 = (f[3], f[2], f[1], f[0], sig_in[i+3], sig_in[i+2], sig_in[i+1], sig_in[i]);</span></span><br><span class="line">  dotph(R5, R5);           <span class="comment">// R5 = R5_&#123;127-64&#125; dot R5_&#123;63-0&#125; = f[3] sig_in[i+3] + f[2] sig_in[i+2] + f[1] sig_in[i+1] + f[0] sig_in[i]</span></span><br><span class="line">  storesh(&amp;sig_out[i+<span class="number">3</span>], R5);</span><br><span class="line"></span><br><span class="line">  andph(R2, R2, <span class="number">0x0000000000000000FFFFFFFFFFFFFFFF</span>);  <span class="comment">// R2 = R2 &amp; 0x0000000000000000FFFFFFFFFFFFFFFF = (0, 0, 0, 0, sig_in[i], sig_in[i-1], sig_in[i-2], sig_in[i-3])</span></span><br><span class="line">  orph(R2, R2, R1);        <span class="comment">// R2 = R2 | R1 = (f[3], f[2], f[1], f[0], sig_in[i], sig_in[i-1], sig_in[i-2], sig_in[i-3]);</span></span><br><span class="line">  dotph(R2, R2);           <span class="comment">// R2 = R2_&#123;127-64&#125; dot R2_&#123;63-0&#125; = f[3] sig_in[i] + f[2] sig_in[i-1] + f[1] sig_in[i-2] + f[0] sig_in[i-3]</span></span><br><span class="line">  storesh(&amp;sig_out[i], R2);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解説">解説</span></h5><ul>
+<li>内積計算の際、R2の計算は最後に回す。R2はR3~R5の入力にも使われるので。</li>
+</ul>
+
+    
+	</div>
+	<footer class="entry-footer">
+		<div class="entry-meta-footer">
+			<span class="category">
+				
+			</span>
+			<span class="tags">
+				
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E3%80%8E%E3%82%B3%E3%83%B3%E3%83%94%E3%83%A5%E3%83%BC%E3%82%BF%E3%81%AE%E6%A7%8B%E6%88%90%E3%81%A8%E8%A8%AD%E8%A8%88%E3%80%8F/" rel="tag">『コンピュータの構成と設計』</a></li></ul>
+
+			</span>
+		</div>
+	</footer>
+    
+    <footer class="author-info clearfix">
+      <img class="author-picture circle" src="https://www.gravatar.com/avatar/cb02a2b3f429b7c938d1fe2665e8e342">
+      <div class="author-content right">
+        <div class="author-caption">
+          <span class="label">author</span>
+          Sho Nakatani a.k.a. laysakura
+        </div>
+        <p class="author-description">
+          東京大学大学院 情報理工学系研究科 電子情報学専攻 修士課程で並列分散処理・ストリーム処理・データベースを研究。<br>
+          2014年4月に株式会社ディー・エヌ・エーにエンジニアスペシャリストとして入社し、ソーシャルゲームのサーバサイド共通基盤の開発に従事。<br>
+          2016年8月より、オンライン証券会社<a href="https://folio-sec.com" target="_blank" rel="noopener">株式会社FOLIO</a>に入社。バックエンドシステム開発・プロジェクトマネージメント・Engineering Managementに従事。<br>
+          2020年3月より<a href="https://idein.jp" target="_blank" rel="noopener">Idein株式会社</a>所属。<br>
+          随時副業募集中です: <a href="https://github.com/laysakura/resume-jp-for-side-job" target="_blank" rel="noopener">職務経歴書や募集職種</a>
+        </p>
+        <ul class="author-social-buttons">
+          <li class="author-social-button"><a class="fa fa-lg fa-twitter-square" href="https://twitter.com/laysakura" target="_blank" rel="noopener"></a></li>
+          <li class="author-social-button"><a class="fa fa-lg fa-github-square" href="https://github.com/laysakura" target="_blank" rel="noopener"></a></li>
+          <li class="author-social-button"><a class="fa fa-lg fa-facebook-square" href="https://www.facebook.com/lay.sakura" target="_blank" rel="noopener"></a></li>
+        </ul>
+      </div>
+    </footer>
+    
+	
+    
+<nav id="article-nav">
+  
+    <a href="/2020/01/28/Patterson-Hennessy-5th-Excersise04/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          『コンピュータの構成と設計 第5版』演習問題解答集 第4章
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/01/13/Patterson-Hennessy-5th-Excersise02/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          『コンピュータの構成と設計 第5版』演習問題解答集 第2章
+        
+      </div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+
+
+<section id="comments">
+  <div id="disqus_thread">
+
+  <!-- comment service provided by disqus -->
+  <script>
+    /**
+     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+     */
+    var disqus_config = function () {
+        this.page.url = https://laysakura.github.io/2020/01/19/Patterson-Hennessy-5th-Excersise03/;  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = https://laysakura.github.io/2020/01/19/Patterson-Hennessy-5th-Excersise03/; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    (function() {  // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        
+        s.src = '//laysakura.disqus.com/embed.js';
+        
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript" target="_blank" rel="noopener">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+    </div>
+    <div class="mb-search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:laysakura.github.io">
+  </form>
+</div>
+<footer id="footer">
+	<h1 class="footer-blog-title">
+		<a href="/">俺とお前とlaysakura</a>
+	</h1>
+	<span class="copyright">
+		&copy; 2020 Sho Nakatani a.k.a. laysakura<br>
+		Modify from <a href="https://sanographix.github.io/tumblr/apollo/" target="_blank">Apollo</a> theme, designed by <a href="https://www.sanographix.net/" target="_blank">SANOGRAPHIX.NET</a><br>
+		Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+	</span>
+</footer>
+
+    
+<script>
+  var disqus_shortname = 'laysakura';
+  
+  var disqus_url = 'https://laysakura.github.io/2020/01/19/Patterson-Hennessy-5th-Excersise03/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+
+  <!-- https://github.com/vfeskov/vanilla-back-to-top -->
+  <script src="https://unpkg.com/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js"></script>
+  <script>addBackToTop({
+    diameter: 50,
+    backgroundColor: '#33a6b880',
+    textColor: '#fff'
+  })</script>
+
+</body>
+</html>

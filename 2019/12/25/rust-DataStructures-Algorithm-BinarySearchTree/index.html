@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>二分探索木 - Rustではじめるデータ構造とアルゴリズム（第2回） | 俺とお前とlaysakura</title>
+  
+  <link rel="canonical" href="https://laysakura.github.io/2019/12/25/rust-DataStructures-Algorithm-BinarySearchTree/"/>
+  <meta name="viewport" content="width=device-width">
+  <meta name="description" content="Rustの特徴のひとつは、所有権(ownership)・移動(move)・借用(borrow)の概念です。これらがコンパイル時に厳格にチェックされることにより、古くから未定義挙動でプログラマを悩ませてきたダングリングポインタなどの問題がなくなり、メモリ安全性がもたらされます。 しかし一方で、自分で多少複雑なデータ構造を定義しようとする場合にはコンパイルを通すだけでもかなりの知識・力量が要求され">
+<meta property="og:type" content="article">
+<meta property="og:title" content="二分探索木 - Rustではじめるデータ構造とアルゴリズム（第2回）">
+<meta property="og:url" content="https://laysakura.github.io/2019/12/25/rust-DataStructures-Algorithm-BinarySearchTree/index.html">
+<meta property="og:site_name" content="俺とお前とlaysakura">
+<meta property="og:description" content="Rustの特徴のひとつは、所有権(ownership)・移動(move)・借用(borrow)の概念です。これらがコンパイル時に厳格にチェックされることにより、古くから未定義挙動でプログラマを悩ませてきたダングリングポインタなどの問題がなくなり、メモリ安全性がもたらされます。 しかし一方で、自分で多少複雑なデータ構造を定義しようとする場合にはコンパイルを通すだけでもかなりの知識・力量が要求され">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:image" content="https://laysakura.github.io/img/2019/12-25-le-ge.png">
+<meta property="og:image" content="https://b.hatena.ne.jp/entry/image/https://laysakura.github.io/2019/12/22/rust-DataStructures-Algorithm-BinaryTree/">
+<meta property="og:image" content="https://b.hatena.ne.jp/entry/image/https://laysakura.github.io/2019/12/25/rust-DataStructures-Algorithm-BinarySearchTree/">
+<meta property="og:image" content="https://laysakura.github.io/img/2019/12-25-le-ge.png">
+<meta property="og:image" content="https://laysakura.github.io/img/2019/12-25-unbalanced-balanced.png">
+<meta property="og:image" content="https://laysakura.github.io/img/2019/12-25-contains-6.png">
+<meta property="og:image" content="https://laysakura.github.io/img/2019/12-25-contains-11.png">
+<meta property="og:image" content="https://laysakura.github.io/img/2019/12-25-unbalanced-balanced.png">
+<meta property="og:image" content="https://laysakura.github.io/img/2019/12-25-range.png">
+<meta property="og:image" content="https://laysakura.github.io/img/2019/12-25-bst.png">
+<meta property="og:image" content="https://laysakura.github.io/img/2019/12-25-unbalanced-balanced.png">
+<meta property="og:image" content="https://laysakura.github.io/img/2019/12-25-add.png">
+<meta property="article:published_time" content="2019-12-25T00:47:32.000Z">
+<meta property="article:modified_time" content="2020-02-10T05:06:21.000Z">
+<meta property="article:author" content="Sho Nakatani a.k.a. laysakura">
+<meta property="article:tag" content="Rust">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://laysakura.github.io/img/2019/12-25-le-ge.png">
+
+  <!-- favicon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+  <link rel="icon" href="/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+  <link rel="manifest" href="/favicon/site.webmanifest">
+  <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#5bbad5">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="theme-color" content="#ffffff">
+
+  
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-22289437-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+  <!-- MathJax -->
+  <script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+  <div id="container">
+    <div class="mobile-nav-panel">
+	<i class="icon-reorder icon-large"></i>
+</div>
+<header id="header">
+	<h1 class="blog-title">
+		<a href="/">俺とお前とlaysakura</a>
+	</h1>
+	<nav class="nav">
+		<ul>
+			<li><a href="/archives">過去の投稿</a></li>
+			<li><a id="nav-search-btn" class="nav-icon" title="Search"></a></li>
+			<li><a href="http://cloud.feedly.com/#subscription%2Ffeed%2Fhttps%3A%2F%2Flaysakura.github.io%2Fatom.xml" target="_blank" rel="noopener" id="nav-rss-link" class="nav-icon" title="RSS Feed"></a></li>
+		</ul>
+	</nav>
+	<div id="search-form-wrap">
+		<form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://laysakura.github.io"></form>
+	</div>
+</header>
+    <div id="main">
+      <article id="post-二分探索木-Rustで始めるデータ構造とアルゴリズム（第2回）" class="post">
+	<footer class="entry-meta-header">
+		<span class="meta-elements date">
+			<a href="/2019/12/25/rust-DataStructures-Algorithm-BinarySearchTree/" class="article-date">
+  <time datetime="2019-12-25T00:47:32.000Z" itemprop="datePublished">2019-12-25</time>
+</a>
+		</span>
+	</footer>
+	
+	<header class="entry-header">
+		
+  
+    <h1 class="article-title entry-title" itemprop="name">
+      二分探索木 - Rustではじめるデータ構造とアルゴリズム（第2回）
+    </h1>
+  
+
+	</header>
+	<div class="entry-content">
+		
+    	<img src="/img/2019/12-25-le-ge.png" alt="簡単な二分探索木" width="800">
+
+<p>Rustの特徴のひとつは、所有権(ownership)・移動(move)・借用(borrow)の概念です。これらがコンパイル時に厳格にチェックされることにより、古くから未定義挙動でプログラマを悩ませてきたダングリングポインタなどの問題がなくなり、メモリ安全性がもたらされます。</p>
+<p>しかし一方で、自分で多少複雑なデータ構造を定義しようとする場合にはコンパイルを通すだけでもかなりの知識・力量が要求されます。</p>
+<p>この（不定期）連載では、 <strong>Rustではじめるデータ構造とアルゴリズム</strong> と題し、プログラミングコンテストなどでよく見かける基礎的なデータ構造とアルゴリズムを、できるだけシンプルにRustで実装していきます。 <code>&amp;</code>, <code>&amp;mut</code>, <code>Box</code>, <code>Rc</code>, <code>Cell</code>, <code>RefCell</code> などの使い分けや、なぜそれを使う必要があるかの解説を、実例を通して行います。</p>
+<p>今回第2回では、 <strong>二分探索木</strong> を取り扱います。値の大小に沿った構造を持つ二分木であり、単純なデータ構造でありながら、検索やソートなど実用性が高いです。第1回の二分木に少し制約を付け足した構造になるので、未読の方はぜひ第1回のほうからご覧ください。</p>
+<a id="more"></a>
+
+<h2><span id="連載記事一覧">連載記事一覧</span></h2><ol>
+<li><a href="/2019/12/22/rust-DataStructures-Algorithm-BinaryTree">二分木</a> <img class="hatebu" src="https://b.hatena.ne.jp/entry/image/https://laysakura.github.io/2019/12/22/rust-DataStructures-Algorithm-BinaryTree/"></li>
+<li><a href="/2019/12/25/rust-DataStructures-Algorithm-BinarySearchTree">二分探索木</a> <strong>（この記事）</strong> <img class="hatebu" src="https://b.hatena.ne.jp/entry/image/https://laysakura.github.io/2019/12/25/rust-DataStructures-Algorithm-BinarySearchTree/"></li>
+<li>平衡二分探索木 <strong>（未執筆）</strong></li>
+<li>ヒープ <strong>（未執筆）</strong></li>
+<li>有向グラフ（ポインタ表現） <strong>（未執筆）</strong></li>
+<li>有向グラフ（行列表現） <strong>（未執筆）</strong></li>
+<li>無向グラフ（ポインタ表現） <strong>（未執筆）</strong></li>
+<li>無向グラフ（行列表現） <strong>（未執筆）</strong></li>
+</ol>
+<h2><span id="目次">目次</span></h2><!-- toc -->
+
+<ul>
+<li><a href="#二分探索木の説明">二分探索木の説明</a><ul>
+<li><a href="#二分探索木のアルゴリズム-検索">二分探索木のアルゴリズム: 検索</a></li>
+<li><a href="#二分探索木のアルゴリズム-範囲検索">二分探索木のアルゴリズム: 範囲検索</a></li>
+<li><a href="#二分探索木のアルゴリズム-ソート">二分探索木のアルゴリズム: ソート</a></li>
+<li><a href="#二分探索木のアルゴリズム-値の追加">二分探索木のアルゴリズム: 値の追加</a></li>
+</ul>
+</li>
+<li><a href="#rustで定義する二分探索木">Rustで定義する二分探索木</a><ul>
+<li><a href="#データ構造とコンストラクタ">データ構造とコンストラクタ</a></li>
+<li><a href="#要素の追加">要素の追加</a></li>
+<li><a href="#一致検索">一致検索</a></li>
+<li><a href="#ソート">ソート</a></li>
+<li><a href="#範囲検索">範囲検索</a></li>
+</ul>
+</li>
+<li><a href="#応用編-leetcode-の問題を解いてみる">応用編: LeetCode の問題を解いてみる</a></li>
+<li><a href="#終わりに">終わりに</a></li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="二分探索木の説明">二分探索木の説明</span></h2><p>二分探索木は二分木の一種です。ただの二分木とは異なり、以下の特性を持っています。</p>
+<ol>
+<li>ノードは大小が定義できる値を持つ。<ul>
+<li>例: 数値, 文字列（辞書順の大小など）</li>
+</ul>
+</li>
+<li>あるノードの左側の子孫ノードは、そのノードの値 以下 の値を持つ。</li>
+<li>あるノードの右側の子孫ノードは、そのノードの値 以上 の値を持つ。</li>
+</ol>
+<p>どのノードを取っても2, 3 の性質が成立していることが二分探索木の条件です。</p>
+<img src="/img/2019/12-25-le-ge.png" alt="簡単な二分探索木" width="800">
+
+<p>さて、二分探索木の上記の制約は、実は結構緩いです。そのため、同じ値の集合から、異なる複数種類の二分探索木を構成することができます。</p>
+<img src="/img/2019/12-25-unbalanced-balanced.png" alt="同一の値の集合から異なる二分探索木が構成できる" width="800">
+
+<p>上の図の2種類の二分探索木は、ともに <code>3, 5, 5, 5, 6, 8, 8, 9, 10, 15</code> の値から構成されています。では、どちらが “良い” 二分探索木でしょうか？</p>
+<p>それを考えるためには、二分探索木の用途、すなわち関連するアルゴリズムを考える必要があります。</p>
+<h3><span id="二分探索木のアルゴリズム-検索">二分探索木のアルゴリズム: 検索</span></h3><p>二分探索木の最も基本的な用途は <strong>検索</strong> です。二分 “探索” 木ですものね。<br>ここでいう検索とは、「パラメータとして指定した値が、二分探索木のどれかのノード値として含まれているかを判定する」操作とします。</p>
+<p>二分探索木の要素が <code>n</code> 個、二分探索木の最大の深さが <code>h</code> だとすると、検索操作は <code>O(h)</code> の時間計算量で完了できます。<br>（ <code>O(xxx)</code> は <a href="https://www.google.com/search?q=%E3%83%93%E3%83%83%E3%82%B0%E3%82%AA%E3%83%BC%E8%A8%98%E6%B3%95&ie=UTF-8" target="_blank" rel="noopener">ビッグオー記法</a> です）<br>二分探索木の全要素数ではなく、深さの <code>h</code> しか計算量が掛からないため、比較的高速に検索ができるデータ構造と言えます。</p>
+<p>では、どのような手続きで <code>O(h)</code> で検索をするのでしょうか。まずは、冒頭の二分探索木から <code>6</code> を探す例を見てみます。</p>
+<img src="/img/2019/12-25-contains-6.png" alt="二分探索木から6を検索" width="800">
+
+<p>二分探索木は左右の子が大小関係に対応しているので、左右のどちらかの可能性を捨てながら深さ優先探索していくことが可能です。検索して見つからない例として、 <code>11</code> を探す例を見てみます。</p>
+<img src="/img/2019/12-25-contains-11.png" alt="二分探索木から11を検索" width="800">
+
+<p>探索は必ずリーフまで続ける必要があります。 <code>11</code> より大きい <code>15</code> に当たったからといって探索を停止してはいけません。先程の <code>6</code> を探す例も、 <code>6</code> より小さい <code>5</code> を見つけても右への探索を続けたから <code>6</code> にたどり着きました。</p>
+<p>以上の例からわかるように、各深さごとに1個のノードを見れば十分なので、 <code>O(h)</code> での探索が可能です。では先程の疑問、「 “良い” 二分探索木とはなにか」に戻りましょう。<br>最大の深さ <code>h</code> が小さければ小さいほど、「一番深いところまで見に行かないと検索に引っかからない」という最悪の場合における計算量が小さくなります。</p>
+<img src="/img/2019/12-25-unbalanced-balanced.png" alt="同一の値の集合から異なる二分探索木が構成できる" width="800">
+
+<p>従ってこちらの図では、最大の深さが5の左の二分探索木よりも、最大の深さが4の右の二分探索木のほうが、検索効率が良いという点で優れています。</p>
+<p>左の二分探索木の最大の深さが大きくなってしまっているのは、バランスが取れていないからです。実は二分探索木は、どんな値の集合を持とうとも、「任意のリーフ同士の深さの差が1以内」になるように構成できます。このようにバランスが取れている（平衡している）二分探索木を <strong>平衡二分探索木</strong> と呼びます。上図の右は、リーフの深さが3か4なので平衡二分探索木ですね。</p>
+<p>次回第3回で平衡二分探索木を取り上げますが、今回は平衡ではない二分探索木について説明を続けていきます。</p>
+<h3><span id="二分探索木のアルゴリズム-範囲検索">二分探索木のアルゴリズム: 範囲検索</span></h3><p>二分探索木では、値の存在の有無を調べる <strong>一致検索</strong> は <code>O(h)</code> ( <code>h</code> は最大の深さ) の時間計算量であることを見ました。しかし一致検索だけならハッシュテーブルなどは <code>O(1)</code> でできてしまいます。それでも「ハッシュテーブルがあれば二分探索木はいらない😤」とならないのは、二分探索木では <strong>範囲検索</strong> が効率的にできるためです。</p>
+<p>範囲検索とは、「パラメーターとして最小値と最大値を指定する。二分探索木の値のうち、最小値と最大値の間の値をすべて返却する」操作とします。両側を挟んだ範囲検索だけでなく、最小値を無限小としたり、最大値を無限大とすることで、片側の範囲検索も同じように考えることができます。</p>
+<p>例を見ていきます。</p>
+<img src="/img/2019/12-25-range.png" alt="二分探索木から7以上を範囲検索" width="800">
+
+<p>最小値を指定した範囲検索では、その最小値よりも更に小さいノードを見つけた瞬間に、そのノードの左のサブツリーは探索範囲から排除（枝刈り）できるのが肝です。検索範囲が広ければ、最大で二分探索木の要素数 <code>n</code> と同じ <code>O(n)</code> の計算量になってしまいますが、検索範囲が狭ければもっと小さい計算量で済みます（ <code>O(h)</code> に近づいていく）。</p>
+<h3><span id="二分探索木のアルゴリズム-ソート">二分探索木のアルゴリズム: ソート</span></h3><p>二分探索木はソートも高速です。というより、二分探索木は値の順序性を保ちながら構築していくので、元々がソート済みというわけです。</p>
+<p><code>n</code> 個の要素の列をソートするアルゴリズムは色々ありますが、大体速いもので時間計算量 <code>O(n * log n)</code> 程度になります（空間計算量を多く使う基数ソートなどでは <code>O(n)</code> も可能ですが）。一方、要素が <code>n</code> 個の二分探索木からソート済みの値の列を取り出すのは、 <code>O(n)</code> で可能です。</p>
+<p>計算手順は単純です。二分探索木を深さ優先探索しながら、in-place orderで値を配列に追加していけばその配列はソート済みの列になっています。in-place orderとは、「左のサブツリー、親自身、右のサブツリー」の順に処理をすることであり、一般の二分木に関する処理順序のひとつです。</p>
+<img src="/img/2019/12-25-bst.png" alt="簡単な二分探索木" width="400">
+
+<p>この二分探索の要素をin-place orderで出力していくと、 <code>3, 5 (深さ5), 5 (深さ3), 5 (深さ2), 6, 8 (深さ4), 8 (深さ1), 9, 10, 15</code> と、ソート済みの列になりますね。</p>
+<p>以下、in-place order に関する参考です。読み飛ばしても二分探索木の理解上問題ありません。</p>
+<figure class="highlight plain"><figcaption><span>参考: in-place order, pre-order, post-order で値を出力</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">    a</span><br><span class="line">   &#x2F; \</span><br><span class="line">  b   e</span><br><span class="line"> &#x2F; \</span><br><span class="line">c   d</span><br><span class="line"></span><br><span class="line">in-order (左, 親, 右 の順) : c, b, d, a, e</span><br><span class="line">pre-order (親, 左, 右 の順) : a, b, c, d, e</span><br><span class="line">post-order (左, 右, 親 の順) : c, d, b, e, a</span><br><span class="line"></span><br><span class="line">それぞれ、再帰関数の書き方を考えるとわかりやすい。</span><br><span class="line"></span><br><span class="line">in-order:</span><br><span class="line">  rec(parent) &#123;</span><br><span class="line">    rec(parent.left)</span><br><span class="line">    do(parent)</span><br><span class="line">    rec(parent.right)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">pre-order:</span><br><span class="line">  rec(parent) &#123;</span><br><span class="line">    do(parent)</span><br><span class="line">    rec(parent.left)</span><br><span class="line">    rec(parent.right)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">post-order:</span><br><span class="line">  rec(parent) &#123;</span><br><span class="line">    rec(parent.left)</span><br><span class="line">    rec(parent.right)</span><br><span class="line">    do(parent)</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<h3><span id="二分探索木のアルゴリズム-値の追加">二分探索木のアルゴリズム: 値の追加</span></h3><p>ここまでは、既に構築された二分探索木を読むアルゴリズムを見てきました。ここでは、二分探索木に値を追加していくことを考えます。</p>
+<p>二分探索木の制約をもう一度見てみましょう。</p>
+<ol>
+<li>ノードは大小が定義できる値を持つ。</li>
+<li>あるノードの左側の子孫ノードは、そのノードの値 以下 の値を持つ。</li>
+<li>あるノードの右側の子孫ノードは、そのノードの値 以上 の値を持つ。</li>
+</ol>
+<p>これを満たすような二分木は、値の集合が同じでも複数種類存在することも見てきました。</p>
+<img src="/img/2019/12-25-unbalanced-balanced.png" alt="同一の値の集合から異なる二分探索木が構成できる" width="800">
+
+<p>挿入方法も色々なバリエーションが考えられ、これを工夫すると深さのバランスの取れた平衡二分探索木を構成することができます。そのアルゴリズムは次回に回し、ここでは以下のようなシンプルな挿入アルゴリズムを考えます。</p>
+<ol>
+<li>必ずリーフ要素として追加する。</li>
+<li>二分探索木の制約を守るために、検索アルゴリズムと同じ考え方で、挿入すべきリーフを深さ優先探索していく。</li>
+</ol>
+<p>ここまで使ってきている二分探索木に、 <code>7</code> を追加することを考えます。</p>
+<img src="/img/2019/12-25-add.png" alt="二分探索木に7を追加" width="800">
+
+<p>追加後の二分探索木が大小の制約を満たしていることを確認してみてください。</p>
+<h2><span id="rustで定義する二分探索木">Rustで定義する二分探索木</span></h2><h3><span id="データ構造とコンストラクタ">データ構造とコンストラクタ</span></h3><p>ここまでで二分探索木のデータ構造とアルゴリズムを一気に見てきました。これらをRustで実装してみましょう。まずはデータ構造から。</p>
+<p>二分探索木のデータ構造は、二分木のデータ構造とほとんど差がありません。二分木よりも厳しい制約は「値が小さければ左、大きければ右」という値レベルのものなので、型レベルの違いではないからです。とはいえ、その値レベルの違いのルールを破らないようにするため、構築に関して縛りを入れるべきです。</p>
+<p><a href="/2019/12/22/rust-DataStructures-Algorithm-BinaryTree/#%E6%A7%8B%E7%AF%89">第1回の二分木の構築</a> では、 <code>enum BinaryTree::Node</code> の <code>val, left, right</code> を直接埋めていました。これだと、 <code>left.val &gt; val</code> になるような構築もできてしまい、二分探索木としては困ってしまいます。</p>
+<p>Rustのenumは、enum自体がpublicならば全要素publicになってしまうので、structと組み合わせて「何でもできるコンストラクタ」を隠蔽し、空の二分探索木を作る <code>new()</code> コンストラクタを提供します。</p>
+<figure class="highlight rust"><figcaption><span>二分探索木のデータ構造</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// 二分探索木。</span></span><br><span class="line"><span class="comment">/// あるノードと等しい値は、必ず左側の子ノード以下に入ることとする。</span></span><br><span class="line"><span class="comment">///</span></span><br><span class="line"><span class="comment">///          8</span></span><br><span class="line"><span class="comment">///       __/ \__</span></span><br><span class="line"><span class="comment">///      /       \</span></span><br><span class="line"><span class="comment">///     5        10</span></span><br><span class="line"><span class="comment">///    / \      /  \</span></span><br><span class="line"><span class="comment">///   5   6    9   15</span></span><br><span class="line"><span class="comment">///  /     \</span></span><br><span class="line"><span class="comment">/// 3       8</span></span><br><span class="line"><span class="comment">///  \</span></span><br><span class="line"><span class="comment">///   5</span></span><br><span class="line"><span class="comment">///</span></span><br><span class="line"><span class="meta">#[derive(Debug, PartialEq, Eq)]</span></span><br><span class="line"><span class="keyword">pub</span> <span class="class"><span class="keyword">struct</span> <span class="title">BinarySearchTree</span></span>&lt;T: <span class="built_in">Ord</span>&gt;(</span><br><span class="line">    <span class="comment">// private に実体を持つ。enumを直接使った構築はできない。</span></span><br><span class="line">    BinarySearchTreeInner&lt;T&gt;,</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">/// 実体。二分木と同じフィールド。</span></span><br><span class="line"><span class="meta">#[derive(Debug, PartialEq, Eq)]</span></span><br><span class="line"><span class="class"><span class="keyword">enum</span> <span class="title">BinarySearchTreeInner</span></span>&lt;T: <span class="built_in">Ord</span>&gt; &#123;</span><br><span class="line">    Nil,</span><br><span class="line">    Node &#123;</span><br><span class="line">        val: T,</span><br><span class="line">        left: <span class="built_in">Box</span>&lt;<span class="keyword">Self</span>&gt;,</span><br><span class="line">        right: <span class="built_in">Box</span>&lt;<span class="keyword">Self</span>&gt;,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span>&lt;T: <span class="built_in">Ord</span>&gt; BinarySearchTree&lt;T&gt; &#123;</span><br><span class="line">    <span class="comment">/// 空の二分探索木をつくる。</span></span><br><span class="line">    <span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">new</span></span>() -&gt; <span class="keyword">Self</span> &#123;</span><br><span class="line">        <span class="keyword">Self</span>(BinarySearchTreeInner::Nil)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>二分探索木と異なり、ノードの値が任意の型ではなく、 <code>Ord</code> （順序付き）であることを制約として持つ点に注意してください。</p>
+<h3><span id="要素の追加">要素の追加</span></h3><p>値を追加するメソッド <code>add()</code> を定義します。</p>
+<figure class="highlight rust"><figcaption><span>要素の追加</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">impl</span>&lt;T: <span class="built_in">Ord</span>&gt; BinarySearchTree&lt;T&gt; &#123;</span><br><span class="line">    <span class="comment">/// 二分探索木に val を追加する。</span></span><br><span class="line">    <span class="comment">/// val は二分探索木に組み込まれる形で move される。</span></span><br><span class="line">    <span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">add</span></span>(&amp;<span class="keyword">mut</span> <span class="keyword">self</span>, val: T) &#123;</span><br><span class="line">        <span class="comment">// val を配置すべきNilを探索。</span></span><br><span class="line">        <span class="keyword">let</span> nil = Self::find_nil_to_add(&amp;<span class="keyword">mut</span> <span class="keyword">self</span>.<span class="number">0</span>, &amp;val);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// ノード値が val であるようなリーフを作り、Nilを置き換える。</span></span><br><span class="line">        *nil = BinarySearchTreeInner::Node &#123;</span><br><span class="line">            val,</span><br><span class="line">            left: <span class="built_in">Box</span>::new(BinarySearchTreeInner::Nil),</span><br><span class="line">            right: <span class="built_in">Box</span>::new(BinarySearchTreeInner::Nil),</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// val を二分探索木に追加する場合に、val と交換すべき箇所の Nil を、深さ優先探索で探す、再帰関数。</span></span><br><span class="line">    <span class="comment">///</span></span><br><span class="line">    <span class="comment">/// 上図の二分木の例だと、</span></span><br><span class="line">    <span class="comment">/// - val == 1 の場合: `3` の左の Nil</span></span><br><span class="line">    <span class="comment">/// - val == 5 の場合: リーフの `5` の左の Nil</span></span><br><span class="line">    <span class="comment">/// - val == 16 の場合: `15` の右の Nil</span></span><br><span class="line">    <span class="comment">///</span></span><br><span class="line">    <span class="comment">/// 生存期間パラメータの解説:</span></span><br><span class="line">    <span class="comment">/// - 't : 二分探索木自体の生存期間。 cur_node (現在探索中のノード) も、置き換えるべき Nil も、二分探索木自体の生存期と一致している。</span></span><br><span class="line">    <span class="comment">/// - 'v : 追加する要素の生存期間</span></span><br><span class="line">    <span class="function"><span class="keyword">fn</span> <span class="title">find_nil_to_add</span></span>&lt;<span class="symbol">'t</span>, <span class="symbol">'v</span>&gt;(</span><br><span class="line">        cur_node: &amp;<span class="symbol">'t</span> <span class="keyword">mut</span> BinarySearchTreeInner&lt;T&gt;,</span><br><span class="line">        val: &amp;<span class="symbol">'v</span> T,</span><br><span class="line">    ) -&gt; &amp;<span class="symbol">'t</span> <span class="keyword">mut</span> BinarySearchTreeInner&lt;T&gt; &#123;</span><br><span class="line">        <span class="keyword">match</span> cur_node &#123;</span><br><span class="line">            <span class="comment">// Nil まで到達したら、それが val と置き換えるべき Nil。</span></span><br><span class="line">            BinarySearchTreeInner::Nil =&gt; cur_node,</span><br><span class="line"></span><br><span class="line">            BinarySearchTreeInner::Node &#123;</span><br><span class="line">                val: cur_v,</span><br><span class="line">                left,</span><br><span class="line">                right,</span><br><span class="line">            &#125; =&gt; &#123;</span><br><span class="line">                <span class="keyword">if</span> val &lt;= cur_v &#123;</span><br><span class="line">                    <span class="comment">// 探索中のノード値以下の値を追加したいなら、左に降りる</span></span><br><span class="line">                    Self::find_nil_to_add(left, &amp;val)</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    Self::find_nil_to_add(right, &amp;val)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>private な再帰関数 <code>find_nil_to_add()</code> が登場します。これは意味合い的には <code>add()</code> の中の内部関数で十分なのですが、型パラメーター <code>T</code> を内部関数に持ってくることができないため、 <code>BinarySearchTree</code> のメソッドとして定義しています。<br><code>find_nil_to_add()</code> の生存期間パラメータは少々難しいポイントです。明示的に指定しなければ、 <code>cur_node</code> , <code>val</code> , 返り値の参照のすべてが同一の生存期間となります。これは制約としては少々厳しすぎます。 <code>val</code> はまだ二分探索木に取り込まれていない外からの値の参照なので、これの生存期間は二分探索木の生存期間と分けて定義してあげるべきでしょう。そうしなければ、</p>
+<figure class="highlight rust"><figcaption><span>add() を呼び出す</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut</span> bst1 = BinarySearchTree::new();</span><br><span class="line">    bst1.add(<span class="number">1</span>);  <span class="comment">// 1 リテラルの生存期間は、 &#123;&#125; ブロック内よりも短い</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>このコードがコンパイルエラーとなります。</p>
+<p>使い方を示すためにも、テストコードを記載します。</p>
+<figure class="highlight rust"><figcaption><span>add() の単体テスト</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#[test]</span></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">add_in_same_order</span></span>() &#123;</span><br><span class="line">    <span class="keyword">use</span> BinarySearchTree;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut</span> bst1 = BinarySearchTree::new();</span><br><span class="line">    bst1.add(<span class="number">1</span>);</span><br><span class="line">    bst1.add(<span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut</span> bst2 = BinarySearchTree::new();</span><br><span class="line">    bst2.add(<span class="number">1</span>);</span><br><span class="line">    bst2.add(<span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">assert_eq!</span>(bst1, bst2);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#[test]</span></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">add_in_different_order1</span></span>() &#123;</span><br><span class="line">    <span class="keyword">use</span> BinarySearchTree;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut</span> bst1 = BinarySearchTree::new();</span><br><span class="line">    bst1.add(<span class="number">1</span>);</span><br><span class="line">    bst1.add(<span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut</span> bst2 = BinarySearchTree::new();</span><br><span class="line">    bst2.add(<span class="number">2</span>);</span><br><span class="line">    bst2.add(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">assert_ne!</span>(bst1, bst2);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#[test]</span></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">add_in_different_order2</span></span>() &#123;</span><br><span class="line">    <span class="keyword">use</span> BinarySearchTree;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut</span> bst1 = BinarySearchTree::new();</span><br><span class="line">    bst1.add(<span class="number">8</span>);</span><br><span class="line">    bst1.add(<span class="number">5</span>);</span><br><span class="line">    bst1.add(<span class="number">10</span>);</span><br><span class="line">    bst1.add(<span class="number">5</span>);</span><br><span class="line">    bst1.add(<span class="number">3</span>);</span><br><span class="line">    bst1.add(<span class="number">5</span>);</span><br><span class="line">    bst1.add(<span class="number">6</span>);</span><br><span class="line">    bst1.add(<span class="number">8</span>);</span><br><span class="line">    bst1.add(<span class="number">9</span>);</span><br><span class="line">    bst1.add(<span class="number">15</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut</span> bst2 = BinarySearchTree::new();</span><br><span class="line">    bst2.add(<span class="number">8</span>);</span><br><span class="line">    bst2.add(<span class="number">10</span>);</span><br><span class="line">    bst2.add(<span class="number">5</span>);</span><br><span class="line">    bst2.add(<span class="number">15</span>);</span><br><span class="line">    bst2.add(<span class="number">9</span>);</span><br><span class="line">    bst2.add(<span class="number">6</span>);</span><br><span class="line">    bst2.add(<span class="number">5</span>);</span><br><span class="line">    bst2.add(<span class="number">8</span>);</span><br><span class="line">    bst2.add(<span class="number">3</span>);</span><br><span class="line">    bst2.add(<span class="number">5</span>);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">assert_eq!</span>(bst1, bst2);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>同じ要素の集合を異なる順番で追加したとき、最終的な二分探索木が同じ構造になることも違う構造になることもあります。紙に書きながら <code>add()</code> のアルゴリズムをたどれば理解は難しくないはずです。</p>
+<h3><span id="一致検索">一致検索</span></h3><p>一致検索はとても素直な再帰で書けます。</p>
+<figure class="highlight rust"><figcaption><span>一致検索</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">impl</span>&lt;T: <span class="built_in">Ord</span>&gt; BinarySearchTree&lt;T&gt; &#123;</span><br><span class="line">    <span class="comment">/// 二分探索木に val が1つ以上含まれているかを返す。</span></span><br><span class="line">    <span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">contains</span></span>(&amp;<span class="keyword">self</span>, val: &amp;T) -&gt; <span class="built_in">bool</span> &#123;</span><br><span class="line">        Self::contains_inner(&amp;<span class="keyword">self</span>.<span class="number">0</span>, &amp;val)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fn</span> <span class="title">contains_inner</span></span>(cur_node: &amp;BinarySearchTreeInner&lt;T&gt;, val: &amp;T) -&gt; <span class="built_in">bool</span> &#123;</span><br><span class="line">        <span class="keyword">match</span> cur_node &#123;</span><br><span class="line">            BinarySearchTreeInner::Nil =&gt; <span class="literal">false</span>, <span class="comment">// たどってきたpathには val がなかった</span></span><br><span class="line"></span><br><span class="line">            BinarySearchTreeInner::Node &#123;</span><br><span class="line">                val: cur_v,</span><br><span class="line">                left,</span><br><span class="line">                right,</span><br><span class="line">            &#125; =&gt; &#123;</span><br><span class="line">                <span class="keyword">if</span> cur_v == val &#123;</span><br><span class="line">                    <span class="comment">// val を見つけたら、リーフまで到達していなくても、これ以上の再起をやめてtrueを返す</span></span><br><span class="line">                    <span class="literal">true</span></span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="comment">// 左か右のどちらかに val があるかどうか</span></span><br><span class="line">                    Self::contains_inner(left, val) || Self::contains_inner(right, val)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#[test]</span></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">contains</span></span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut</span> bst = BinarySearchTree::new();</span><br><span class="line">    bst.add(<span class="number">8</span>);</span><br><span class="line">    bst.add(<span class="number">5</span>);</span><br><span class="line">    bst.add(<span class="number">10</span>);</span><br><span class="line">    bst.add(<span class="number">5</span>);</span><br><span class="line">    bst.add(<span class="number">3</span>);</span><br><span class="line">    bst.add(<span class="number">5</span>);</span><br><span class="line">    bst.add(<span class="number">6</span>);</span><br><span class="line">    bst.add(<span class="number">8</span>);</span><br><span class="line">    bst.add(<span class="number">9</span>);</span><br><span class="line">    bst.add(<span class="number">15</span>);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">assert_eq!</span>(bst.contains(&amp;<span class="number">0</span>), <span class="literal">false</span>);</span><br><span class="line">    <span class="built_in">assert_eq!</span>(bst.contains(&amp;<span class="number">5</span>), <span class="literal">true</span>);</span><br><span class="line">    <span class="built_in">assert_eq!</span>(bst.contains(&amp;<span class="number">10</span>), <span class="literal">true</span>);</span><br><span class="line">    <span class="built_in">assert_eq!</span>(bst.contains(&amp;<span class="number">9</span>), <span class="literal">true</span>);</span><br><span class="line">    <span class="built_in">assert_eq!</span>(bst.contains(&amp;<span class="number">15</span>), <span class="literal">true</span>);</span><br><span class="line">    <span class="built_in">assert_eq!</span>(bst.contains(&amp;<span class="number">16</span>), <span class="literal">false</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3><span id="ソート">ソート</span></h3><p>in-place order で <code>Vec</code> に値を詰めていくだけです。本当は <code>Vec</code> よりもイテレーターを返すほうがメモリ確保を必要なときまで遅延できるのでベターですが、ここでは二分探索木にフォーカスするために <code>Vec</code> を返却します。</p>
+<figure class="highlight rust"><figcaption><span>ソート</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">impl</span>&lt;T: <span class="built_in">Ord</span>&gt; BinarySearchTree&lt;T&gt; &#123;</span><br><span class="line">    <span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">get_all_sorted</span></span>(&amp;<span class="keyword">self</span>) -&gt; <span class="built_in">Vec</span>&lt;&amp;T&gt; &#123;</span><br><span class="line">        <span class="keyword">let</span> <span class="keyword">mut</span> ret = <span class="built_in">Vec</span>::&lt;&amp;T&gt;::new();</span><br><span class="line">        Self::get_all_sorted_inner(&amp;<span class="keyword">self</span>.<span class="number">0</span>, &amp;<span class="keyword">mut</span> ret);</span><br><span class="line">        ret</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// in-place order で ret にノード値を追加していく</span></span><br><span class="line">    <span class="function"><span class="keyword">fn</span> <span class="title">get_all_sorted_inner</span></span>&lt;<span class="symbol">'t</span>, <span class="symbol">'a</span>&gt;(</span><br><span class="line">        cur_node: &amp;<span class="symbol">'t</span> BinarySearchTreeInner&lt;T&gt;,</span><br><span class="line">        ret: &amp;<span class="symbol">'a</span> <span class="keyword">mut</span> <span class="built_in">Vec</span>&lt;&amp;<span class="symbol">'t</span> T&gt;,</span><br><span class="line">    ) &#123;</span><br><span class="line">        <span class="keyword">match</span> cur_node &#123;</span><br><span class="line">            BinarySearchTreeInner::Nil =&gt; &#123;&#125;</span><br><span class="line">            BinarySearchTreeInner::Node &#123; val, left, right &#125; =&gt; &#123;</span><br><span class="line">                Self::get_all_sorted_inner(left, ret);</span><br><span class="line">                ret.push(val);</span><br><span class="line">                Self::get_all_sorted_inner(right, ret);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#[test]</span></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">get_all_sorted</span></span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut</span> bst = BinarySearchTree::new();</span><br><span class="line">    bst.add(<span class="number">8</span>);</span><br><span class="line">    bst.add(<span class="number">5</span>);</span><br><span class="line">    bst.add(<span class="number">10</span>);</span><br><span class="line">    bst.add(<span class="number">5</span>);</span><br><span class="line">    bst.add(<span class="number">3</span>);</span><br><span class="line">    bst.add(<span class="number">5</span>);</span><br><span class="line">    bst.add(<span class="number">6</span>);</span><br><span class="line">    bst.add(<span class="number">8</span>);</span><br><span class="line">    bst.add(<span class="number">9</span>);</span><br><span class="line">    bst.add(<span class="number">15</span>);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">assert_eq!</span>(</span><br><span class="line">        bst.get_all_sorted(),</span><br><span class="line">        <span class="built_in">vec!</span>[&amp;<span class="number">3</span>, &amp;<span class="number">5</span>, &amp;<span class="number">5</span>, &amp;<span class="number">5</span>, &amp;<span class="number">6</span>, &amp;<span class="number">8</span>, &amp;<span class="number">8</span>, &amp;<span class="number">9</span>, &amp;<span class="number">10</span>, &amp;<span class="number">15</span>]</span><br><span class="line">    );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3><span id="範囲検索">範囲検索</span></h3><p>範囲検索も、ソートと同じく in-place order で再帰処理をすれば、自然にソート済みの検索結果が得られます。「左の子以下は今見ているノードの値以下なので、探している val は絶対にない」のように枝刈りしていることに着目してください。</p>
+<figure class="highlight rust"><figcaption><span>範囲検索</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">impl</span>&lt;T: <span class="built_in">Ord</span>&gt; BinarySearchTree&lt;T&gt; &#123;</span><br><span class="line">    <span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">get_range_sorted</span></span>(&amp;<span class="keyword">self</span>, min: &amp;T, max: &amp;T) -&gt; <span class="built_in">Vec</span>&lt;&amp;T&gt; &#123;</span><br><span class="line">        <span class="keyword">let</span> <span class="keyword">mut</span> ret = <span class="built_in">Vec</span>::&lt;&amp;T&gt;::new();</span><br><span class="line">        Self::get_range_sorted_inner(&amp;<span class="keyword">self</span>.<span class="number">0</span>, min, max, &amp;<span class="keyword">mut</span> ret);</span><br><span class="line">        ret</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// in-place order で [min, max] の範囲のノード値を検索し、 ret に追加していく</span></span><br><span class="line">    <span class="function"><span class="keyword">fn</span> <span class="title">get_range_sorted_inner</span></span>&lt;<span class="symbol">'t</span>, <span class="symbol">'a</span>&gt;(</span><br><span class="line">        cur_node: &amp;<span class="symbol">'t</span> BinarySearchTreeInner&lt;T&gt;,</span><br><span class="line">        min: &amp;T,</span><br><span class="line">        max: &amp;T,</span><br><span class="line">        ret: &amp;<span class="symbol">'a</span> <span class="keyword">mut</span> <span class="built_in">Vec</span>&lt;&amp;<span class="symbol">'t</span> T&gt;,</span><br><span class="line">    ) &#123;</span><br><span class="line">        <span class="keyword">match</span> cur_node &#123;</span><br><span class="line">            BinarySearchTreeInner::Nil =&gt; &#123;&#125;</span><br><span class="line">            BinarySearchTreeInner::Node &#123; val, left, right &#125; =&gt; &#123;</span><br><span class="line">                <span class="keyword">if</span> val &gt;= min &#123;</span><br><span class="line">                    <span class="comment">// cur_node の値が最小値以上なら、まだ左の子ノード以下に最小値以上のノード値があり得るので、探索する。</span></span><br><span class="line">                    Self::get_range_sorted_inner(left, min, max, ret);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> min &lt;= val &amp;&amp; val &lt;= max &#123;</span><br><span class="line">                    ret.push(val);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> val &lt; max &#123;</span><br><span class="line">                    <span class="comment">// cur_node の値が最大値より小さければ、まだ右の子ノード以下に最大値以下のノード値があり得るので、探索する。</span></span><br><span class="line">                    Self::get_range_sorted_inner(right, min, max, ret);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#[test]</span></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">get_range_sorted</span></span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut</span> bst = BinarySearchTree::new();</span><br><span class="line">    bst.add(<span class="number">8</span>);</span><br><span class="line">    bst.add(<span class="number">5</span>);</span><br><span class="line">    bst.add(<span class="number">10</span>);</span><br><span class="line">    bst.add(<span class="number">5</span>);</span><br><span class="line">    bst.add(<span class="number">3</span>);</span><br><span class="line">    bst.add(<span class="number">5</span>);</span><br><span class="line">    bst.add(<span class="number">6</span>);</span><br><span class="line">    bst.add(<span class="number">8</span>);</span><br><span class="line">    bst.add(<span class="number">9</span>);</span><br><span class="line">    bst.add(<span class="number">15</span>);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">assert_eq!</span>(</span><br><span class="line">        bst.get_range_sorted(&amp;<span class="number">3</span>, &amp;<span class="number">15</span>),</span><br><span class="line">        <span class="built_in">vec!</span>[&amp;<span class="number">3</span>, &amp;<span class="number">5</span>, &amp;<span class="number">5</span>, &amp;<span class="number">5</span>, &amp;<span class="number">6</span>, &amp;<span class="number">8</span>, &amp;<span class="number">8</span>, &amp;<span class="number">9</span>, &amp;<span class="number">10</span>, &amp;<span class="number">15</span>]</span><br><span class="line">    );</span><br><span class="line">    <span class="built_in">assert_eq!</span>(</span><br><span class="line">        bst.get_range_sorted(&amp;<span class="number">5</span>, &amp;<span class="number">15</span>),</span><br><span class="line">        <span class="built_in">vec!</span>[&amp;<span class="number">5</span>, &amp;<span class="number">5</span>, &amp;<span class="number">5</span>, &amp;<span class="number">6</span>, &amp;<span class="number">8</span>, &amp;<span class="number">8</span>, &amp;<span class="number">9</span>, &amp;<span class="number">10</span>, &amp;<span class="number">15</span>]</span><br><span class="line">    );</span><br><span class="line">    <span class="built_in">assert_eq!</span>(</span><br><span class="line">        bst.get_range_sorted(&amp;<span class="number">5</span>, &amp;<span class="number">14</span>),</span><br><span class="line">        <span class="built_in">vec!</span>[&amp;<span class="number">5</span>, &amp;<span class="number">5</span>, &amp;<span class="number">5</span>, &amp;<span class="number">6</span>, &amp;<span class="number">8</span>, &amp;<span class="number">8</span>, &amp;<span class="number">9</span>, &amp;<span class="number">10</span>]</span><br><span class="line">    );</span><br><span class="line">    <span class="built_in">assert_eq!</span>(bst.get_range_sorted(&amp;<span class="number">5</span>, &amp;<span class="number">5</span>), <span class="built_in">vec!</span>[&amp;<span class="number">5</span>, &amp;<span class="number">5</span>, &amp;<span class="number">5</span>]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2><span id="応用編-leetcode-の問題を解いてみる">応用編: LeetCode の問題を解いてみる</span></h2><p>説明した操作やアルゴリズムで実際の問題が解決できることを例示するために、 LeetCode から以下の問題を取り上げます。</p>
+<ul>
+<li><a href="https://leetcode.com/problems/range-sum-of-bst/" target="_blank" rel="noopener">938. Range Sum of BST</a><ul>
+<li>二分探索木と、最小値・最大値が与えられたとき、最小値と最大値の間のノード値の総和を回答。</li>
+</ul>
+</li>
+</ul>
+<p>これは <strong>範囲検索</strong> した結果の <code>Vec</code> を足し合わせれば一発ですね。特に新しく回答関数を書いたりする必要もありません。サンプルの入出力を確かめるテストだけ書きます。</p>
+<figure class="highlight rust"><figcaption><span>938. Range Sum of BST</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#[test]</span></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">leetcode_938_range_sum_of_bst</span></span>() &#123;</span><br><span class="line">    <span class="comment">//          10</span></span><br><span class="line">    <span class="comment">//         /  \</span></span><br><span class="line">    <span class="comment">//        5    15</span></span><br><span class="line">    <span class="comment">//       / \     \</span></span><br><span class="line">    <span class="comment">//      3   7     18</span></span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut</span> bst1 = BinarySearchTree::new();</span><br><span class="line">    bst1.add(<span class="number">10</span>);</span><br><span class="line">    bst1.add(<span class="number">5</span>);</span><br><span class="line">    bst1.add(<span class="number">3</span>);</span><br><span class="line">    bst1.add(<span class="number">7</span>);</span><br><span class="line">    bst1.add(<span class="number">15</span>);</span><br><span class="line">    bst1.add(<span class="number">18</span>);</span><br><span class="line">    <span class="built_in">assert_eq!</span>(bst1.get_range_sorted(&amp;<span class="number">7</span>, &amp;<span class="number">15</span>).into_iter().sum::&lt;<span class="built_in">i32</span>&gt;(), <span class="number">32</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//          10</span></span><br><span class="line">    <span class="comment">//       __/  \__</span></span><br><span class="line">    <span class="comment">//      /        \</span></span><br><span class="line">    <span class="comment">//     5         15</span></span><br><span class="line">    <span class="comment">//    / \       /  \</span></span><br><span class="line">    <span class="comment">//   3   7     13   18</span></span><br><span class="line">    <span class="comment">//  /   /</span></span><br><span class="line">    <span class="comment">// 1   6</span></span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut</span> bst2 = BinarySearchTree::new();</span><br><span class="line">    bst2.add(<span class="number">10</span>);</span><br><span class="line">    bst2.add(<span class="number">5</span>);</span><br><span class="line">    bst2.add(<span class="number">3</span>);</span><br><span class="line">    bst2.add(<span class="number">7</span>);</span><br><span class="line">    bst2.add(<span class="number">1</span>);</span><br><span class="line">    bst2.add(<span class="number">6</span>);</span><br><span class="line">    bst2.add(<span class="number">15</span>);</span><br><span class="line">    bst2.add(<span class="number">13</span>);</span><br><span class="line">    bst2.add(<span class="number">18</span>);</span><br><span class="line">    <span class="built_in">assert_eq!</span>(bst2.get_range_sorted(&amp;<span class="number">6</span>, &amp;<span class="number">10</span>).into_iter().sum::&lt;<span class="built_in">i32</span>&gt;(), <span class="number">23</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h2><span id="終わりに">終わりに</span></h2><p>この記事ではRustで二分探索木をシンプルに定義する方法と、二分探索木の構築・追加、そして一致検索・範囲検索・ソートを紹介しました。</p>
+<p><a href="#二分探索木のアルゴリズム-検索">一致検索の説明</a> で指摘したように、二分探索木の強みは一致検索が <code>O(h)</code> （木の深さ）程度でできるだけでなく、範囲検索が <code>O(n)</code> （木の要素数）より小さい計算量で実現でき、もともとソート済みの構造になるので <code>O(n)</code> でソート済の列が得られることにあります。<br>ただし、ただの二分探索木の制約では、木の深さ <code>h</code> が最大で要素数の <code>n</code> になってしまいます（例: ルートに最小値、右の子ノードに次に大きい値、と小さい順に右に連ねる場合）。</p>
+<p>次回は木の深さを小さく抑える工夫の詰まった、平衡二分探索木を紹介します。</p>
+
+    
+	</div>
+	<footer class="entry-footer">
+		<div class="entry-meta-footer">
+			<span class="category">
+				
+			</span>
+			<span class="tags">
+				
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Rust/" rel="tag">Rust</a></li></ul>
+
+			</span>
+		</div>
+	</footer>
+    
+    <footer class="author-info clearfix">
+      <img class="author-picture circle" src="https://www.gravatar.com/avatar/cb02a2b3f429b7c938d1fe2665e8e342">
+      <div class="author-content right">
+        <div class="author-caption">
+          <span class="label">author</span>
+          Sho Nakatani a.k.a. laysakura
+        </div>
+        <p class="author-description">
+          東京大学大学院 情報理工学系研究科 電子情報学専攻 修士課程で並列分散処理・ストリーム処理・データベースを研究。<br>
+          2014年4月に株式会社ディー・エヌ・エーにエンジニアスペシャリストとして入社し、ソーシャルゲームのサーバサイド共通基盤の開発に従事。<br>
+          2016年8月より、オンライン証券会社<a href="https://folio-sec.com" target="_blank" rel="noopener">株式会社FOLIO</a>に入社。バックエンドシステム開発・プロジェクトマネージメント・Engineering Managementに従事。<br>
+          2020年3月より<a href="https://idein.jp" target="_blank" rel="noopener">Idein株式会社</a>所属。<br>
+          随時副業募集中です: <a href="https://github.com/laysakura/resume-jp-for-side-job" target="_blank" rel="noopener">職務経歴書や募集職種</a>
+        </p>
+        <ul class="author-social-buttons">
+          <li class="author-social-button"><a class="fa fa-lg fa-twitter-square" href="https://twitter.com/laysakura" target="_blank" rel="noopener"></a></li>
+          <li class="author-social-button"><a class="fa fa-lg fa-github-square" href="https://github.com/laysakura" target="_blank" rel="noopener"></a></li>
+          <li class="author-social-button"><a class="fa fa-lg fa-facebook-square" href="https://www.facebook.com/lay.sakura" target="_blank" rel="noopener"></a></li>
+        </ul>
+      </div>
+    </footer>
+    
+	
+    
+<nav id="article-nav">
+  
+    <a href="/2020/01/13/Patterson-Hennessy-5th-Excersise02/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          『コンピュータの構成と設計 第5版』演習問題解答集 第2章
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/12/22/rust-DataStructures-Algorithm-BinaryTree/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          二分木 - Rustではじめるデータ構造とアルゴリズム（第1回）
+        
+      </div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+
+
+<section id="comments">
+  <div id="disqus_thread">
+
+  <!-- comment service provided by disqus -->
+  <script>
+    /**
+     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+     */
+    var disqus_config = function () {
+        this.page.url = https://laysakura.github.io/2019/12/25/rust-DataStructures-Algorithm-BinarySearchTree/;  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = https://laysakura.github.io/2019/12/25/rust-DataStructures-Algorithm-BinarySearchTree/; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    (function() {  // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        
+        s.src = '//laysakura.disqus.com/embed.js';
+        
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript" target="_blank" rel="noopener">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+    </div>
+    <div class="mb-search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:laysakura.github.io">
+  </form>
+</div>
+<footer id="footer">
+	<h1 class="footer-blog-title">
+		<a href="/">俺とお前とlaysakura</a>
+	</h1>
+	<span class="copyright">
+		&copy; 2020 Sho Nakatani a.k.a. laysakura<br>
+		Modify from <a href="https://sanographix.github.io/tumblr/apollo/" target="_blank">Apollo</a> theme, designed by <a href="https://www.sanographix.net/" target="_blank">SANOGRAPHIX.NET</a><br>
+		Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+	</span>
+</footer>
+
+    
+<script>
+  var disqus_shortname = 'laysakura';
+  
+  var disqus_url = 'https://laysakura.github.io/2019/12/25/rust-DataStructures-Algorithm-BinarySearchTree/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+
+  <!-- https://github.com/vfeskov/vanilla-back-to-top -->
+  <script src="https://unpkg.com/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js"></script>
+  <script>addBackToTop({
+    diameter: 50,
+    backgroundColor: '#33a6b880',
+    textColor: '#fff'
+  })</script>
+
+</body>
+</html>

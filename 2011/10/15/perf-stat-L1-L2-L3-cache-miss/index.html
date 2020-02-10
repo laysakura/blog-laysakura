@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>perf statでL1,L2(,L3)キャッシュミス測定 | 俺とお前とlaysakura</title>
+  
+  <link rel="canonical" href="https://laysakura.github.io/2011/10/15/perf-stat-L1-L2-L3-cache-miss/"/>
+  <meta name="viewport" content="width=device-width">
+  <meta name="description" content="はじめにこの記事は，前回のエントリの続きものです．まだご覧になっていない方は，前回分をお読みになってからこちらの記事を見てください．">
+<meta property="og:type" content="article">
+<meta property="og:title" content="perf statでL1,L2(,L3)キャッシュミス測定">
+<meta property="og:url" content="https://laysakura.github.io/2011/10/15/perf-stat-L1-L2-L3-cache-miss/index.html">
+<meta property="og:site_name" content="俺とお前とlaysakura">
+<meta property="og:description" content="はじめにこの記事は，前回のエントリの続きものです．まだご覧になっていない方は，前回分をお読みになってからこちらの記事を見てください．">
+<meta property="og:locale" content="ja_JP">
+<meta property="article:published_time" content="2011-10-15T04:12:42.000Z">
+<meta property="article:modified_time" content="2020-02-10T05:06:21.000Z">
+<meta property="article:author" content="Sho Nakatani a.k.a. laysakura">
+<meta property="article:tag" content="High Performance Computing">
+<meta property="article:tag" content="Linux Kernel">
+<meta property="article:tag" content="Linuxオペレーション">
+<meta name="twitter:card" content="summary">
+
+  <!-- favicon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+  <link rel="icon" href="/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+  <link rel="manifest" href="/favicon/site.webmanifest">
+  <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#5bbad5">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="theme-color" content="#ffffff">
+
+  
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-22289437-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+  <!-- MathJax -->
+  <script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+  <div id="container">
+    <div class="mobile-nav-panel">
+	<i class="icon-reorder icon-large"></i>
+</div>
+<header id="header">
+	<h1 class="blog-title">
+		<a href="/">俺とお前とlaysakura</a>
+	</h1>
+	<nav class="nav">
+		<ul>
+			<li><a href="/archives">過去の投稿</a></li>
+			<li><a id="nav-search-btn" class="nav-icon" title="Search"></a></li>
+			<li><a href="http://cloud.feedly.com/#subscription%2Ffeed%2Fhttps%3A%2F%2Flaysakura.github.io%2Fatom.xml" target="_blank" rel="noopener" id="nav-rss-link" class="nav-icon" title="RSS Feed"></a></li>
+		</ul>
+	</nav>
+	<div id="search-form-wrap">
+		<form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://laysakura.github.io"></form>
+	</div>
+</header>
+    <div id="main">
+      <article id="post-perf-statでL1-L2-L3-キャッシュミス測定" class="post">
+	<footer class="entry-meta-header">
+		<span class="meta-elements date">
+			<a href="/2011/10/15/perf-stat-L1-L2-L3-cache-miss/" class="article-date">
+  <time datetime="2011-10-15T04:12:42.000Z" itemprop="datePublished">2011-10-15</time>
+</a>
+		</span>
+	</footer>
+	
+	<header class="entry-header">
+		
+  
+    <h1 class="article-title entry-title" itemprop="name">
+      perf statでL1,L2(,L3)キャッシュミス測定
+    </h1>
+  
+
+	</header>
+	<div class="entry-content">
+		
+    	<h2><span id="はじめに">はじめに</span></h2><p>この記事は，<a href="/2011/10/11/perf-stat-performance-counters">前回のエントリ</a>の続きものです．<br>まだご覧になっていない方は，前回分をお読みになってからこちらの記事を見てください．</p>
+<a id="more"></a>
+
+<!-- toc -->
+
+<ul>
+<li><a href="#対象プロセッサ">対象プロセッサ</a></li>
+<li><a href="#参考文献">参考文献</a></li>
+<li><a href="#perf-stat-でキャッシュミスを正確に測定するのは難しい">perf stat でキャッシュミスを正確に測定するのは難しい</a><ul>
+<li><a href="#perf-のソースを覗いて実際に測っているものを調べる">perf のソースを覗いて実際に測っているものを調べる</a></li>
+</ul>
+</li>
+<li><a href="#キャッシュメインメモリの構成を正しく把握する">キャッシュ・メインメモリの構成を正しく把握する</a></li>
+<li><a href="#キャッシュミスを計算する">キャッシュミスを計算する</a><ul>
+<li><a href="#l1データキャッシュミスの計算を例に考え方を知る">L1データキャッシュミスの計算を例に，考え方を知る</a></li>
+<li><a href="#その他のレベルのキャシュミスについて">その他のレベルのキャシュミスについて</a></li>
+</ul>
+</li>
+<li><a href="#キャッシュに関するイベントを計測するスクリプト">キャッシュに関するイベントを計測するスクリプト</a><ul>
+<li><a href="#スクリプトの実装上の細かい注意点">スクリプトの実装上の細かい注意点</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="対象プロセッサ">対象プロセッサ</span></h2><p>このエントリは，AMDの次のプロセッサを対象に書かれています．</p>
+<ul>
+<li>AMD Athlon 64</li>
+<li>AMD Opteron</li>
+<li>AMD Phenom</li>
+</ul>
+<p>ただし， <span style="font-weight:bold;">これらのプロセッサでは本エントリの記述がそのまま当てはまる</span> という意味であって，<br><span style="font-weight:bold;">他のプロセッサでも，記憶域の構成を知った上で本エントリのような考え方を適用すればキャッシュミス測定ができます．</span></p>
+<p>上に挙げたプロセッサをお使いの場合でも，L3キャッシュがあるモデルかどうかで読み替えてください．<br>本エントリではL3キャッシュがあるとして記述している箇所があります．</p>
+<h2><span id="参考文献">参考文献</span></h2><p><a href="/2011/10/11/perf-stat-performance-counters">前回のエントリ</a>でも紹介した<br><a href="http://developer.amd.com/Assets/intro_to_ca_v3_final.pdf" target="_blank" rel="noopener">Basic Performance Measurements for AMD Athlon 64, AMD Opteron and AMD Phenom Processors</a><br>の “4.3 Memory Accesses” を参考に本エントリを書きました．</p>
+<h2><span id="perf-stat-でキャッシュミスを正確に測定するのは難しい">perf stat でキャッシュミスを正確に測定するのは難しい</span></h2><p>perf list 一覧できるイベント名は直感的ですが，実際には何のハードウェアイベントを測定しているのかが分かりにくいというのは<a href="/2011/10/11/perf-stat-performance-counters">前回のエントリ</a>でも触れました．</p>
+<p>試しに，イベント名を使ってキャッシュミスを計測します．<br>その値と， <a href="http://developer.amd.com/Assets/intro_to_ca_v3_final.pdf" target="_blank" rel="noopener">Basic Performance Measurements for AMD Athlon 64, AMD Opteron and AMD Phenom Processors</a> に書かれた計算式から求めた値と比較してみて，「イベント名はアテできない・・・」ということを実感してみましょう．</p>
+<p>測定に使ったCPUは，Quad-Core AMD Opteron. Model. 8354 です．L1データキャッシュ，L1命令キャッシュ,L2キャッシュがコアごとに1つずつ,L3キャッシュが4コアに1つあります．</p>
+<p>測定用アプリケーション(a.out)は単純なもので，1次元の領域に対して書き込みをした後読み出すだけです(下の擬似コード参照)．</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">size</span> = atoi(コマンドライン引数);</span><br><span class="line"><span class="keyword">int</span> *a = <span class="built_in">malloc</span>(<span class="built_in">size</span> * <span class="keyword">sizeof</span>(<span class="keyword">int</span>));</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; <span class="built_in">size</span>; ++<span class="built_in">size</span>)</span><br><span class="line">  <span class="built_in">size</span>[i] = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">sum = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; <span class="built_in">size</span>; ++<span class="built_in">size</span>)</span><br><span class="line">  sum += a[i];</span><br><span class="line"></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">"%d\n"</span>, sum);</span><br></pre></td></tr></table></figure>
+
+<p>では，イベント名を使ってキャッシュミスらしきものを計測してみましょう．</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$ perf <span class="built_in">stat</span> -e L1-dcache-load-misses -e L1-dcache-store-misses -e cache-misses -e LLC-load-misses -e LLC-store-misses ./a.out 1000000000</span><br><span class="line"></span><br><span class="line"> Performance counter stats <span class="keyword">for</span> <span class="string">'./a.out 1000000000'</span>:</span><br><span class="line"></span><br><span class="line">       77557463  L1-dcache-load-misses    <span class="comment">#      0.000 M/sec</span></span><br><span class="line">  &lt;not counted&gt;  L1-dcache-store-misses</span><br><span class="line">         190127  cache-misses             <span class="comment">#      0.000 M/sec</span></span><br><span class="line">       86401250  LLC-load-misses          <span class="comment">#      0.000 M/sec</span></span><br><span class="line">  &lt;not counted&gt;  LLC-store-misses</span><br><span class="line"></span><br><span class="line">    7.447300257  seconds time elapsed</span><br></pre></td></tr></table></figure>
+
+<p>*-store-misses が計測出来ていない時点で，イベント名が疑わしい臭いがします．</p>
+<p>(※ ‘dcache’ はデータキャッシュ， ‘LLC’ は ‘Last Level Cache’ の略です)</p>
+<p>次に， <a href="http://developer.amd.com/Assets/intro_to_ca_v3_final.pdf" target="_blank" rel="noopener">Basic Performance Measurements for AMD Athlon 64, AMD Opteron and AMD Phenom Processors</a> の計算式を使った測定の結果を見てみます．<br>測定用のスクリプト， “perf-stat-with-events.py” はこのエントリ中に掲載します．</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">$ perf-stat-with-events.py ./a.out 1000000000</span><br><span class="line"></span><br><span class="line">(出力抜粋)</span><br><span class="line"></span><br><span class="line">      186936122   Data Cache Misses</span><br><span class="line">      146084145   L2 Misses</span><br><span class="line">       16306069   L3 Misses</span><br><span class="line"></span><br><span class="line">=== Elapsed Time ===</span><br><span class="line">    7.371837186  seconds time elapsed</span><br></pre></td></tr></table></figure>
+
+<p>先程のイベント名を使った測定の値と比較すると，どのように対応しているのかが全く分かりません．</p>
+<p>やはり，真面目に各階層のキャッシュミスを計測しようと思うと，イベント名に頼ってもいられないというのが現状のようです．</p>
+<h3><span id="perf-のソースを覗いて実際に測っているものを調べる">perf のソースを覗いて実際に測っているものを調べる</span></h3><p>今回のエントリの本筋とは外れますので，読み飛ばして結構です．</p>
+<p>perf のソースを見て perf stat では何を測っているのかを確認してみたいと思います．</p>
+<p>perfのソースは，Linuxのソースツリーの中にあります．<br>Linuxのソースがあるディレクトリの中で，</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find -name <span class="string">"perf_"</span></span><br></pre></td></tr></table></figure>
+
+<p>とすると，perfのソースのありかが分かります(ただし，これで列挙されるファイルで全てなのかは知りません)．</p>
+<p>実際にハードウェアカウンタの値をとるソースは，当然プロセッサの種類に依存します．<br>先の測定に用いた， AMD Opteron. Model. 8354 では，<br>“arch/x86/kernel/cpu/perf_event_amd.c”<br>に， perf stat ではどのハードウェアカウンタの値をとっているのかが書いてあります．</p>
+<p>コードについてあまり深くは触れませんが，これを見ると，</p>
+<ul>
+<li>「AMDのプロセッサ」という風に汎用的な枠組みで定義しているので，L3キャッシュを持つプロセッサについても，L3キャッシュミスを計測するためのイベント名を提供していない</li>
+<li>例えばデータキャッシュミスなどは， <a href="http://developer.amd.com/Assets/intro_to_ca_v3_final.pdf" target="_blank" rel="noopener">Basic Performance Measurements for AMD Athlon 64, AMD Opteron and AMD Phenom Processors</a> で「この測り方は正確な測定としてはお勧めできません」と書いてあるやり方で計測しようとしている</li>
+</ul>
+<p>といった問題点が見えてきます．</p>
+<p>Oprofileみたいに，プロセッサの種類をもっと細かく分類しなければ，「直感的なイベント名で正しく計測」というのは難しいのでしょう．<br>(余談の余談ですが，そういうpatchは投げられてないんですかね?)</p>
+<h2><span id="キャッシュメインメモリの構成を正しく把握する">キャッシュ・メインメモリの構成を正しく把握する</span></h2><p>お使いのプロセッサで，キャッシュとメインメモリがどのような構成になっているのかを正しく知らなければ，正しいキャッシュミス測定はできません．<br>これはそれぞれのプロセッサのマニュアルに載っている情報のはずです．</p>
+<p>先程の計測に使った AMD Opteron. Model. 8354 については，同様のキャッシュ・メインメモリ構成を持つプロセッサの日本語解説記事がありました:<br><a href="http://pc.watch.impress.co.jp/docs/2006/1016/kaigai312.htm" target="_blank" rel="noopener">後藤弘茂のWeekly海外ニュース - 大幅に強化されたAMDのクアッドコア「Barcelona」</a></p>
+<h2><span id="キャッシュミスを計算する">キャッシュミスを計算する</span></h2><p>それでは，キャッシュミスを計算します．計算するのは，</p>
+<ul>
+<li>L1データキャッシュミス</li>
+<li>L1命令キャッシュミス</li>
+<li>L2キャッシュミス</li>
+<li>L3キャッシュミス</li>
+</ul>
+<p>です．</p>
+<p>そのために，次のハードウェアイベントを計測しておきます．<br>括弧内は，</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ perf <span class="built_in">stat</span> -e rNNN</span><br></pre></td></tr></table></figure>
+
+<p>の NNN に当たる， &lt;UnitMask(16進数)&gt;&lt;EventSelect(16進数)&gt; を表します．</p>
+<ul>
+<li>Data Cache Accesses (40)</li>
+<li>Data Cache Refills from L2 (1e42)</li>
+<li>Data Cache Refills from System (1e43)</li>
+<li>Instruction Cache Fetches (c80)</li>
+<li>Instruction Cache Refills from L2 (c82)</li>
+<li>Instruction Cache Refills from System (c83)</li>
+<li>Requests to L2 Cache [TLB fill] (c47d)</li>
+<li>L2 Cache Misses [TLB fill] (c47e)</li>
+<li>Read Requests to L3 Cache (cf74e0)</li>
+<li>L3 Cache Misses (cf74e1)</li>
+</ul>
+<h3><span id="l1データキャッシュミスの計算を例に考え方を知る">L1データキャッシュミスの計算を例に，考え方を知る</span></h3><p>L1データキャッシュミスを直接測定するためのハードウェアイベントはありません．間接的な手法を採ります．</p>
+<p>これはL1データキャッシュにも以外の全てのキャッシュにも言えることですが，<br><span style="font-weight:bold;">キャッシュミスが起きると，自分より下のレベルのキャッシュかメインメモリからキャッシュライン分のデータを取ってきて，自分のキャッシュに載せる</span><br>ということが起きます(この動作を refill と言います)．<br>つまり，<br><span style="font-weight:bold;">自分より下のレベルのキャッシュ・メインメモリからデータを取ってきて，自分のキャッシュに載せるという一連の動作(Refill)の回数が，キャッシュミス回数</span><br>となります．</p>
+<p>従って，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&quot;L1データキャッシュミス回数&quot; &#x3D; &quot;L2からL1データキャッシュへのrefill回数&quot; + &quot;L3からL1データキャッシュへのrefill回数&quot; + &quot;メインメモリからL1データキャッシュへのrefill回数&quot;</span><br></pre></td></tr></table></figure>
+
+<p>という関係が成立します．</p>
+<p>右辺の項とハードウェアイベントの対応は，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&quot;L2からL1データキャッシュへのrefill回数&quot; &#x3D; &quot;Data Cache Refills from L2&quot;</span><br><span class="line">(&quot;L3からL1データキャッシュへのrefill回数&quot; + &quot;メインメモリからL1データキャッシュへのrefill回数&quot;) &#x3D; &quot;Data Cache Refills from System&quot;</span><br></pre></td></tr></table></figure>
+
+<p>となっています．</p>
+<p>以上より，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&quot;L1データキャッシュミス回数&quot; &#x3D; &quot;Data Cache Refills from L2&quot; + &quot;Data Cache Refills from System&quot;</span><br></pre></td></tr></table></figure>
+
+<p>として計算ができます．</p>
+<h3><span id="その他のレベルのキャシュミスについて">その他のレベルのキャシュミスについて</span></h3><p>L2キャッシュミスが起こる状況を考えてみます．</p>
+<ul>
+<li>L1データキャッシュミスが起きて，L2キャッシュにアクセスしたところ，L2キャッシュもミスしたので，L3キャッシュまたはメインメモリから，L1データキャッシュにキャッシュラインを取ってきた</li>
+<li>L1命令キャッシュミスが起きて，L2キャッシュにアクセスしたところ，L2キャッシュもミスしたので，L3キャッシュまたはメインメモリから，L1命令キャッシュにキャッシュラインを取ってきた</li>
+</ul>
+<p>これらの場合の他に，L2キャッシュのTLBミスが発生した場合も勘定に入れます(よく分かってないのですが，ページテーブルのキャッシュとして，TLBとの間のL2キャッシュも使用しているのでしょうかね?．</p>
+<p>従って，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&quot;L2キャッシュミス回数&quot; &#x3D; &quot;Data Cache Refills from System&quot; + &quot;Instruction Cache Refills from System&quot; + &quot;L2 Cache Misses [TLB fill]&quot;</span><br></pre></td></tr></table></figure>
+
+<p>と計算できます．</p>
+<p>今回対象にしているプロセッサでは，(L3キャッシュを持つものならば)L3キャッシュミスは直接計測できます．</p>
+<h2><span id="キャッシュに関するイベントを計測するスクリプト">キャッシュに関するイベントを計測するスクリプト</span></h2><p>データキャッシュ・命令キャッシュ・L2キャッシュ・L3キャッシュに関する測定をするスクリプトを作りました．<br>AMD Opteron. Model. 8354 で動作を確認しています．</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">$ perf-stat-with-events.py ./a.out 1000000000</span><br><span class="line">=== Running Environment ===</span><br><span class="line"> Performance counter stats <span class="keyword">for</span> <span class="string">'./mopt_ref_implementation 1000000000'</span>:</span><br><span class="line"></span><br><span class="line">=== Counted Events ===</span><br><span class="line">     6122320253                                      Retired Instructions</span><br><span class="line">     2123804830                                       Data Cache Accesses</span><br><span class="line">       59707845                                Data Cache Refills from L2</span><br><span class="line">      127228277              Data Cache Refills from System (Northbridge)</span><br><span class="line">     1630510550                                 Instruction Cache Fetches</span><br><span class="line">          80385                         Instruction Cache Refills from L2</span><br><span class="line">          88990       Instruction Cache Refills from System (Northbridge)</span><br><span class="line">       18766878                           Requests to L2 Cache [TLB fill]</span><br><span class="line">        8167131                                L2 Cache Misses [TLB fill]</span><br><span class="line">       32867005                                 Read Requests to L3 Cache</span><br><span class="line">       16306069                                           L3 Cache Misses</span><br><span class="line"></span><br><span class="line">=== Calculated Events ===</span><br><span class="line">     6122320253   Retired Instructions</span><br><span class="line">     2123804830   Data Cache Accesses</span><br><span class="line">        34.690%   Data Cache Request Rate</span><br><span class="line">      186936122   Data Cache Misses</span><br><span class="line">         8.802%   Data Cache Miss Ratio</span><br><span class="line">     1630510550   Instruction Cache Fetches</span><br><span class="line">        26.632%   Instruction cache Request Rate</span><br><span class="line">         169375   Instruction Cache Misses</span><br><span class="line">         0.010%   Instruction Cache Miss Ratio</span><br><span class="line">      205872375   L2 Requests</span><br><span class="line">         3.363%   L2 Request Rate</span><br><span class="line">      146084145   L2 Misses</span><br><span class="line">        70.959%   L2 Miss Ratio</span><br><span class="line">       32867005   Read Requests to L3 Cache</span><br><span class="line">         0.537%   L3 Request Rate</span><br><span class="line">       16306069   L3 Misses</span><br><span class="line">        49.612%   L3 Miss Ratio</span><br><span class="line"></span><br><span class="line">=== Elapsed Time ===</span><br><span class="line">    7.371837186  seconds time elapsed</span><br></pre></td></tr></table></figure>
+
+<p>といった感じの出力が得られます．</p>
+<p>改変等ご自由にどうぞ．<br>(print_calculated_events 関数がアレな感じですが，基本的にやっていることは上述のキャッシュミス計算などです)</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># This script is written referring to</span></span><br><span class="line"><span class="comment">#   Basic Performance Measurements for AMD Athlon 64,</span></span><br><span class="line"><span class="comment">#   AMD Opteron and AMD Phenom Processors</span></span><br><span class="line"><span class="comment">#   http://developer.amd.com/Assets/intro_to_ca_v3_final.pdf</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">import</span> re</span><br><span class="line"><span class="keyword">import</span> subprocess</span><br><span class="line"><span class="keyword">import</span> types</span><br><span class="line"></span><br><span class="line"><span class="comment"># Modify this list as you like.</span></span><br><span class="line"><span class="comment"># The format of each element is:</span></span><br><span class="line"><span class="comment">#   select: `NNN' for "perf stat -e rNNN"</span></span><br><span class="line"><span class="comment">#   name:   Event name used in output</span></span><br><span class="line">events = [</span><br><span class="line">    &#123;<span class="string">"select"</span>: <span class="string">"c0"</span>, <span class="string">"name"</span>: <span class="string">"Retired Instructions"</span>&#125;,</span><br><span class="line">    &#123;<span class="string">"select"</span>: <span class="string">"40"</span>, <span class="string">"name"</span>: <span class="string">"Data Cache Accesses"</span>&#125;,</span><br><span class="line">    &#123;<span class="string">"select"</span>: <span class="string">"1e42"</span>, <span class="string">"name"</span>: <span class="string">"Data Cache Refills from L2"</span>&#125;,</span><br><span class="line">    &#123;<span class="string">"select"</span>: <span class="string">"1e43"</span>, <span class="string">"name"</span>: <span class="string">"Data Cache Refills from System (Northbridge)"</span>&#125;,</span><br><span class="line">    &#123;<span class="string">"select"</span>: <span class="string">"c80"</span>, <span class="string">"name"</span>: <span class="string">"Instruction Cache Fetches"</span>&#125;,</span><br><span class="line">    &#123;<span class="string">"select"</span>: <span class="string">"c82"</span>, <span class="string">"name"</span>: <span class="string">"Instruction Cache Refills from L2"</span>&#125;,</span><br><span class="line">    &#123;<span class="string">"select"</span>: <span class="string">"c83"</span>, <span class="string">"name"</span>: <span class="string">"Instruction Cache Refills from System (Northbridge)"</span>&#125;,</span><br><span class="line">    &#123;<span class="string">"select"</span>: <span class="string">"c47d"</span>, <span class="string">"name"</span>: <span class="string">"Requests to L2 Cache [TLB fill]"</span>&#125;,</span><br><span class="line">    &#123;<span class="string">"select"</span>: <span class="string">"c47e"</span>, <span class="string">"name"</span>: <span class="string">"L2 Cache Misses [TLB fill]"</span>&#125;,</span><br><span class="line">    &#123;<span class="string">"select"</span>: <span class="string">"cf74e0"</span>, <span class="string">"name"</span>: <span class="string">"Read Requests to L3 Cache"</span>&#125;,</span><br><span class="line">    &#123;<span class="string">"select"</span>: <span class="string">"cf74e1"</span>, <span class="string">"name"</span>: <span class="string">"L3 Cache Misses"</span>&#125;</span><br><span class="line">    ]</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_event_with_name</span><span class="params">(name)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> [event <span class="keyword">for</span> event <span class="keyword">in</span> events <span class="keyword">if</span> event[<span class="string">"name"</span>] == name][<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">event_list</span><span class="params">()</span>:</span></span><br><span class="line">    ret = <span class="string">""</span></span><br><span class="line">    <span class="keyword">for</span> event <span class="keyword">in</span> events:</span><br><span class="line">        ret += <span class="string">"-e r"</span> + event[<span class="string">"select"</span>] + <span class="string">"   "</span></span><br><span class="line">    <span class="keyword">return</span> ret</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">store_count_to_events</span><span class="params">(perf_output_lines)</span>:</span></span><br><span class="line">    <span class="comment"># Sample perf-stat output line</span></span><br><span class="line">    <span class="comment">#        1565650  raw 0xc0                 #      0.000 M/sec    ( +-   1.457% )  (scaled from 75.04%)</span></span><br><span class="line">    <span class="comment">#  &lt;not counted&gt;  raw 0xc0                 #      0.000 M/sec</span></span><br><span class="line">    count_pat = re.compile(<span class="string">"^ &lt;span style="</span>font-weight:bold;<span class="string">"&gt;([0-9]+|&lt;not counted&gt;).&lt;/span&gt;"</span>)</span><br><span class="line">    variance_pat = re.compile(<span class="string">"\+- *([0-9]+\.[0-9]+)%"</span>)</span><br><span class="line"></span><br><span class="line">    lines = perf_output_lines</span><br><span class="line">    <span class="keyword">for</span> event <span class="keyword">in</span> events:</span><br><span class="line">        search_str = <span class="string">"raw 0x"</span> + event[<span class="string">"select"</span>]</span><br><span class="line">        event_line = <span class="string">""</span>.join([line <span class="keyword">for</span> line <span class="keyword">in</span> lines <span class="keyword">if</span> line.find(search_str) != <span class="number">-1</span>])</span><br><span class="line"></span><br><span class="line">        count_mat = count_pat.match(event_line)</span><br><span class="line">        variance_mat = variance_pat.search(event_line)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> count_mat <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            print(<span class="string">"Unexpected event format:\n  %s"</span></span><br><span class="line">                  % event_line)</span><br><span class="line">            exit(<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">if</span> count_mat.group(<span class="number">1</span>) != <span class="string">"&lt;not counted&gt;"</span>:</span><br><span class="line">            event[<span class="string">"count"</span>] = int(count_mat.group(<span class="number">1</span>))</span><br><span class="line">            <span class="keyword">if</span> variance_mat <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">                event[<span class="string">"variance"</span>] = float(variance_mat.group(<span class="number">1</span>))</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                event[<span class="string">"variance"</span>] = <span class="number">-1.0</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            event[<span class="string">"count"</span>] = <span class="number">-1</span></span><br><span class="line">            event[<span class="string">"variance"</span>] = <span class="number">-1.0</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">print_running_env</span><span class="params">(perf_output_lines)</span>:</span></span><br><span class="line">    search_str = <span class="string">"Performance counter stats for"</span></span><br><span class="line">    print(<span class="string">""</span>.join([line <span class="keyword">for</span> line <span class="keyword">in</span> perf_output_lines <span class="keyword">if</span> line.find(search_str) != <span class="number">-1</span>]))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">print_elapsed_time</span><span class="params">(perf_output_lines)</span>:</span></span><br><span class="line">    search_str = <span class="string">"seconds time elapsed"</span></span><br><span class="line">    print(<span class="string">""</span>.join([line <span class="keyword">for</span> line <span class="keyword">in</span> perf_output_lines <span class="keyword">if</span> line.find(search_str) != <span class="number">-1</span>]))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">print_counted_events</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">for</span> event <span class="keyword">in</span> events:</span><br><span class="line">        <span class="keyword">if</span> event[<span class="string">"count"</span>] &gt;= <span class="number">0</span> <span class="keyword">and</span> event[<span class="string">"variance"</span>] &gt;= <span class="number">0.0</span>:</span><br><span class="line">            print(<span class="string">"%15s   %55s   ( +- %6.2f%%)"</span></span><br><span class="line">                  % (str(event[<span class="string">"count"</span>]), event[<span class="string">"name"</span>], event[<span class="string">"variance"</span>]))</span><br><span class="line">        <span class="keyword">elif</span> event[<span class="string">"count"</span>] &gt;= <span class="number">0</span> <span class="keyword">and</span> event[<span class="string">"variance"</span>] &lt; <span class="number">0.0</span>:</span><br><span class="line">            print(<span class="string">"%15s   %55s"</span></span><br><span class="line">                  % (str(event[<span class="string">"count"</span>]), event[<span class="string">"name"</span>]))</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            print(<span class="string">"%15s   %55s"</span></span><br><span class="line">                  % (<span class="string">"&lt;not counted&gt;"</span>, event[<span class="string">"name"</span>]))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">print_calculated_events</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_clever_calc</span><span class="params">(rhs, terms)</span>:</span></span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        @returns:</span></span><br><span class="line"><span class="string">        if `terms' does not have any value less than 0:</span></span><br><span class="line"><span class="string">            The result of rhs</span></span><br><span class="line"><span class="string">        else:</span></span><br><span class="line"><span class="string">            Value less than 0</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="keyword">if</span> len([term <span class="keyword">for</span> term <span class="keyword">in</span> terms <span class="keyword">if</span> term &lt; <span class="number">0</span>]) &gt; <span class="number">0</span>:</span><br><span class="line">            <span class="keyword">return</span> <span class="number">-1</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">return</span> rhs</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_clever_print</span><span class="params">(val, ev_name)</span>:</span></span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        @parameters:</span></span><br><span class="line"><span class="string">        val: Value to print. Must be int or float.</span></span><br><span class="line"><span class="string">             Value less than 0 means that the event is &lt;not counted&gt;.</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        is_valid_val = (val &gt;= <span class="number">0</span>)</span><br><span class="line">        <span class="keyword">if</span> is_valid_val <span class="keyword">and</span> type(val) == types.IntType:</span><br><span class="line">            print(<span class="string">"%15d   %s"</span> % (val, ev_name))</span><br><span class="line">        <span class="keyword">elif</span> is_valid_val <span class="keyword">and</span> type(val) == types.FloatType:</span><br><span class="line">            print(<span class="string">"%14.3f%%   %s"</span> % (<span class="number">100.0</span> * val, ev_name))</span><br><span class="line">        <span class="keyword">elif</span> <span class="keyword">not</span> is_valid_val:</span><br><span class="line">            print(<span class="string">"%15s   %s"</span> % (<span class="string">"&lt;not counted&gt;"</span>, ev_name))</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            print(<span class="string">"Unexpected calculated value: "</span> + str(val))</span><br><span class="line"></span><br><span class="line">    retired_instructions = get_event_with_name(<span class="string">"Retired Instructions"</span>)[<span class="string">"count"</span>]</span><br><span class="line">    _clever_print(retired_instructions, <span class="string">"Retired Instructions"</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># Data Cache</span></span><br><span class="line">    data_cache_accesses = get_event_with_name(<span class="string">"Data Cache Accesses"</span>)[<span class="string">"count"</span>]</span><br><span class="line">    _clever_print(data_cache_accesses, <span class="string">"Data Cache Accesses"</span>)</span><br><span class="line"></span><br><span class="line">    data_cache_request_rate = _clever_calc(float(data_cache_accesses) / float(retired_instructions),</span><br><span class="line">                                           [data_cache_accesses, retired_instructions])</span><br><span class="line">    _clever_print(data_cache_request_rate, <span class="string">"Data Cache Request Rate"</span>)</span><br><span class="line"></span><br><span class="line">    data_cache_refills_from_L2 = get_event_with_name(<span class="string">"Data Cache Refills from L2"</span>)[<span class="string">"count"</span>]</span><br><span class="line">    data_cache_refills_from_system = get_event_with_name(<span class="string">"Data Cache Refills from System (Northbridge)"</span>)[<span class="string">"count"</span>]</span><br><span class="line">    data_cache_misses = _clever_calc(data_cache_refills_from_L2 + data_cache_refills_from_system,</span><br><span class="line">                                     [data_cache_refills_from_L2, data_cache_refills_from_system])</span><br><span class="line">    _clever_print(data_cache_misses, <span class="string">"Data Cache Misses"</span>)</span><br><span class="line"></span><br><span class="line">    data_cache_miss_ratio = _clever_calc(float(data_cache_misses) / float(data_cache_accesses),</span><br><span class="line">                                         [data_cache_misses, data_cache_accesses])</span><br><span class="line">    _clever_print(data_cache_miss_ratio, <span class="string">"Data Cache Miss Ratio"</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># Instruction Cache</span></span><br><span class="line">    instruction_cache_fetches = get_event_with_name(<span class="string">"Instruction Cache Fetches"</span>)[<span class="string">"count"</span>]</span><br><span class="line">    _clever_print(instruction_cache_fetches, <span class="string">"Instruction Cache Fetches"</span>)</span><br><span class="line"></span><br><span class="line">    instruction_cache_request_rate = _clever_calc(float(instruction_cache_fetches) / float(retired_instructions),</span><br><span class="line">                                                  [instruction_cache_fetches, retired_instructions])</span><br><span class="line">    _clever_print(instruction_cache_request_rate, <span class="string">"Instruction cache Request Rate"</span>)</span><br><span class="line"></span><br><span class="line">    instruction_cache_refills_from_L2 = get_event_with_name(<span class="string">"Instruction Cache Refills from L2"</span>)[<span class="string">"count"</span>]</span><br><span class="line">    instruction_cache_refills_from_system = get_event_with_name(<span class="string">"Instruction Cache Refills from System (Northbridge)"</span>)[<span class="string">"count"</span>]</span><br><span class="line">    instruction_cache_misses = _clever_calc(instruction_cache_refills_from_L2 + instruction_cache_refills_from_system,</span><br><span class="line">                                            [instruction_cache_refills_from_L2, instruction_cache_refills_from_system])</span><br><span class="line">    _clever_print(instruction_cache_misses, <span class="string">"Instruction Cache Misses"</span>)</span><br><span class="line"></span><br><span class="line">    instruction_cache_miss_ratio = _clever_calc(float(instruction_cache_misses) / float(instruction_cache_fetches),</span><br><span class="line">                                                [instruction_cache_misses, instruction_cache_fetches])</span><br><span class="line">    _clever_print(instruction_cache_miss_ratio, <span class="string">"Instruction Cache Miss Ratio"</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># L2 Cache</span></span><br><span class="line">    L2_misses_TLB = get_event_with_name(<span class="string">"Requests to L2 Cache [TLB fill]"</span>)[<span class="string">"count"</span>]</span><br><span class="line">    L2_requests = _clever_calc(data_cache_misses + instruction_cache_misses + L2_misses_TLB,</span><br><span class="line">                               [data_cache_misses, instruction_cache_misses, L2_misses_TLB])</span><br><span class="line">    _clever_print(L2_requests, <span class="string">"L2 Requests"</span>)</span><br><span class="line"></span><br><span class="line">    L2_request_rate = _clever_calc(float(L2_requests) / float(retired_instructions),</span><br><span class="line">                                   [L2_requests, retired_instructions])</span><br><span class="line">    _clever_print(L2_request_rate, <span class="string">"L2 Request Rate"</span>)</span><br><span class="line"></span><br><span class="line">    L2_misses = _clever_calc(data_cache_refills_from_system + instruction_cache_refills_from_system + L2_misses_TLB,</span><br><span class="line">                             [data_cache_refills_from_system, instruction_cache_refills_from_system, L2_misses_TLB])</span><br><span class="line">    _clever_print(L2_misses, <span class="string">"L2 Misses"</span>)</span><br><span class="line"></span><br><span class="line">    L2_miss_ratio = _clever_calc(float(L2_misses) / float(L2_requests),</span><br><span class="line">                                 [L2_misses, L2_requests])</span><br><span class="line">    _clever_print(L2_miss_ratio, <span class="string">"L2 Miss Ratio"</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># L3 Cache</span></span><br><span class="line">    L3_requests = get_event_with_name(<span class="string">"Read Requests to L3 Cache"</span>)[<span class="string">"count"</span>]</span><br><span class="line">    _clever_print(L3_requests, <span class="string">"Read Requests to L3 Cache"</span>)</span><br><span class="line"></span><br><span class="line">    L3_request_rate = _clever_calc(float(L3_requests) / float(retired_instructions),</span><br><span class="line">                                   [L3_requests, retired_instructions])</span><br><span class="line">    _clever_print(L3_request_rate, <span class="string">"L3 Request Rate"</span>)</span><br><span class="line"></span><br><span class="line">    L3_misses = get_event_with_name(<span class="string">"L3 Cache Misses"</span>)[<span class="string">"count"</span>]</span><br><span class="line">    _clever_print(L3_misses, <span class="string">"L3 Misses"</span>)</span><br><span class="line"></span><br><span class="line">    L3_miss_ratio = _clever_calc(float(L3_misses) / float(L3_requests),</span><br><span class="line">                                 [L3_misses, L3_requests])</span><br><span class="line">    _clever_print(L3_miss_ratio, <span class="string">"L3 Miss Ratio"</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">()</span>:</span></span><br><span class="line">    command = <span class="string">"perf stat "</span> + event_list() + <span class="string">" "</span>.join(sys.argv[<span class="number">1</span>:])</span><br><span class="line">    p = subprocess.Popen(command, shell=<span class="literal">True</span>,</span><br><span class="line">                         stderr=subprocess.PIPE)</span><br><span class="line">    perf_output_lines = p.stderr.readlines()</span><br><span class="line">    store_count_to_events(perf_output_lines)</span><br><span class="line"></span><br><span class="line">    print(<span class="string">"=== Running Environment ==="</span>)</span><br><span class="line">    print_running_env(perf_output_lines)</span><br><span class="line">    print(<span class="string">"=== Counted Events ==="</span>)</span><br><span class="line">    print_counted_events()</span><br><span class="line">    print(<span class="string">"\n=== Calculated Events ==="</span>)</span><br><span class="line">    print_calculated_events()</span><br><span class="line">    print(<span class="string">"\n=== Elapsed Time ==="</span>)</span><br><span class="line">    print_elapsed_time(perf_output_lines)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
+
+<h3><span id="スクリプトの実装上の細かい注意点">スクリプトの実装上の細かい注意点</span></h3><p>キャッシュミスなどの計算値は，計算に必要なハードウェアイベントが正しく測定されていなければ出せません．<br>更に，計算値Aを利用して計算値Bを出す場合も，計算値Aが正しい値である必要があります．</p>
+<p>つまり，「測定値が正しく採れなかった場合，影響が連鎖する」という性質があります．<br>スクリプトでは，<br><code>_clever_calc</code> , <code>_clever_print</code><br>関数によって，この連鎖関係を把握しています．</p>
+
+    
+	</div>
+	<footer class="entry-footer">
+		<div class="entry-meta-footer">
+			<span class="category">
+				
+			</span>
+			<span class="tags">
+				
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/High-Performance-Computing/" rel="tag">High Performance Computing</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux-Kernel/" rel="tag">Linux Kernel</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux%E3%82%AA%E3%83%9A%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3/" rel="tag">Linuxオペレーション</a></li></ul>
+
+			</span>
+		</div>
+	</footer>
+    
+    <footer class="author-info clearfix">
+      <img class="author-picture circle" src="https://www.gravatar.com/avatar/cb02a2b3f429b7c938d1fe2665e8e342">
+      <div class="author-content right">
+        <div class="author-caption">
+          <span class="label">author</span>
+          Sho Nakatani a.k.a. laysakura
+        </div>
+        <p class="author-description">
+          東京大学大学院 情報理工学系研究科 電子情報学専攻 修士課程で並列分散処理・ストリーム処理・データベースを研究。<br>
+          2014年4月に株式会社ディー・エヌ・エーにエンジニアスペシャリストとして入社し、ソーシャルゲームのサーバサイド共通基盤の開発に従事。<br>
+          2016年8月より、オンライン証券会社<a href="https://folio-sec.com" target="_blank" rel="noopener">株式会社FOLIO</a>に入社。バックエンドシステム開発・プロジェクトマネージメント・Engineering Managementに従事。<br>
+          2020年3月より<a href="https://idein.jp" target="_blank" rel="noopener">Idein株式会社</a>所属。<br>
+          随時副業募集中です: <a href="https://github.com/laysakura/resume-jp-for-side-job" target="_blank" rel="noopener">職務経歴書や募集職種</a>
+        </p>
+        <ul class="author-social-buttons">
+          <li class="author-social-button"><a class="fa fa-lg fa-twitter-square" href="https://twitter.com/laysakura" target="_blank" rel="noopener"></a></li>
+          <li class="author-social-button"><a class="fa fa-lg fa-github-square" href="https://github.com/laysakura" target="_blank" rel="noopener"></a></li>
+          <li class="author-social-button"><a class="fa fa-lg fa-facebook-square" href="https://www.facebook.com/lay.sakura" target="_blank" rel="noopener"></a></li>
+        </ul>
+      </div>
+    </footer>
+    
+	
+    
+<nav id="article-nav">
+  
+    <a href="/2012/01/06/sse-8flops-clock/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          真・SSEを使って8flops/clockを実現する
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2011/10/11/perf-stat-performance-counters/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          perf stat でパフォーマンスカウンタの値を直接指定し表示
+        
+      </div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+
+
+<section id="comments">
+  <div id="disqus_thread">
+
+  <!-- comment service provided by disqus -->
+  <script>
+    /**
+     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+     */
+    var disqus_config = function () {
+        this.page.url = https://laysakura.github.io/2011/10/15/perf-stat-L1-L2-L3-cache-miss/;  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = https://laysakura.github.io/2011/10/15/perf-stat-L1-L2-L3-cache-miss/; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    (function() {  // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        
+        s.src = '//laysakura.disqus.com/embed.js';
+        
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript" target="_blank" rel="noopener">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+    </div>
+    <div class="mb-search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:laysakura.github.io">
+  </form>
+</div>
+<footer id="footer">
+	<h1 class="footer-blog-title">
+		<a href="/">俺とお前とlaysakura</a>
+	</h1>
+	<span class="copyright">
+		&copy; 2020 Sho Nakatani a.k.a. laysakura<br>
+		Modify from <a href="https://sanographix.github.io/tumblr/apollo/" target="_blank">Apollo</a> theme, designed by <a href="https://www.sanographix.net/" target="_blank">SANOGRAPHIX.NET</a><br>
+		Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+	</span>
+</footer>
+
+    
+<script>
+  var disqus_shortname = 'laysakura';
+  
+  var disqus_url = 'https://laysakura.github.io/2011/10/15/perf-stat-L1-L2-L3-cache-miss/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+
+  <!-- https://github.com/vfeskov/vanilla-back-to-top -->
+  <script src="https://unpkg.com/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js"></script>
+  <script>addBackToTop({
+    diameter: 50,
+    backgroundColor: '#33a6b880',
+    textColor: '#fff'
+  })</script>
+
+</body>
+</html>

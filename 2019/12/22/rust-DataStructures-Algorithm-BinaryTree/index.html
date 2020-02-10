@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>二分木 - Rustではじめるデータ構造とアルゴリズム（第1回） | 俺とお前とlaysakura</title>
+  
+  <link rel="canonical" href="https://laysakura.github.io/2019/12/22/rust-DataStructures-Algorithm-BinaryTree/"/>
+  <meta name="viewport" content="width=device-width">
+  <meta name="description" content="Rustの特徴のひとつは、所有権(ownership)・移動(move)・借用(borrow)の概念です。これらがコンパイル時に厳格にチェックされることにより、古くから未定義挙動でプログラマを悩ませてきたダングリングポインタなどの問題がなくなり、メモリ安全性がもたらされます。 しかし一方で、自分で多少複雑なデータ構造を定義しようとする場合にはコンパイルを通すだけでもかなりの知識・力量が要求され">
+<meta property="og:type" content="article">
+<meta property="og:title" content="二分木 - Rustではじめるデータ構造とアルゴリズム（第1回）">
+<meta property="og:url" content="https://laysakura.github.io/2019/12/22/rust-DataStructures-Algorithm-BinaryTree/index.html">
+<meta property="og:site_name" content="俺とお前とlaysakura">
+<meta property="og:description" content="Rustの特徴のひとつは、所有権(ownership)・移動(move)・借用(borrow)の概念です。これらがコンパイル時に厳格にチェックされることにより、古くから未定義挙動でプログラマを悩ませてきたダングリングポインタなどの問題がなくなり、メモリ安全性がもたらされます。 しかし一方で、自分で多少複雑なデータ構造を定義しようとする場合にはコンパイルを通すだけでもかなりの知識・力量が要求され">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:image" content="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Binary_tree.svg/384px-Binary_tree.svg.png">
+<meta property="og:image" content="https://b.hatena.ne.jp/entry/image/https://laysakura.github.io/2019/12/22/rust-DataStructures-Algorithm-BinaryTree/">
+<meta property="og:image" content="https://b.hatena.ne.jp/entry/image/https://laysakura.github.io/2019/12/25/rust-DataStructures-Algorithm-BinarySearchTree/">
+<meta property="article:published_time" content="2019-12-22T06:04:14.000Z">
+<meta property="article:modified_time" content="2020-02-10T05:06:21.000Z">
+<meta property="article:author" content="Sho Nakatani a.k.a. laysakura">
+<meta property="article:tag" content="Rust">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Binary_tree.svg/384px-Binary_tree.svg.png">
+
+  <!-- favicon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+  <link rel="icon" href="/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+  <link rel="manifest" href="/favicon/site.webmanifest">
+  <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#5bbad5">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="theme-color" content="#ffffff">
+
+  
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-22289437-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+  <!-- MathJax -->
+  <script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+  <div id="container">
+    <div class="mobile-nav-panel">
+	<i class="icon-reorder icon-large"></i>
+</div>
+<header id="header">
+	<h1 class="blog-title">
+		<a href="/">俺とお前とlaysakura</a>
+	</h1>
+	<nav class="nav">
+		<ul>
+			<li><a href="/archives">過去の投稿</a></li>
+			<li><a id="nav-search-btn" class="nav-icon" title="Search"></a></li>
+			<li><a href="http://cloud.feedly.com/#subscription%2Ffeed%2Fhttps%3A%2F%2Flaysakura.github.io%2Fatom.xml" target="_blank" rel="noopener" id="nav-rss-link" class="nav-icon" title="RSS Feed"></a></li>
+		</ul>
+	</nav>
+	<div id="search-form-wrap">
+		<form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://laysakura.github.io"></form>
+	</div>
+</header>
+    <div id="main">
+      <article id="post-二分木-Rustではじめるデータ構造とアルゴリズム（第1回）" class="post">
+	<footer class="entry-meta-header">
+		<span class="meta-elements date">
+			<a href="/2019/12/22/rust-DataStructures-Algorithm-BinaryTree/" class="article-date">
+  <time datetime="2019-12-22T06:04:14.000Z" itemprop="datePublished">2019-12-22</time>
+</a>
+		</span>
+	</footer>
+	
+	<header class="entry-header">
+		
+  
+    <h1 class="article-title entry-title" itemprop="name">
+      二分木 - Rustではじめるデータ構造とアルゴリズム（第1回）
+    </h1>
+  
+
+	</header>
+	<div class="entry-content">
+		
+    	<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Binary_tree.svg/384px-Binary_tree.svg.png" alt="簡単な二分木（引用元: Wikipedia）" width="400" height="333">
+
+<p>Rustの特徴のひとつは、所有権(ownership)・移動(move)・借用(borrow)の概念です。これらがコンパイル時に厳格にチェックされることにより、古くから未定義挙動でプログラマを悩ませてきたダングリングポインタなどの問題がなくなり、メモリ安全性がもたらされます。</p>
+<p>しかし一方で、自分で多少複雑なデータ構造を定義しようとする場合にはコンパイルを通すだけでもかなりの知識・力量が要求されます。</p>
+<p>この（不定期）連載では、 <strong>Rustではじめるデータ構造とアルゴリズム</strong> と題し、プログラミングコンテストなどでよく見かける基礎的なデータ構造とアルゴリズムを、できるだけシンプルにRustで実装していきます。 <code>&amp;</code>, <code>&amp;mut</code>, <code>Box</code>, <code>Rc</code>, <code>Cell</code>, <code>RefCell</code> などの使い分けや、なぜそれを使う必要があるかの解説を、実例を通して行います。</p>
+<p>第1回は、最もシンプルな木構造である <strong>二分木</strong> を取り扱います。基礎的な木構造なので、再帰・深さ優先探索・幅優先探索のエッセンスを集中的に理解することが期待できます。</p>
+<p>各回共通し、以下のような構成を予定しています。</p>
+<ol>
+<li>データ構造の説明と、Rustでの定義</li>
+<li>関連するアルゴリズムの説明と、（汎用的に実装できる場合は）Rustでの実装</li>
+<li>定義したデータ構造とアルゴリズムを使って、プログラミングコンテストの問題を解いてみる</li>
+</ol>
+<a id="more"></a>
+
+<h2><span id="連載記事一覧">連載記事一覧</span></h2><ol>
+<li><a href="/2019/12/22/rust-DataStructures-Algorithm-BinaryTree">二分木</a> <strong>（この記事）</strong> <img class="hatebu" src="https://b.hatena.ne.jp/entry/image/https://laysakura.github.io/2019/12/22/rust-DataStructures-Algorithm-BinaryTree/"></li>
+<li><a href="/2019/12/25/rust-DataStructures-Algorithm-BinarySearchTree">二分探索木</a> <img class="hatebu" src="https://b.hatena.ne.jp/entry/image/https://laysakura.github.io/2019/12/25/rust-DataStructures-Algorithm-BinarySearchTree/"></li>
+<li>平衡二分探索木 <strong>（未執筆）</strong></li>
+<li>ヒープ <strong>（未執筆）</strong></li>
+<li>有向グラフ（ポインタ表現） <strong>（未執筆）</strong></li>
+<li>有向グラフ（行列表現） <strong>（未執筆）</strong></li>
+<li>無向グラフ（ポインタ表現） <strong>（未執筆）</strong></li>
+<li>無向グラフ（行列表現） <strong>（未執筆）</strong></li>
+</ol>
+<h2><span id="目次">目次</span></h2><!-- toc -->
+
+<ul>
+<li><a href="#更新履歴">更新履歴</a></li>
+<li><a href="#二分木の説明">二分木の説明</a></li>
+<li><a href="#rustで定義する二分木">Rustで定義する二分木</a></li>
+<li><a href="#データ構造への基本的な操作とアルゴリズム">データ構造への基本的な操作とアルゴリズム</a><ul>
+<li><a href="#構築">構築</a></li>
+<li><a href="#追加置き換え">追加（置き換え）</a></li>
+<li><a href="#削除">削除</a></li>
+<li><a href="#深さ優先探索">深さ優先探索</a></li>
+<li><a href="#幅優先探索">幅優先探索</a></li>
+</ul>
+</li>
+<li><a href="#応用編-leetcode-の問題を解いてみる">応用編: LeetCode の問題を解いてみる</a><ul>
+<li><a href="#112-path-sum">112. Path Sum</a></li>
+<li><a href="#814-binary-tree-pruning">814. Binary Tree Pruning</a></li>
+</ul>
+</li>
+<li><a href="#終わりに">終わりに</a></li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="更新履歴">更新履歴</span></h2><ul>
+<li>2020/01/01<ul>
+<li>typo修正と、 <code>BinaryTree::Nil</code> への参照解決できずに構築のコードがコンパイル不可な問題を修正。<a href="https://github.com/laysakura/laysakura.github.io/pull/25" target="_blank" rel="noopener">Fix trivial mistakes in the 12-22 post</a> で <a href="https://github.com/magurotuna" target="_blank" rel="noopener">@magurotuna</a> さんからPRいただきました🌅</li>
+</ul>
+</li>
+<li>2019/12/31<ul>
+<li><code>bin_tree!</code> マクロがケツカンマの重複を許す問題を修正。<a href="https://github.com/laysakura/data-structures-and-algorithms-rs/pull/4" target="_blank" rel="noopener">Fix the trailing-comma patterns in macros</a> で更に <a href="https://twitter.com/__gfx__" target="_blank" rel="noopener">@__gfx__</a>氏からPRいただきました🙏</li>
+</ul>
+</li>
+<li>2019/12/29<ul>
+<li>二分木の構築コードをシンプルにするために <code>bin_tree!</code> マクロを使ったものに差し替え。<a href="https://github.com/laysakura/data-structures-and-algorithms-rs/pull/1" target="_blank" rel="noopener">Add <code>bin_tree!</code> to create a new Node with less letters</a> で <a href="https://twitter.com/__gfx__" target="_blank" rel="noopener">@__gfx__</a>氏からPRいただきました😂</li>
+</ul>
+</li>
+</ul>
+<h2><span id="二分木の説明">二分木の説明</span></h2><p>二分木は木構造の一種で、1つのノード（節点）が、0~2個の子ノードを持つものを指します。</p>
+<figure class="highlight plain"><figcaption><span>バランスの良い二分木</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">       2</span><br><span class="line">    __&#x2F; \__</span><br><span class="line">   &#x2F;       \</span><br><span class="line">  7         5</span><br><span class="line"> &#x2F; \         \</span><br><span class="line">2   6         9</span><br><span class="line">   &#x2F; \       &#x2F;</span><br><span class="line">  5  11     4</span><br></pre></td></tr></table></figure>
+
+<p>上の図のように、ルート（根: 親ノードを持たないノード）からリーフ（葉: 子ノードを持たないノード）までの深さがどこをとってもだいたい同じものを平衡二分木と言いますが、下のように深さがバラバラなものも二分木です。</p>
+<figure class="highlight plain"><figcaption><span>バランスの悪い二分木</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">  x</span><br><span class="line"> &#x2F; \</span><br><span class="line">a   c</span><br><span class="line">     \</span><br><span class="line">      n</span><br><span class="line">       \</span><br><span class="line">        o</span><br></pre></td></tr></table></figure>
+
+<p>この記事では平衡二分木ではなく、一般の二分木について扱います。</p>
+<h2><span id="rustで定義する二分木">Rustで定義する二分木</span></h2><p>二分木の定義はどのように行うのが良いでしょうか？</p>
+<p>木構造の定義の方法は、大まかに</p>
+<ul>
+<li>子が親への参照（1つ）を持つ</li>
+<li>親が子への参照（複数）を持つ</li>
+</ul>
+<p>と分けられるかと思います。</p>
+<p>前者の「子が親への参照を持つ」は二分木の定義に適していません。</p>
+<figure class="highlight rust"><figcaption><span>間違った二分木の定義（擬似コード）</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">BinaryTree</span></span> &#123;</span><br><span class="line">    parent: <span class="built_in">Option</span>&lt;BinaryTree&gt;  <span class="comment">// None はルートノード</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>この定義では、「親は子を2つ以下しか持たない」という制約が表現できていません。「子が親を参照するタイミングで、親がこの個数をカウントして、2個までしか認めないようにする」というような実装は可能ですが、あまり自然でもないしランタイムでのチェックが必要になってしまいます。</p>
+<p>「親が子への参照を持つ」形式だと、「親は子を2つ以下しか持たない」制約を型レベルで（コンパイルタイムに）強制することができます。</p>
+<figure class="highlight rust"><figcaption><span>二分木の定義（Optionを使う, 擬似コード）</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">BinaryTree</span></span> &#123;</span><br><span class="line">    left: <span class="built_in">Option</span>&lt;BinaryTree&gt;,  <span class="comment">// None は、左側の子ノードがないことを表す</span></span><br><span class="line">    right: <span class="built_in">Option</span>&lt;BinaryTree&gt;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>だいぶ良くなってきました。ここで Option は、子の有無を表現するために使用しています。この定義でも十分実用に耐えますが、この有無を組み込みの型で表現するのではなく自前で定義すると、次のように定義できます。</p>
+<figure class="highlight rust"><figcaption><span>二分木の定義（enumを使う, 擬似コード）</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">enum</span> <span class="title">BinaryTree</span></span> &#123;</span><br><span class="line">    Nil,  <span class="comment">// 終端。子ノードが Nil ならば、子ノードを持たないことを表す。</span></span><br><span class="line">    Node &#123; left: BinaryTree, right: BinaryTree &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>さて、これで二分木の外形は定義できましたが、各ノードが値を持てるようになっていません。各ノードが任意の型 <code>T</code> の値を持てるようにした完全な定義が下記になります。</p>
+<figure class="highlight rust"><figcaption><span>二分木の定義</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#[derive(Debug, PartialEq, Eq)]</span></span><br><span class="line"><span class="keyword">pub</span> <span class="class"><span class="keyword">enum</span> <span class="title">BinaryTree</span></span>&lt;T&gt; &#123;</span><br><span class="line">    Nil,</span><br><span class="line">    Node &#123;</span><br><span class="line">        val: T,</span><br><span class="line">        left: <span class="built_in">Box</span>&lt;BinaryTree&lt;T&gt;&gt;,</span><br><span class="line">        right: <span class="built_in">Box</span>&lt;BinaryTree&lt;T&gt;&gt;,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>いくつか飛躍があるので説明しておきます。</p>
+<ul>
+<li><code>#[derive(Debug, PartialEq, Eq)]</code><ul>
+<li><code>assert_eq!(BinaryTree { ... }, BinaryTree { ... })</code> のように比較したいので、いくつかのTraitの実装を使う。</li>
+</ul>
+</li>
+<li><code>pub</code><ul>
+<li>BinaryTree を定義したモジュールの外でも使いたいので公開する。</li>
+</ul>
+</li>
+<li><code>Box&lt;BinaryTree&lt;T&gt;&gt;</code> <strong>（重要）</strong><ul>
+<li><code>left: BinaryTree&lt;T&gt;</code> のように書きたくなるが、これでは再帰的な型定義となってしまい、 BinaryTree 型のサイズが確定できない（「 <code>BinaryTree</code> のサイズは… <code>val</code> のバイト数と、 <code>left</code> の <code>BinaryTree</code> のサイズを足して… ってそれを今計算してるのに😫」）。これを回避するために、”BinaryTree 型へのポインタ型” としてサイズが確定できるよう Box に包む。</li>
+</ul>
+</li>
+</ul>
+<p>これで二分木の型定義ができました。これからこの二分木に対する構築・追加・削除の操作や、深さ優先探索・幅優先探索のアルゴリズムを記述していきます。その後、実応用（？）として、いくつか <a href="https://leetcode.com/" target="_blank" rel="noopener">LeetCode</a> の問題を解いていきます。</p>
+<h2><span id="データ構造への基本的な操作とアルゴリズム">データ構造への基本的な操作とアルゴリズム</span></h2><h3><span id="構築">構築</span></h3><p>二分木の構築は、定義したenumを使って素直に初期化をするだけです。</p>
+<figure class="highlight rust"><figcaption><span>構築</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 二分木の構築。</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//       5</span></span><br><span class="line"><span class="comment">//      / \</span></span><br><span class="line"><span class="comment">//     4   8</span></span><br><span class="line"><span class="comment">//    /</span></span><br><span class="line"><span class="comment">//   11</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="keyword">let</span> root = BinaryTree::&lt;<span class="built_in">i32</span>&gt;::Node &#123;</span><br><span class="line">    val: <span class="number">5</span>,</span><br><span class="line">    left: <span class="built_in">Box</span>::new(BinaryTree::&lt;<span class="built_in">i32</span>&gt;::Node &#123;</span><br><span class="line">        val: <span class="number">4</span>,</span><br><span class="line">        left: <span class="built_in">Box</span>::new(BinaryTree::&lt;<span class="built_in">i32</span>&gt;::Node &#123;</span><br><span class="line">            val: <span class="number">11</span>,</span><br><span class="line">            left: <span class="built_in">Box</span>::new(BinaryTree::Nil),</span><br><span class="line">            right: <span class="built_in">Box</span>::new(BinaryTree::Nil),</span><br><span class="line">        &#125;),</span><br><span class="line">        right: <span class="built_in">Box</span>::new(BinaryTree::Nil),</span><br><span class="line">    &#125;),</span><br><span class="line">    right: <span class="built_in">Box</span>::new(BinaryTree::&lt;<span class="built_in">i32</span>&gt;::Node &#123;</span><br><span class="line">        val: <span class="number">8</span>,</span><br><span class="line">        left: <span class="built_in">Box</span>::new(BinaryTree::Nil),</span><br><span class="line">        right: <span class="built_in">Box</span>::new(BinaryTree::Nil),</span><br><span class="line">    &#125;),</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>このように見た目が煩雑になってしまうので、構築用の new マクロを用意します。マクロ定義の方法は本記事の範疇を超えるので読み飛ばして良いですが、 <code>bin_tree!</code> マクロはこれ以降出てくるので、使い方だけでも把握してください。</p>
+<figure class="highlight rust"><figcaption><span>構築用のマクロ定義</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#[macro_export]</span></span><br><span class="line"><span class="built_in">macro_rules!</span> bin_tree &#123;</span><br><span class="line">    ( val: $val:expr, left: $left:expr, right: $right:expr $(,)? ) =&gt; &#123;</span><br><span class="line">        BinaryTree::Node &#123;</span><br><span class="line">            val: $val,</span><br><span class="line">            left: <span class="built_in">Box</span>::new($left),</span><br><span class="line">            right: <span class="built_in">Box</span>::new($right),</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    ( val: $val:expr, right: $right:expr $(,)? ) =&gt; &#123;</span><br><span class="line">        bin_tree! &#123;</span><br><span class="line">            val: $val,</span><br><span class="line">            left: bin_tree!(),</span><br><span class="line">            right: $right,</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    ( val: $val:expr, left: $left:expr $(,)? ) =&gt; &#123;</span><br><span class="line">        bin_tree! &#123;</span><br><span class="line">            val: $val,</span><br><span class="line">            left: $left,</span><br><span class="line">            right: bin_tree!(),</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    ( val: $val:expr $(,)? ) =&gt; &#123;</span><br><span class="line">        bin_tree!(val: $val, left: bin_tree!(), right: bin_tree!(),)</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    () =&gt; &#123;</span><br><span class="line">        BinaryTree::Nil</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight rust"><figcaption><span>bin_tree! マクロの使い方</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 二分木の構築。</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//       5</span></span><br><span class="line"><span class="comment">//      / \</span></span><br><span class="line"><span class="comment">//     4   8</span></span><br><span class="line"><span class="comment">//    /</span></span><br><span class="line"><span class="comment">//   11</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="keyword">let</span> root = bin_tree! &#123;</span><br><span class="line">    val: <span class="number">5</span>,</span><br><span class="line">    left: bin_tree! &#123;</span><br><span class="line">        val: <span class="number">4</span>,</span><br><span class="line">        left: bin_tree! &#123; val: <span class="number">11</span> &#125;,</span><br><span class="line">    &#125;,</span><br><span class="line">    right: bin_tree! &#123; val: <span class="number">8</span> &#125;,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+
+<h3><span id="追加置き換え">追加（置き換え）</span></h3><p>子ノードの追加を考えます。これは、「左または右の子ノードが Nil であるときに、それを Node に置き換える」操作として記述できます。<br>Node が1つのノードでなくサブツリーのルートであれば、二分木に二分木を追加することになります。</p>
+<p>汎用性の高い操作なので、メソッドとして定義しましょう。</p>
+<figure class="highlight rust"><figcaption><span>追加（置き換え）</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">impl</span>&lt;T&gt; BinaryTree&lt;T&gt; &#123;</span><br><span class="line">    <span class="comment">/// self の Node または Nil を、 to に置き換える。</span></span><br><span class="line">    <span class="comment">/// to は self に組み込まれる形で move される。</span></span><br><span class="line">    <span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">replace</span></span>(&amp;<span class="keyword">mut</span> <span class="keyword">self</span>, to: <span class="keyword">Self</span>) &#123;</span><br><span class="line">        *<span class="keyword">self</span> = to;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>テストしてみます。</p>
+<figure class="highlight rust"><figcaption><span>replace() のテスト</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#[test]</span></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">test_replace</span></span>() &#123;</span><br><span class="line">    <span class="comment">// tree1:</span></span><br><span class="line">    <span class="comment">//       5</span></span><br><span class="line">    <span class="comment">//      /</span></span><br><span class="line">    <span class="comment">//     4</span></span><br><span class="line">    <span class="comment">//    /</span></span><br><span class="line">    <span class="comment">//   11</span></span><br><span class="line">    <span class="comment">//  /  \</span></span><br><span class="line">    <span class="comment">// 7    2</span></span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    <span class="comment">// tree2:</span></span><br><span class="line">    <span class="comment">//         8</span></span><br><span class="line">    <span class="comment">//        / \</span></span><br><span class="line">    <span class="comment">//       13  4</span></span><br><span class="line">    <span class="comment">//            \</span></span><br><span class="line">    <span class="comment">//             1</span></span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    <span class="comment">// tree3 = tree1.root.right + tree2:</span></span><br><span class="line">    <span class="comment">//       5</span></span><br><span class="line">    <span class="comment">//      / \</span></span><br><span class="line">    <span class="comment">//     4   8</span></span><br><span class="line">    <span class="comment">//    /   / \</span></span><br><span class="line">    <span class="comment">//   11  13  4</span></span><br><span class="line">    <span class="comment">//  /  \      \</span></span><br><span class="line">    <span class="comment">// 7    2      1</span></span><br><span class="line">    <span class="comment">//</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// tree1 は後ほどルートの右のNilを置き換えるので、 mut でつくる。</span></span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut</span> tree1 = bin_tree! &#123;</span><br><span class="line">        val: <span class="number">5</span>,</span><br><span class="line">        left: bin_tree! &#123;</span><br><span class="line">            val: <span class="number">4</span>,</span><br><span class="line">            left: bin_tree! &#123;</span><br><span class="line">                val: <span class="number">11</span>,</span><br><span class="line">                left: bin_tree! &#123; val: <span class="number">7</span> &#125;,</span><br><span class="line">                right: bin_tree! &#123; val: <span class="number">2</span> &#125;,</span><br><span class="line">            &#125;,</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> tree2 = bin_tree! &#123;</span><br><span class="line">        val: <span class="number">8</span>,</span><br><span class="line">        left: bin_tree! &#123; val: <span class="number">13</span> &#125;,</span><br><span class="line">        right: bin_tree! &#123;</span><br><span class="line">            val: <span class="number">4</span>,</span><br><span class="line">            right: bin_tree! &#123; val: <span class="number">1</span> &#125;,</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> tree3 = bin_tree! &#123;</span><br><span class="line">        val: <span class="number">5</span>,</span><br><span class="line">        left: bin_tree! &#123;</span><br><span class="line">            val: <span class="number">4</span>,</span><br><span class="line">            left: bin_tree! &#123;</span><br><span class="line">                val: <span class="number">11</span>,</span><br><span class="line">                left: bin_tree! &#123; val: <span class="number">7</span> &#125;,</span><br><span class="line">                right: bin_tree! &#123; val: <span class="number">2</span> &#125;,</span><br><span class="line">            &#125;,</span><br><span class="line">        &#125;,</span><br><span class="line">        right: bin_tree! &#123;</span><br><span class="line">            val: <span class="number">8</span>,</span><br><span class="line">            left: bin_tree! &#123; val: <span class="number">13</span> &#125;,</span><br><span class="line">            right: bin_tree! &#123;</span><br><span class="line">                val: <span class="number">4</span>,</span><br><span class="line">                right: bin_tree!&#123; val: <span class="number">1</span> &#125;,</span><br><span class="line">            &#125;,</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">let</span> BinaryTree::Node &#123; right, .. &#125; = &amp;<span class="keyword">mut</span> tree1 &#123;</span><br><span class="line">        <span class="comment">// tree1のルートの右を、Nilからtree2のルートに置き換える。</span></span><br><span class="line">        <span class="comment">//</span></span><br><span class="line">        <span class="comment">// 型の解説:</span></span><br><span class="line">        <span class="comment">//   right: &amp;mut Box&lt;BinaryTree&gt;</span></span><br><span class="line">        <span class="comment">//   *right: mut Box&lt;BinaryTree&gt;</span></span><br><span class="line">        <span class="comment">//   **right: mut BinaryTree</span></span><br><span class="line">        <span class="comment">//</span></span><br><span class="line">        <span class="comment">// replaceは &amp;mut BinaryTree をセルフとして受け取るので (&amp;mut **right).replace と書くのが明示的だが、</span></span><br><span class="line">        <span class="comment">// `.` 演算子が暗黙的に借用への変換を行ってくれる。</span></span><br><span class="line">        (**right).replace(tree2);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">assert_eq!</span>(&amp;tree1, &amp;tree3);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3><span id="削除">削除</span></h3><p>先程の replace() 関数を使って素直に実装できますね。</p>
+<figure class="highlight rust"><figcaption><span>削除</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">impl</span>&lt;T&gt; BinaryTree&lt;T&gt; &#123;</span><br><span class="line">    <span class="comment">/// self の Node (または Nil) を Nil に置き換える。</span></span><br><span class="line">    <span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">remove</span></span>(&amp;<span class="keyword">mut</span> <span class="keyword">self</span>) &#123;</span><br><span class="line">        <span class="keyword">self</span>.replace(BinaryTree::Nil);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3><span id="深さ優先探索">深さ優先探索</span></h3><p>深さ優先探索は、再帰関数を使うことで簡潔に実装することができます。1回1回の関数呼び出しであるノードを探索し、その中で左右の子ノードについても同じ関数を呼び出して探索します。</p>
+<p>以下、二分木の中から 13 という値を探す再帰関数を擬似コードで記載します（コンパイルできるコードは下記の応用編で出てきます）。</p>
+<figure class="highlight rust"><figcaption><span>13 を深さ優先探索で探す再帰関数（擬似コード）</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">find_13</span></span>(cur_node: BinaryTree) -&gt; <span class="built_in">bool</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> cur_node.val == <span class="number">13</span> &#123; <span class="keyword">return</span> <span class="literal">true</span>; &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 左の子ノードから再帰的に 13 を探索</span></span><br><span class="line">    <span class="keyword">if</span> cur_node.left != Nil &#123;</span><br><span class="line">        <span class="keyword">if</span> find_13(cur_node.left) &#123; <span class="keyword">return</span> <span class="literal">true</span>; &#125;  <span class="comment">// left 以下に13があった場合</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 右の子ノードから再帰的に 13 を探索</span></span><br><span class="line">    <span class="keyword">if</span> cur_node.right != Nil &#123;</span><br><span class="line">        <span class="keyword">if</span> find_13(cur_node.right) &#123; <span class="keyword">return</span> <span class="literal">true</span>; &#125;  <span class="comment">// right 以下に13があった場合</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="literal">false</span>  <span class="comment">// cur_node 以下には 13 が見つからなかった</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 以下の二分木を構築。</span></span><br><span class="line"><span class="comment">//       5</span></span><br><span class="line"><span class="comment">//      / \</span></span><br><span class="line"><span class="comment">//     4   8</span></span><br><span class="line"><span class="comment">//    /   / \</span></span><br><span class="line"><span class="comment">//   11  13  4</span></span><br><span class="line"><span class="comment">//  /  \      \</span></span><br><span class="line"><span class="comment">// 7    2      1</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="keyword">let</span> root = ...;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 以下の順番で探索されて、最終的にtrueが返る。</span></span><br><span class="line"><span class="comment">//   5, 4, 11, 7, 2, 8, 13</span></span><br><span class="line"><span class="built_in">assert!</span>(find_13(root));</span><br></pre></td></tr></table></figure>
+
+<h3><span id="幅優先探索">幅優先探索</span></h3><p>幅優先探索は、FIFOなキューに左右の子ノードを順にpushしていき、それをpopしていくループによって実現できます。再帰を使った深さ優先探索のほうが直感的に記述できることが多いですが、以下のような場合は幅優先探索の利用を検討してみましょう。</p>
+<ul>
+<li>二分木の中に答えを持つノードがいくつかあるが、深さが最も小さいノードを選択するのが重要なとき（最短経路問題）。</li>
+<li>再帰関数を使うとスタック領域を多く使ってしまい、プロセスや言語のランタイムが持つスタック領域の上限を超えてしまう場合。<ul>
+<li>この場合は、再帰を使わずに（データ構造としての）スタックとループを使う手もあります。</li>
+</ul>
+</li>
+</ul>
+<p>さて、深さ優先探索で見たのと同じ問題を幅優先探索で解いてみましょう。こちらも擬似コードですが、下記の応用編にコンパイルが通るコードがあります。</p>
+<figure class="highlight rust"><figcaption><span>13 を幅優先探索で探す関数（擬似コード）</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">find_13</span></span>(root: BinaryTree) -&gt; <span class="built_in">bool</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut</span> queue = VecDeque::&lt;BinaryTree&gt;::new();  <span class="comment">// ノードを入れるキューを用意</span></span><br><span class="line">    queue.push_back(root);  <span class="comment">// ルートをpushしてループ開始</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> <span class="keyword">let</span> <span class="literal">Some</span>(cur_node) = queue.pop_front() &#123;  <span class="comment">// キューが空の場合は pop_front() は None を返すので、ループから抜ける</span></span><br><span class="line">        <span class="keyword">if</span> cur_node.val == <span class="number">13</span> &#123; <span class="keyword">return</span> <span class="literal">true</span>; &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> cur_node.left != Nil &#123; queue.push_back(cur_node.left); &#125;  <span class="comment">// 左の子ノードがあればキューにpush</span></span><br><span class="line">        <span class="keyword">if</span> cur_node.right != Nil &#123; queue.push_back(cur_node.right); &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="literal">false</span>  <span class="comment">// 13はどこにもなかった</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 以下の二分木を構築。</span></span><br><span class="line"><span class="comment">//       5</span></span><br><span class="line"><span class="comment">//      / \</span></span><br><span class="line"><span class="comment">//     4   8</span></span><br><span class="line"><span class="comment">//    /   / \</span></span><br><span class="line"><span class="comment">//   11  13  4</span></span><br><span class="line"><span class="comment">//  /  \      \</span></span><br><span class="line"><span class="comment">// 7    2      1</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="keyword">let</span> root = ...;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 以下の順番で探索されて、最終的にtrueが返る。</span></span><br><span class="line"><span class="comment">//   5, 4, 8, 11, 13</span></span><br><span class="line"><span class="built_in">assert!</span>(find_13(root));</span><br></pre></td></tr></table></figure>
+
+<h2><span id="応用編-leetcode-の問題を解いてみる">応用編: LeetCode の問題を解いてみる</span></h2><p>説明した操作やアルゴリズムで実際の問題が解決できることを例示するために、 LeetCode から以下の問題を取り上げます。</p>
+<ul>
+<li><a href="https://leetcode.com/problems/path-sum/" target="_blank" rel="noopener">112. Path Sum</a><ul>
+<li>整数値をノード値に持つ二分木について、ルートからリーフまで値を足し算しながら辿っていき、その和が特定の数になるような辿り方があるかどうかを回答。 <strong>構築</strong> と <strong>深さ優先探索</strong> または <strong>幅優先探索</strong> を使う。</li>
+</ul>
+</li>
+<li><a href="https://leetcode.com/problems/binary-tree-pruning/" target="_blank" rel="noopener">814. Binary Tree Pruning</a><ul>
+<li>0 または 1 をノード値に持つ二分木について、すべてのノードが 0 であるようなサブツリーを切り落とす (prune) 操作をする。 <strong>構築・削除・深さ優先探索</strong> を使う。</li>
+</ul>
+</li>
+</ul>
+<p>さて、LeetCode の問題のページにアクセスすればわかると思いますが、LeetCode ではRustを使って回答をすることもできます。LeetCode の二分木関連の問題では、二分木として以下の構造を使うことが求められます。</p>
+<figure class="highlight rust"><figcaption><span>LeetCode で使う二分木</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#[derive(Debug, PartialEq, Eq)]</span></span><br><span class="line"><span class="keyword">pub</span> <span class="class"><span class="keyword">struct</span> <span class="title">TreeNode</span></span> &#123;</span><br><span class="line">  <span class="keyword">pub</span> val: <span class="built_in">i32</span>,</span><br><span class="line">  <span class="keyword">pub</span> left: <span class="built_in">Option</span>&lt;Rc&lt;RefCell&lt;TreeNode&gt;&gt;&gt;,</span><br><span class="line">  <span class="keyword">pub</span> right: <span class="built_in">Option</span>&lt;Rc&lt;RefCell&lt;TreeNode&gt;&gt;&gt;,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> TreeNode &#123;</span><br><span class="line">  <span class="meta">#[inline]</span></span><br><span class="line">  <span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">new</span></span>(val: <span class="built_in">i32</span>) -&gt; <span class="keyword">Self</span> &#123;</span><br><span class="line">    TreeNode &#123;</span><br><span class="line">      val,</span><br><span class="line">      left: <span class="literal">None</span>,</span><br><span class="line">      right: <span class="literal">None</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>Option&lt;Rc&lt;RefCell&lt;TreeNode&gt;&gt;&gt;</code> といういかつい型が出てきました。</p>
+<p>一番外側のOptionは、冒頭でも触れたように、子ノードの有無を表します。</p>
+<p><strong>（本記事の範疇を超えるので、この段落は読み飛ばしても良いです📝）</strong><br><code>Rc&lt;RefCell&lt;...&gt;&gt;</code> は、イディオムのように頻出する型です。Rustにおいて所有権は、通常たった一つの変数（や仮引数など）が持つものですが、<code>Rc</code> (Reference counting の略) を使えば複数の変数が所有権を持つことができるようになります。<code>RefCell</code> は内部可変性を導入するために利用する型です。 <code>mut</code> ではない <code>struct</code> であっても、 <code>RefCell</code> なフィールドだけは可変にできます。Rustにメモリ安全性を導入する「可変参照はたったひとつしか作れない」というコンパイルタイムの原則に対する抜け穴として <code>RefCell</code> があります。これを使うとコンパイルタイムでのメモリ安全性は保証されず、可変参照を2個以上作ったときにランタイムエラーが発生するようになるので、本当にどうしても必要で、かつ制御しきれる程度の仕事しかしない箇所で利用することをお勧めします。<br>二分木の各ノードを読むだけなら、共有参照で事足りるので、<code>Rc&lt;RefCell&gt;</code> は不要です。二分木をサブツリーに分けて扱い、同じノードに対する可変参照が複数個必要となるケースでは、 <code>Rc&lt;RefCell&gt;</code> が必要になるかもしれません。とはいえ、 <code>Rc&lt;RefCell&gt;</code> を導入する前に制御フローを工夫して、可変参照を1個以内に保てないかをまず検討するべきだと思います。</p>
+<p>というわけで、今回は <code>Option&lt;Rc&lt;RefCell&lt;TreeNode&gt;&gt;&gt;</code> は使わず、最初に定義した</p>
+<figure class="highlight rust"><figcaption><span>二分木の定義</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#[derive(Debug, PartialEq, Eq)]</span></span><br><span class="line"><span class="keyword">pub</span> <span class="class"><span class="keyword">enum</span> <span class="title">BinaryTree</span></span>&lt;T&gt; &#123;</span><br><span class="line">    Nil,</span><br><span class="line">    Node &#123;</span><br><span class="line">        val: T,</span><br><span class="line">        left: <span class="built_in">Box</span>&lt;BinaryTree&lt;T&gt;&gt;,</span><br><span class="line">        right: <span class="built_in">Box</span>&lt;BinaryTree&lt;T&gt;&gt;,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>を使います。LeetCodeで求められる型ではないのでSubmitはできませんが、代わりに簡単なテストコードを書いていきます。</p>
+<h3><span id="112-path-sum">112. Path Sum</span></h3><p>整数値をノード値に持つ二分木について、ルートからリーフまで値を足し算しながら辿っていき、その和が特定の数になるような辿り方があるかどうかを回答する問題です。</p>
+<p>解き方としては、愚直にルートからリーフまで足し算しながら辿っていって、リーフにたどり着いた時点で目指す総和になっていれば true を返せばよいです。</p>
+<p>まずは深さ優先探索で回答してみます。テスト実行可能な形式で書いていきます。解説はコード内コメントで。</p>
+<figure class="highlight rust"><figcaption><span>112. Path Sum - 深さ優先探索</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#[test]</span></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">leetcode_112_path_sum_dfs</span></span>() &#123;</span><br><span class="line">    <span class="keyword">use</span> BinaryTree::&#123;Nil, Node&#125;;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// この関数を書き上げることが問題に対する回答。</span></span><br><span class="line">    <span class="comment">// 二分木のルートと、目指す総和を入力に取り、総和を実現する path が存在するかどうかを返却。</span></span><br><span class="line">    <span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">has_path_sum</span></span>(root: &amp;BinaryTree&lt;<span class="built_in">i32</span>&gt;, sum: <span class="built_in">i32</span>) -&gt; <span class="built_in">bool</span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 再帰のヘルパー関数。「ルートから cur_node までたどってきました。今までの総和は cur_sum です。」という情報を引数に持つ。</span></span><br><span class="line">        <span class="function"><span class="keyword">fn</span> <span class="title">rec</span></span>(cur_node: &amp;BinaryTree&lt;<span class="built_in">i32</span>&gt;, cur_sum: <span class="built_in">i32</span>, sum: <span class="built_in">i32</span>) -&gt; <span class="built_in">bool</span> &#123;</span><br><span class="line">            <span class="keyword">match</span> cur_node &#123;</span><br><span class="line">                Nil =&gt; <span class="built_in">panic!</span>(<span class="string">"cur_node が Nil のときは呼び出さないでください"</span>),</span><br><span class="line"></span><br><span class="line">                <span class="comment">// パターンマッチで、 cur_node の値、左右の子ノードを一気に束縛できる。</span></span><br><span class="line">                Node &#123; val, left, right &#125; =&gt; &#123;</span><br><span class="line">                    <span class="keyword">let</span> cur_sum = cur_sum + val;</span><br><span class="line"></span><br><span class="line">                    <span class="comment">// left の型は &amp;Box&lt;BinaryTree&gt; となっている。&amp; は cur_node が参照なので、 `match cur_node` で付いた。</span></span><br><span class="line">                    <span class="comment">// *left で Box&lt;BinaryTree&gt; となる。このままだと Box が邪魔で取り回しづらいので、</span></span><br><span class="line">                    <span class="comment">// **left で BinaryTree 型とする。ただしこれをそのまま使うと所有権が移動してしまうので、</span></span><br><span class="line">                    <span class="comment">// &amp;(**left) として &amp;BinaryTree 型を得る。</span></span><br><span class="line">                    <span class="comment">//</span></span><br><span class="line">                    <span class="comment">// ここは boxキーワード (https://doc.rust-jp.rs/the-rust-programming-language-ja/1.9/book/box-syntax-and-patterns.html) を使えばもっときれいに書ける。</span></span><br><span class="line">                    <span class="keyword">match</span> (&amp;(**left), &amp;(**right)) &#123;</span><br><span class="line">                        (Nil, Nil) =&gt; cur_sum == sum,  <span class="comment">// Leafに到達しpathが完成したので、sumと比較</span></span><br><span class="line">                        (_, Nil) =&gt; rec(&amp;(*left), cur_sum, sum),  <span class="comment">// 左の子があるので path 未完成。左の子も辿る。</span></span><br><span class="line">                        (Nil, _) =&gt; rec(&amp;(*right), cur_sum, sum),</span><br><span class="line">                        (_, _) =&gt; rec(&amp;(*left), cur_sum, sum) || rec(&amp;(*right), cur_sum, sum),  <span class="comment">// 左右の子どちらかが総和を満たす path を持っていれば十分。</span></span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 探索開始</span></span><br><span class="line">        rec(root, <span class="number">0</span>, sum)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 二分木の構築。</span></span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    <span class="comment">//       5</span></span><br><span class="line">    <span class="comment">//      / \</span></span><br><span class="line">    <span class="comment">//     4   8</span></span><br><span class="line">    <span class="comment">//    /   / \</span></span><br><span class="line">    <span class="comment">//   11  13  4</span></span><br><span class="line">    <span class="comment">//  /  \      \</span></span><br><span class="line">    <span class="comment">// 7    2      1</span></span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    <span class="keyword">let</span> root = bin_tree! &#123;</span><br><span class="line">        val: <span class="number">5</span>,</span><br><span class="line">        left: bin_tree! &#123;</span><br><span class="line">            val: <span class="number">4</span>,</span><br><span class="line">            left: bin_tree! &#123;</span><br><span class="line">                val: <span class="number">11</span>,</span><br><span class="line">                left: bin_tree! &#123; val: <span class="number">7</span> &#125;,</span><br><span class="line">                right: bin_tree! &#123; val: <span class="number">2</span> &#125;,</span><br><span class="line">            &#125;,</span><br><span class="line">        &#125;,</span><br><span class="line">        right: bin_tree! &#123;</span><br><span class="line">            val: <span class="number">8</span>,</span><br><span class="line">            left: bin_tree! &#123; val: <span class="number">13</span> &#125;,</span><br><span class="line">            right: bin_tree! &#123;</span><br><span class="line">                val: <span class="number">4</span>,</span><br><span class="line">                right: bin_tree! &#123; val: <span class="number">1</span> &#125;,</span><br><span class="line">            &#125;,</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 総和が22になるpathは存在する。</span></span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    <span class="comment">//      *5*</span></span><br><span class="line">    <span class="comment">//      / \</span></span><br><span class="line">    <span class="comment">//    *4*   8</span></span><br><span class="line">    <span class="comment">//    /   / \</span></span><br><span class="line">    <span class="comment">//  *11*  13  4</span></span><br><span class="line">    <span class="comment">//  /  \      \</span></span><br><span class="line">    <span class="comment">// 7   *2*      1</span></span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    <span class="built_in">assert_eq!</span>(has_path_sum(&amp;root, <span class="number">22</span>), <span class="literal">true</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>幅優先探索での回答は以下のように書けます。二分木の構築とassertion部分は省略。</p>
+<figure class="highlight rust"><figcaption><span>112. Path Sum - 幅優先探索</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#[test]</span></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">leetcode_112_path_sum_bfs</span></span>() &#123;</span><br><span class="line">    <span class="keyword">use</span> std::collections::VecDeque;</span><br><span class="line">    <span class="keyword">use</span> BinaryTree::&#123;Nil, Node&#125;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">has_path_sum</span></span>(root: &amp;BinaryTree&lt;<span class="built_in">i32</span>&gt;, sum: <span class="built_in">i32</span>) -&gt; <span class="built_in">bool</span> &#123;</span><br><span class="line">        <span class="comment">// (今探索中のノード, 親ノードの値のここまでの総和) を格納するキュー</span></span><br><span class="line">        <span class="keyword">let</span> <span class="keyword">mut</span> queue = VecDeque::&lt;(&amp;BinaryTree&lt;<span class="built_in">i32</span>&gt;, <span class="built_in">i32</span>)&gt;::new();</span><br><span class="line">        queue.push_back((root, <span class="number">0</span>));</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> <span class="keyword">let</span> <span class="literal">Some</span>((cur_node, cur_sum)) = queue.pop_front() &#123;</span><br><span class="line">            <span class="keyword">match</span> cur_node &#123;</span><br><span class="line">                Nil =&gt; &#123;</span><br><span class="line">                    <span class="built_in">panic!</span>(<span class="string">"Nil を queue に詰めないでください"</span>);</span><br><span class="line">                &#125;</span><br><span class="line">                Node &#123; val, left, right &#125; =&gt; &#123;</span><br><span class="line">                    <span class="keyword">let</span> cur_sum = cur_sum + val;</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">match</span> (&amp;(**left), &amp;(**right)) &#123;</span><br><span class="line">                        <span class="comment">// Leafに到達しpathが完成したので、sumと比較</span></span><br><span class="line">                        (Nil, Nil) =&gt; &#123;</span><br><span class="line">                            <span class="keyword">if</span> cur_sum == sum &#123;</span><br><span class="line">                                <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125;</span><br><span class="line"></span><br><span class="line">                        (_, Nil) =&gt; queue.push_back((&amp;(*left), cur_sum)),</span><br><span class="line">                        (Nil, _) =&gt; queue.push_back((&amp;(*right), cur_sum)),</span><br><span class="line">                        (_, _) =&gt; &#123;</span><br><span class="line">                            queue.push_back((&amp;(*left), cur_sum));</span><br><span class="line">                            queue.push_back((&amp;(*right), cur_sum));</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="literal">false</span> <span class="comment">// キューは空になったが、目指す総和のpathは見つからなかった</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 以下省略...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3><span id="814-binary-tree-pruning">814. Binary Tree Pruning</span></h3><p>0 または 1 をノード値に持つ二分木について、すべてのノードが 0 であるようなサブツリーを切り落とす (prune) 操作をする問題です。</p>
+<p>素直に思いつくのは、「あるノードをルートとするサブツリーを考え、その全要素を探索し、全て0ならばそのサブツリーを切り落とす」という解法ですが、この方法ではリーフ近くのノードが何回も「0かどうか」チェックされて無駄があります。<br>“上から下に” ではなく、 “下から上に” 考えてみると、「あるノードがリーフのとき、自分が0ならば、自分自身をNilに置き換える」という解法がとれます。これだと0との比較の回数は、多くても全ノードの数だけになります。</p>
+<p>この方針に従って、深さ優先探索で回答します。幅優先探索を使うと “下から上” な処理が書きづらいので、難儀するかと思います。</p>
+<figure class="highlight rust"><figcaption><span>814. Binary Tree Pruning</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#[test]</span></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">leetcode_814_binary_tree_pruning</span></span>() &#123;</span><br><span class="line">    <span class="keyword">use</span> BinaryTree::&#123;Nil, Node&#125;;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// この関数を書き上げることが問題に対する回答。</span></span><br><span class="line">    <span class="comment">// 二分木（サブツリー）のルートを入力に取り、左右の子ノードを再帰的に prune_tree() していく。</span></span><br><span class="line">    <span class="comment">// 自分自身が（左右の子を prune した結果、または最初から）リーフであった場合には、自分の値が0ならば、自分自身をNilに置き換える。</span></span><br><span class="line">    <span class="comment">// in-place で二分木を書き換えていく。</span></span><br><span class="line">    <span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">prune_tree</span></span>(root: &amp;<span class="keyword">mut</span> <span class="built_in">Box</span>&lt;BinaryTree&lt;<span class="built_in">i32</span>&gt;&gt;) &#123;</span><br><span class="line">        <span class="comment">// 型の解説:</span></span><br><span class="line">        <span class="comment">//   root: &amp;mut Box&lt;BinaryTree&gt;</span></span><br><span class="line">        <span class="comment">//   *root: mut Box&lt;BinaryTree&gt;</span></span><br><span class="line">        <span class="comment">//   **root: mut BinaryTree</span></span><br><span class="line">        <span class="comment">//   &amp;mut **root: &amp;mut BinaryTree</span></span><br><span class="line">        <span class="keyword">match</span> &amp;<span class="keyword">mut</span> **root &#123;</span><br><span class="line">            Nil =&gt; &#123;&#125;</span><br><span class="line">            Node &#123; val, left, right &#125; =&gt; <span class="keyword">match</span> (&amp;<span class="keyword">mut</span> **left, &amp;<span class="keyword">mut</span> **right) &#123;</span><br><span class="line">                (Nil, Nil) =&gt; &#123;  <span class="comment">// root 自身がリーフ</span></span><br><span class="line">                    <span class="keyword">if</span> *val == <span class="number">0</span> &#123;</span><br><span class="line">                        root.remove();  <span class="comment">// root を Nil に書き換える</span></span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                (_, Nil) =&gt; &#123;</span><br><span class="line">                    prune_tree(left);</span><br><span class="line">                    <span class="keyword">if</span> <span class="keyword">let</span> Nil = &amp;<span class="keyword">mut</span> **left &#123;  <span class="comment">// 左の子ノードを prune した結果、rootがリーフになった</span></span><br><span class="line">                        <span class="keyword">if</span> *val == <span class="number">0</span> &#123;</span><br><span class="line">                            root.remove();</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                (Nil, _) =&gt; &#123;</span><br><span class="line">                    prune_tree(right);</span><br><span class="line">                    <span class="keyword">if</span> <span class="keyword">let</span> Nil = &amp;<span class="keyword">mut</span> **right &#123;</span><br><span class="line">                        <span class="keyword">if</span> *val == <span class="number">0</span> &#123;</span><br><span class="line">                            root.remove();</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                (_, _) =&gt; &#123;</span><br><span class="line">                    prune_tree(left);</span><br><span class="line">                    prune_tree(right);</span><br><span class="line">                    <span class="keyword">if</span> <span class="keyword">let</span> (Nil, Nil) = (&amp;<span class="keyword">mut</span> **left, &amp;<span class="keyword">mut</span> **right) &#123;</span><br><span class="line">                        <span class="keyword">if</span> *val == <span class="number">0</span> &#123;</span><br><span class="line">                            root.remove();</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;,</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 二分木の構築。</span></span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    <span class="comment">//       1</span></span><br><span class="line">    <span class="comment">//      / \</span></span><br><span class="line">    <span class="comment">//     /   \</span></span><br><span class="line">    <span class="comment">//    0     1</span></span><br><span class="line">    <span class="comment">//   / \   / \</span></span><br><span class="line">    <span class="comment">//  /   | |   \</span></span><br><span class="line">    <span class="comment">// 0    0 0    1</span></span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut</span> tree = <span class="built_in">Box</span>::new(bin_tree! &#123;</span><br><span class="line">        val: <span class="number">1</span>,</span><br><span class="line">        left: bin_tree! &#123;</span><br><span class="line">            val: <span class="number">0</span>,</span><br><span class="line">            left: bin_tree! &#123; val: <span class="number">0</span> &#125;,</span><br><span class="line">            right: bin_tree! &#123; val: <span class="number">0</span> &#125;,</span><br><span class="line">        &#125;,</span><br><span class="line">        right: bin_tree! &#123;</span><br><span class="line">            val: <span class="number">1</span>,</span><br><span class="line">            left: bin_tree! &#123; val: <span class="number">0</span> &#125;,</span><br><span class="line">            right: bin_tree! &#123; val: <span class="number">1</span> &#125;,</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// prune_tree(tree) した結果の期待値。</span></span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    <span class="comment">//  1</span></span><br><span class="line">    <span class="comment">//   \</span></span><br><span class="line">    <span class="comment">//    1</span></span><br><span class="line">    <span class="comment">//     \</span></span><br><span class="line">    <span class="comment">//      1</span></span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    <span class="keyword">let</span> pruned = bin_tree! &#123;</span><br><span class="line">        val: <span class="number">1</span>,</span><br><span class="line">        right: bin_tree! &#123;</span><br><span class="line">            val: <span class="number">1</span>,</span><br><span class="line">            right: bin_tree! &#123; val: <span class="number">1</span> &#125;,</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">assert_eq!</span>(</span><br><span class="line">        &#123;</span><br><span class="line">            prune_tree(&amp;<span class="keyword">mut</span> tree);</span><br><span class="line">            *tree</span><br><span class="line">        &#125;,</span><br><span class="line">        pruned</span><br><span class="line">    );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2><span id="終わりに">終わりに</span></h2><p>この記事ではRustで二分木をシンプルに定義する方法と、二分木の構築・追加・削除、そして深さ優先探索と幅優先探索を紹介しました。</p>
+<p>ただ、実用上ただの二分木はそんなに登場しません😂<br>しかし二分木は、二分探索木やヒープという、シンプルでありながら適用範囲の広いデータ構造のための基礎です。次回第2回では、二分探索木を紹介していきます。</p>
+<hr>
+
+<p>この記事は <a href="https://qiita.com/advent-calendar/2019/folio-sec" target="_blank" rel="noopener">FOLIO Advent Calendar 2019</a> の8日目の記事です。<br>12/23に8日目、開始は12/16でしょうか？（原稿落とした同僚の代打投稿です）</p>
+<p>この遡及穴埋めもあり、どうやらFOLIOは今年もアドベントカレンダーを完走できそうです🎅🎄</p>
+
+    
+	</div>
+	<footer class="entry-footer">
+		<div class="entry-meta-footer">
+			<span class="category">
+				
+			</span>
+			<span class="tags">
+				
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Rust/" rel="tag">Rust</a></li></ul>
+
+			</span>
+		</div>
+	</footer>
+    
+    <footer class="author-info clearfix">
+      <img class="author-picture circle" src="https://www.gravatar.com/avatar/cb02a2b3f429b7c938d1fe2665e8e342">
+      <div class="author-content right">
+        <div class="author-caption">
+          <span class="label">author</span>
+          Sho Nakatani a.k.a. laysakura
+        </div>
+        <p class="author-description">
+          東京大学大学院 情報理工学系研究科 電子情報学専攻 修士課程で並列分散処理・ストリーム処理・データベースを研究。<br>
+          2014年4月に株式会社ディー・エヌ・エーにエンジニアスペシャリストとして入社し、ソーシャルゲームのサーバサイド共通基盤の開発に従事。<br>
+          2016年8月より、オンライン証券会社<a href="https://folio-sec.com" target="_blank" rel="noopener">株式会社FOLIO</a>に入社。バックエンドシステム開発・プロジェクトマネージメント・Engineering Managementに従事。<br>
+          2020年3月より<a href="https://idein.jp" target="_blank" rel="noopener">Idein株式会社</a>所属。<br>
+          随時副業募集中です: <a href="https://github.com/laysakura/resume-jp-for-side-job" target="_blank" rel="noopener">職務経歴書や募集職種</a>
+        </p>
+        <ul class="author-social-buttons">
+          <li class="author-social-button"><a class="fa fa-lg fa-twitter-square" href="https://twitter.com/laysakura" target="_blank" rel="noopener"></a></li>
+          <li class="author-social-button"><a class="fa fa-lg fa-github-square" href="https://github.com/laysakura" target="_blank" rel="noopener"></a></li>
+          <li class="author-social-button"><a class="fa fa-lg fa-facebook-square" href="https://www.facebook.com/lay.sakura" target="_blank" rel="noopener"></a></li>
+        </ul>
+      </div>
+    </footer>
+    
+	
+    
+<nav id="article-nav">
+  
+    <a href="/2019/12/25/rust-DataStructures-Algorithm-BinarySearchTree/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          二分探索木 - Rustではじめるデータ構造とアルゴリズム（第2回）
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/07/04/playing-manager-potential-energy/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          プレイイングマネージャーのポテンシャルエナジー理論
+        
+      </div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+
+
+<section id="comments">
+  <div id="disqus_thread">
+
+  <!-- comment service provided by disqus -->
+  <script>
+    /**
+     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+     */
+    var disqus_config = function () {
+        this.page.url = https://laysakura.github.io/2019/12/22/rust-DataStructures-Algorithm-BinaryTree/;  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = https://laysakura.github.io/2019/12/22/rust-DataStructures-Algorithm-BinaryTree/; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    (function() {  // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        
+        s.src = '//laysakura.disqus.com/embed.js';
+        
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript" target="_blank" rel="noopener">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+    </div>
+    <div class="mb-search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:laysakura.github.io">
+  </form>
+</div>
+<footer id="footer">
+	<h1 class="footer-blog-title">
+		<a href="/">俺とお前とlaysakura</a>
+	</h1>
+	<span class="copyright">
+		&copy; 2020 Sho Nakatani a.k.a. laysakura<br>
+		Modify from <a href="https://sanographix.github.io/tumblr/apollo/" target="_blank">Apollo</a> theme, designed by <a href="https://www.sanographix.net/" target="_blank">SANOGRAPHIX.NET</a><br>
+		Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+	</span>
+</footer>
+
+    
+<script>
+  var disqus_shortname = 'laysakura';
+  
+  var disqus_url = 'https://laysakura.github.io/2019/12/22/rust-DataStructures-Algorithm-BinaryTree/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+
+  <!-- https://github.com/vfeskov/vanilla-back-to-top -->
+  <script src="https://unpkg.com/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js"></script>
+  <script>addBackToTop({
+    diameter: 50,
+    backgroundColor: '#33a6b880',
+    textColor: '#fff'
+  })</script>
+
+</body>
+</html>

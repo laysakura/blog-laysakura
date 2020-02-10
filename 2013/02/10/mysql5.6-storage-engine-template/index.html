@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>MySQL 5.6 で動くストレージエンジン・テンプレート | 俺とお前とlaysakura</title>
+  
+  <link rel="canonical" href="https://laysakura.github.io/2013/02/10/mysql5.6-storage-engine-template/"/>
+  <meta name="viewport" content="width=device-width">
+  <meta name="description" content="MySQL 5.6 で動く Skeleton Engine, Yet Another Skeleton Engine を Github で公開してます．https:&#x2F;&#x2F;github.com&#x2F;laysakura&#x2F;mysql-YetAnotherSkeletonEngine Skeleton Engine は MySQL のストレージエンジンを作成するためのテンプレートです．オリジナルのものはhttp">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL 5.6 で動くストレージエンジン・テンプレート">
+<meta property="og:url" content="https://laysakura.github.io/2013/02/10/mysql5.6-storage-engine-template/index.html">
+<meta property="og:site_name" content="俺とお前とlaysakura">
+<meta property="og:description" content="MySQL 5.6 で動く Skeleton Engine, Yet Another Skeleton Engine を Github で公開してます．https:&#x2F;&#x2F;github.com&#x2F;laysakura&#x2F;mysql-YetAnotherSkeletonEngine Skeleton Engine は MySQL のストレージエンジンを作成するためのテンプレートです．オリジナルのものはhttp">
+<meta property="og:locale" content="ja_JP">
+<meta property="article:published_time" content="2013-02-10T00:59:08.000Z">
+<meta property="article:modified_time" content="2020-02-10T05:06:21.000Z">
+<meta property="article:author" content="Sho Nakatani a.k.a. laysakura">
+<meta property="article:tag" content="データベース">
+<meta property="article:tag" content="MySQL">
+<meta name="twitter:card" content="summary">
+
+  <!-- favicon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+  <link rel="icon" href="/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+  <link rel="manifest" href="/favicon/site.webmanifest">
+  <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#5bbad5">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="theme-color" content="#ffffff">
+
+  
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-22289437-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+  <!-- MathJax -->
+  <script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+  <div id="container">
+    <div class="mobile-nav-panel">
+	<i class="icon-reorder icon-large"></i>
+</div>
+<header id="header">
+	<h1 class="blog-title">
+		<a href="/">俺とお前とlaysakura</a>
+	</h1>
+	<nav class="nav">
+		<ul>
+			<li><a href="/archives">過去の投稿</a></li>
+			<li><a id="nav-search-btn" class="nav-icon" title="Search"></a></li>
+			<li><a href="http://cloud.feedly.com/#subscription%2Ffeed%2Fhttps%3A%2F%2Flaysakura.github.io%2Fatom.xml" target="_blank" rel="noopener" id="nav-rss-link" class="nav-icon" title="RSS Feed"></a></li>
+		</ul>
+	</nav>
+	<div id="search-form-wrap">
+		<form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://laysakura.github.io"></form>
+	</div>
+</header>
+    <div id="main">
+      <article id="post-MySQL-5-6-で動くストレージエンジン・テンプレート" class="post">
+	<footer class="entry-meta-header">
+		<span class="meta-elements date">
+			<a href="/2013/02/10/mysql5.6-storage-engine-template/" class="article-date">
+  <time datetime="2013-02-10T00:59:08.000Z" itemprop="datePublished">2013-02-10</time>
+</a>
+		</span>
+	</footer>
+	
+	<header class="entry-header">
+		
+  
+    <h1 class="article-title entry-title" itemprop="name">
+      MySQL 5.6 で動くストレージエンジン・テンプレート
+    </h1>
+  
+
+	</header>
+	<div class="entry-content">
+		
+    	<p>MySQL 5.6 で動く Skeleton Engine, <strong>Yet Another Skeleton Engine</strong> を Github で公開してます．<br><a href="https://github.com/laysakura/mysql-YetAnotherSkeletonEngine" target="_blank" rel="noopener">https://github.com/laysakura/mysql-YetAnotherSkeletonEngine</a></p>
+<p>Skeleton Engine は MySQL のストレージエンジンを作成するためのテンプレートです．<br>オリジナルのものは<br><a href="http://www.sourcefiles.org/Databases/Utilities/" target="_blank" rel="noopener">http://www.sourcefiles.org/Databases/Utilities/</a><br>の skeleton_engine-0.7.tar.gz でダウンロード可能でした(2013/02/10 現在)が，古いバージョンの MySQL を前提としており，MySQL 5.6 にオリジナルのままの Skeleton Engine を組込むことはできません．<br>オリジナルのものが MySQL 5.6 で使えない理由は最後の節に記載します．</p>
+<p>そこで Yet Another Skeleton Engine と名付けまして，MySQL 5.6 で動くストレージエンジンのテンプレートを公開しました．<br>本エントリでは，まず Yet Another Skeleton Engine の使い方を記し，次にメモ程度にリポジトリ作成作業のログを記します．</p>
+<a id="more"></a>
+
+<!-- toc -->
+
+<ul>
+<li><a href="#追記-20130217">追記: 2013/02/17</a></li>
+<li><a href="#yet-another-skeleton-engine-の入手から使用まで">Yet Another Skeleton Engine の入手から使用まで</a><ul>
+<li><a href="#入手">入手</a></li>
+<li><a href="#ビルドインストール">ビルド・インストール</a></li>
+<li><a href="#使用">使用</a></li>
+</ul>
+</li>
+<li><a href="#リポジトリ作成作業のログ">リポジトリ作成作業のログ</a><ul>
+<li><a href="#ディレクトリ作成">ディレクトリ作成</a></li>
+<li><a href="#必要ファイルをコピー">必要ファイルをコピー</a></li>
+<li><a href="#いくつかのファイルの編集">いくつかのファイルの編集</a></li>
+<li><a href="#configure-を作る">configure を作る</a></li>
+</ul>
+</li>
+<li><a href="#オリジナルの-skeleton-engine-が-mysql-56-で使えない理由">オリジナルの Skeleton Engine が MySQL 5.6 で使えない理由</a></li>
+<li><a href="#おまけ-20130217-クラッシュバグ再現テスト">おまけ: 2013/02/17 クラッシュバグ再現テスト</a></li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="追記-20130217">追記: 2013/02/17</span></h2><p><strong>Yet Another Skeleton Engine を使用中にクラッシュするバグを修正しました．</strong><br>MySQL 5.6 本体の Example Storage Engine と同じコンパイルオプションを付けることでクラッシュはなくなった模様です．<br><a href="https://github.com/laysakura/mysql-YetAnotherSkeletonEngine/commit/8b4f3c8d83b47c4e63d9257c92ea71051501841f" target="_blank" rel="noopener">https://github.com/laysakura/mysql-YetAnotherSkeletonEngine/commit/8b4f3c8d83b47c4e63d9257c92ea71051501841f</a></p>
+<p>クラッシュの再現コードを本エントリの最後に付しておきます．</p>
+<h2><span id="yet-another-skeleton-engine-の入手から使用まで">Yet Another Skeleton Engine の入手から使用まで</span></h2><h3><span id="入手">入手</span></h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> git://github.com/laysakura/mysql-YetAnotherSkeletonEngine.git</span><br><span class="line"><span class="built_in">cd</span> mysql-YetAnotherSkeletonEngine</span><br></pre></td></tr></table></figure>
+
+<h3><span id="ビルドインストール">ビルド・インストール</span></h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">./configure  --with-mysql=[ビルド済みMySQLのソースディレクトリ]  --libdir=[MySQLのインストールディレクトリ]/lib/plugin</span><br><span class="line">make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+
+<h3><span id="使用">使用</span></h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo /etc/init.d/mysqld restart</span><br><span class="line">mysql -u root -p</span><br></pre></td></tr></table></figure>
+
+<p>ここからは MySQL のシェルでインストール&amp;確認です．</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; INSTALL PLUGIN YA_SKELETON SONAME 'libskeleton_engine.so';</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; show engines;</span><br><span class="line">+<span class="comment">--------------------+---------+----------------------------------------------------------------+--------------+------+------------+</span></span><br><span class="line">| Engine             | Support | <span class="keyword">Comment</span>                                                        | Transactions | XA   | Savepoints |</span><br><span class="line">+<span class="comment">--------------------+---------+----------------------------------------------------------------+--------------+------+------------+</span></span><br><span class="line">| EXAMPLE            | YES     | Example <span class="keyword">storage</span> <span class="keyword">engine</span>                                         | <span class="keyword">NO</span>           | <span class="keyword">NO</span>   | <span class="keyword">NO</span>         |</span><br><span class="line">| YA_SKELETON        | YES     | Yet Another Skeleton <span class="keyword">Storage</span> <span class="keyword">Engine</span>                            | <span class="keyword">NO</span>           | <span class="keyword">NO</span>   | <span class="keyword">NO</span>         |</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>YA_SKELETON というのが今回インストールした Yet Another Skeleton Engine です．<br>中身は EXAMPLE ストレージエンジンと全く同じなので，<br><a href="http://dev.mysql.com/doc/refman/5.6/en/example-storage-engine.html" target="_blank" rel="noopener">http://dev.mysql.com/doc/refman/5.6/en/example-storage-engine.html</a><br>のように動作確認してみて下さい．</p>
+<h2><span id="リポジトリ作成作業のログ">リポジトリ作成作業のログ</span></h2><h3><span id="ディレクトリ作成">ディレクトリ作成</span></h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkdir mysql-YetAnotherSkeletonEngine</span><br><span class="line"><span class="built_in">cd</span> mysql-YetAnotherSkeletonEngine/</span><br></pre></td></tr></table></figure>
+
+<h3><span id="必要ファイルをコピー">必要ファイルをコピー</span></h3><p>次のようなディレクトリ構成とする．</p>
+<ul>
+<li><code>~/src/skeleton_engine-0.7/</code>: オリジナルの Skeleton Engine.</li>
+<li><code>/usr/share/libtool/config/</code>: ltmain.sh があるところ．</li>
+<li><code>~/src/mysql-5.6.10/</code>: MySQL のソースディレクトリ．</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">cp ~/src/skeleton_engine-0.7/AUTHORS .</span><br><span class="line">cp ~/src/skeleton_engine-0.7/COPYING .</span><br><span class="line">cp ~/src/skeleton_engine-0.7/ChangeLog .</span><br><span class="line">cp ~/src/skeleton_engine-0.7/INSTALL .</span><br><span class="line">cp ~/src/skeleton_engine-0.7/Makefile.am .</span><br><span class="line">cp ~/src/skeleton_engine-0.7/NEWS .</span><br><span class="line">cp ~/src/skeleton_engine-0.7/README .</span><br><span class="line">cp ~/src/skeleton_engine-0.7/README.windows .</span><br><span class="line">cp ~/src/skeleton_engine-0.7/configure.in .</span><br><span class="line"></span><br><span class="line">mkdir config</span><br><span class="line">cp ~/src/skeleton_engine-0.7/config/ac_mysql.m4 config/</span><br><span class="line">cp ~/src/skeleton_engine-0.7/config/dtrace.m4 config/</span><br><span class="line">cp /usr/share/libtool/config/ltmain.sh config/  <span class="comment"># ltmain.sh は何故か automake で作られなかったので・・・</span></span><br><span class="line"></span><br><span class="line">mkdir src</span><br><span class="line">cp ~/src/skeleton_engine-0.7/src/Makefile.am src/</span><br><span class="line">cp ~/src/skeleton_engine-0.7/src/skeleton_probes.d src/</span><br><span class="line">cp ~/src/skeleton_engine-0.7/src/skeleton_probes.h src/</span><br><span class="line">cp ~/src/skeleton_engine-0.7/src/skeleton_config.h.in src/</span><br><span class="line"></span><br><span class="line"><span class="comment"># MySQL から example storage engine をコピー</span></span><br><span class="line">cp ~/src/mysql-5.6.10/storage/example/ha_example.cc src/ha_skeleton.cc</span><br><span class="line">cp ~/src/mysql-5.6.10/storage/example/ha_example.h src/ha_skeleton.h</span><br></pre></td></tr></table></figure>
+
+<h3><span id="いくつかのファイルの編集">いくつかのファイルの編集</span></h3><p>(2013/02/13 - libmysqlservices を静的リンクしていた部分を動的リンクに変更)</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># config/ac_mysql.m4 を編集</span></span><br><span class="line">diff config/ac_mysql.m4.old config/ac_mysql.m4</span><br><span class="line">10,12c10</span><br><span class="line">&lt;     <span class="keyword">if</span> <span class="built_in">test</span> -d <span class="string">"<span class="variable">$withval</span>/sql"</span>; <span class="keyword">then</span></span><br><span class="line">&lt;       MYSQL_SRC=<span class="string">"<span class="variable">$i</span>/mysql_config"</span></span><br><span class="line">&lt;     <span class="keyword">fi</span></span><br><span class="line">---</span><br><span class="line">&gt;     MYSQL_SRC=<span class="string">"<span class="variable">$withval</span>"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># configure.in を編集</span></span><br><span class="line">diff configure.in.old configure.in</span><br><span class="line">5c5</span><br><span class="line">&lt; AM_INIT_AUTOMAKE(<span class="string">"skeleton_engine"</span>, 0.7)</span><br><span class="line">---</span><br><span class="line">&gt; AM_INIT_AUTOMAKE(<span class="string">"ya_skeleton_engine"</span>, 0.1)</span><br><span class="line">20a21</span><br><span class="line">&gt; AC_SUBST(MYSQL_SRC)</span><br><span class="line"></span><br><span class="line"><span class="comment"># src/Makefile.am を編集</span></span><br><span class="line">diff src/Makefile.am.old src/Makefile.am</span><br><span class="line">16c16</span><br><span class="line">&lt; libskeleton_engine_la_LIBADD =</span><br><span class="line">---</span><br><span class="line">&gt; libskeleton_engine_la_LIBADD = -lmysqlservices</span><br><span class="line">22c22</span><br><span class="line">&lt; libskeleton_engine_la_LDFLAGS =       -module</span><br><span class="line">---</span><br><span class="line">&gt; libskeleton_engine_la_LDFLAGS =       -module -L$(MYSQL_SRC)/libservices/</span><br><span class="line"></span><br><span class="line"><span class="comment"># ha_skeleton.cc を編集</span></span><br><span class="line">diff src/ha_skeleton.cc.old src/ha_skeleton.cc</span><br><span class="line">92c92</span><br><span class="line">&lt; <span class="comment">#include "ha_example.h"</span></span><br><span class="line">---</span><br><span class="line">&gt; <span class="comment">#include "ha_skeleton.h"</span></span><br><span class="line">980,982c980,982</span><br><span class="line">&lt;   <span class="string">"EXAMPLE"</span>,</span><br><span class="line">&lt;   <span class="string">"Brian Aker, MySQL AB"</span>,</span><br><span class="line">&lt;   <span class="string">"Example storage engine"</span>,</span><br><span class="line">---</span><br><span class="line">&gt;   <span class="string">"YA_SKELETON"</span>,</span><br><span class="line">&gt;   <span class="string">"Sho Nakatani"</span>,</span><br><span class="line">&gt;   <span class="string">"Yet Another Skeleton Storage Engine"</span>,</span><br></pre></td></tr></table></figure>
+
+<h3><span id="configure-を作る">configure を作る</span></h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># aclocal</span></span><br><span class="line">aclocal</span><br><span class="line"></span><br><span class="line"><span class="comment"># .h.in から .h を作る</span></span><br><span class="line">autoheader</span><br><span class="line"></span><br><span class="line"><span class="comment"># automake で config/* や Makefile.in を作る</span></span><br><span class="line">automake --add-missing --copy</span><br><span class="line">configure.in:11: installing `config/config.guess<span class="string">'</span></span><br><span class="line"><span class="string">configure.in:11: installing `config/config.sub'</span></span><br><span class="line">configure.in:5: installing `config/install-sh<span class="string">'</span></span><br><span class="line"><span class="string">configure.in:5: installing `config/missing'</span></span><br><span class="line">src/Makefile.am: installing `config/depcomp<span class="string">'</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"># autoconf で configure を作る</span></span><br><span class="line"><span class="string">autoconf</span></span><br></pre></td></tr></table></figure>
+
+<h2><span id="オリジナルの-skeleton-engine-が-mysql-56-で使えない理由">オリジナルの Skeleton Engine が MySQL 5.6 で使えない理由</span></h2><p>ha_skeleton.* は古いバージョンの MySQL に対応して書かれており，インクルードしている一部ヘッダが MySQL 5.6 とは対応していません．</p>
+<p>また，MySQL 5.6 のストレージエンジン開発では，libmysqlservices.so というライブラリのリンクが必要です．これを忘れると，いざ作成したライブラリを使おうとすると次のようにエラーになります．</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; INSTALL PLUGIN YOUR_NEW_ENGINE SONAME 'libskeleton_engine.so';</span><br><span class="line">ERROR 1126 (HY000): Can't open shared library '/usr/local/mysql/lib/plugin/libskeleton_engine.so' (errno: 2 /usr/local/mysql/lib/plugin/libskeleton_engine.so: undefined symbol: my_snprintf_service)</span><br></pre></td></tr></table></figure>
+
+<p>参考: <a href="http://dev.mysql.com/doc/refman/5.6/en/compiling-plugin-libraries.html" target="_blank" rel="noopener">http://dev.mysql.com/doc/refman/5.6/en/compiling-plugin-libraries.html</a></p>
+<h2><span id="おまけ-20130217-クラッシュバグ再現テスト">おまけ: 2013/02/17 クラッシュバグ再現テスト</span></h2><p><a href="https://github.com/laysakura/mysql-YetAnotherSkeletonEngine/commit/8b4f3c8d83b47c4e63d9257c92ea71051501841f" target="_blank" rel="noopener">https://github.com/laysakura/mysql-YetAnotherSkeletonEngine/commit/8b4f3c8d83b47c4e63d9257c92ea71051501841f</a><br>の修正前に発生していたクラッシュバグを再現する Perl のテストコードを載せておきます．</p>
+<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/perl</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">use</span> strict;</span><br><span class="line"><span class="keyword">use</span> warnings;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">use</span> DBI;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">my</span> $TEST_ROWS;</span><br><span class="line">BEGIN &#123;</span><br><span class="line">    $TEST_ROWS = $ENV<span class="string">&#123;TEST_ROWS&#125;</span> || <span class="number">1024</span>;</span><br><span class="line">&#125;;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">use</span> Test::More <span class="string">tests =&gt;</span> $TEST_ROWS * <span class="number">4</span> + <span class="number">2</span>;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">use</span> File::Basename;</span><br><span class="line"><span class="keyword">use</span> Cwd <span class="string">'realpath'</span>;</span><br><span class="line"><span class="keyword">my</span> $testdir = realpath(dirname(__FILE_<span class="number">_</span>));</span><br><span class="line"> </span><br><span class="line"><span class="keyword">my</span> $dbh = DBI-&gt;<span class="keyword">connect</span>(</span><br><span class="line">    $ENV<span class="string">&#123;DBI&#125;</span> || <span class="string">'dbi:mysql:database=test;host=localhost'</span>,</span><br><span class="line">    $ENV<span class="string">&#123;DBI_USER&#125;</span> || <span class="string">'root'</span>,</span><br><span class="line">    $ENV<span class="string">&#123;DBI_PASSWORD&#125;</span> || <span class="string">''</span>,</span><br><span class="line">) <span class="keyword">or</span> <span class="keyword">die</span> <span class="string">'connection failed:'</span>;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="comment">## Crash bug repro                                                                                                                                                                                                                  </span></span><br><span class="line">ok($dbh-&gt;<span class="keyword">do</span>(<span class="string">"drop table if exists t_example"</span>));</span><br><span class="line">ok($dbh-&gt;<span class="keyword">do</span>(<span class="string">"create table t_example (a INT) engine = ya_skeleton"</span>));</span><br><span class="line"> </span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">my</span> $i = <span class="number">0</span>; $i &lt; $TEST_ROWS; $i++) &#123;</span><br><span class="line">    ok($dbh-&gt;<span class="keyword">do</span>(<span class="string">"insert into t_example values (777),(333),(888)"</span>));</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">my</span> $i = <span class="number">0</span>; $i &lt; $TEST_ROWS; $i++) &#123;</span><br><span class="line">    ok($dbh-&gt;<span class="keyword">do</span>(<span class="string">"select * from t_example"</span>));</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">my</span> $i = <span class="number">0</span>; $i &lt; $TEST_ROWS; $i++) &#123;</span><br><span class="line">    ok($dbh-&gt;<span class="keyword">do</span>(<span class="string">"insert into t_example values (777),(333),(888)"</span>));</span><br><span class="line">    ok($dbh-&gt;<span class="keyword">do</span>(<span class="string">"select * from t_example"</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+    
+	</div>
+	<footer class="entry-footer">
+		<div class="entry-meta-footer">
+			<span class="category">
+				
+			</span>
+			<span class="tags">
+				
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/MySQL/" rel="tag">MySQL</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E3%83%87%E3%83%BC%E3%82%BF%E3%83%99%E3%83%BC%E3%82%B9/" rel="tag">データベース</a></li></ul>
+
+			</span>
+		</div>
+	</footer>
+    
+    <footer class="author-info clearfix">
+      <img class="author-picture circle" src="https://www.gravatar.com/avatar/cb02a2b3f429b7c938d1fe2665e8e342">
+      <div class="author-content right">
+        <div class="author-caption">
+          <span class="label">author</span>
+          Sho Nakatani a.k.a. laysakura
+        </div>
+        <p class="author-description">
+          東京大学大学院 情報理工学系研究科 電子情報学専攻 修士課程で並列分散処理・ストリーム処理・データベースを研究。<br>
+          2014年4月に株式会社ディー・エヌ・エーにエンジニアスペシャリストとして入社し、ソーシャルゲームのサーバサイド共通基盤の開発に従事。<br>
+          2016年8月より、オンライン証券会社<a href="https://folio-sec.com" target="_blank" rel="noopener">株式会社FOLIO</a>に入社。バックエンドシステム開発・プロジェクトマネージメント・Engineering Managementに従事。<br>
+          2020年3月より<a href="https://idein.jp" target="_blank" rel="noopener">Idein株式会社</a>所属。<br>
+          随時副業募集中です: <a href="https://github.com/laysakura/resume-jp-for-side-job" target="_blank" rel="noopener">職務経歴書や募集職種</a>
+        </p>
+        <ul class="author-social-buttons">
+          <li class="author-social-button"><a class="fa fa-lg fa-twitter-square" href="https://twitter.com/laysakura" target="_blank" rel="noopener"></a></li>
+          <li class="author-social-button"><a class="fa fa-lg fa-github-square" href="https://github.com/laysakura" target="_blank" rel="noopener"></a></li>
+          <li class="author-social-button"><a class="fa fa-lg fa-facebook-square" href="https://www.facebook.com/lay.sakura" target="_blank" rel="noopener"></a></li>
+        </ul>
+      </div>
+    </footer>
+    
+	
+    
+<nav id="article-nav">
+  
+    <a href="/2013/10/11/perl-japanese-full-text-search/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Perlで日本語全文検索できるCPANモジュール作りました
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2012/01/06/sse-8flops-clock/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          真・SSEを使って8flops/clockを実現する
+        
+      </div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+
+
+<section id="comments">
+  <div id="disqus_thread">
+
+  <!-- comment service provided by disqus -->
+  <script>
+    /**
+     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+     */
+    var disqus_config = function () {
+        this.page.url = https://laysakura.github.io/2013/02/10/mysql5.6-storage-engine-template/;  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = https://laysakura.github.io/2013/02/10/mysql5.6-storage-engine-template/; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    (function() {  // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        
+        s.src = '//laysakura.disqus.com/embed.js';
+        
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript" target="_blank" rel="noopener">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+    </div>
+    <div class="mb-search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:laysakura.github.io">
+  </form>
+</div>
+<footer id="footer">
+	<h1 class="footer-blog-title">
+		<a href="/">俺とお前とlaysakura</a>
+	</h1>
+	<span class="copyright">
+		&copy; 2020 Sho Nakatani a.k.a. laysakura<br>
+		Modify from <a href="https://sanographix.github.io/tumblr/apollo/" target="_blank">Apollo</a> theme, designed by <a href="https://www.sanographix.net/" target="_blank">SANOGRAPHIX.NET</a><br>
+		Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+	</span>
+</footer>
+
+    
+<script>
+  var disqus_shortname = 'laysakura';
+  
+  var disqus_url = 'https://laysakura.github.io/2013/02/10/mysql5.6-storage-engine-template/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+
+  <!-- https://github.com/vfeskov/vanilla-back-to-top -->
+  <script src="https://unpkg.com/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js"></script>
+  <script>addBackToTop({
+    diameter: 50,
+    backgroundColor: '#33a6b880',
+    textColor: '#fff'
+  })</script>
+
+</body>
+</html>

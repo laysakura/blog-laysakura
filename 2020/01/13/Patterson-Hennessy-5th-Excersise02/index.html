@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>『コンピュータの構成と設計 第5版』演習問題解答集 第2章 | 俺とお前とlaysakura</title>
+  
+  <link rel="canonical" href="https://laysakura.github.io/2020/01/13/Patterson-Hennessy-5th-Excersise02/"/>
+  <meta name="viewport" content="width=device-width">
+  <meta name="description" content="“パタヘネ本” でおなじみの『コンピュータの構成と設計 第5版』の解答集です。読者は書籍を保有していることを前提として解答・解説を記載します。訂正案などありましたら本ブログ記事のリポジトリ へPull-Requestくだされば幸いです😊 この記事2章では、ひたすらMIPSアセンブリと戯れます。 各章の解答集 『コンピュータの構成と設計 第5版』演習問題解答集 第1章 （執筆中） 『">
+<meta property="og:type" content="article">
+<meta property="og:title" content="『コンピュータの構成と設計 第5版』演習問題解答集 第2章">
+<meta property="og:url" content="https://laysakura.github.io/2020/01/13/Patterson-Hennessy-5th-Excersise02/index.html">
+<meta property="og:site_name" content="俺とお前とlaysakura">
+<meta property="og:description" content="“パタヘネ本” でおなじみの『コンピュータの構成と設計 第5版』の解答集です。読者は書籍を保有していることを前提として解答・解説を記載します。訂正案などありましたら本ブログ記事のリポジトリ へPull-Requestくだされば幸いです😊 この記事2章では、ひたすらMIPSアセンブリと戯れます。 各章の解答集 『コンピュータの構成と設計 第5版』演習問題解答集 第1章 （執筆中） 『">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:image" content="https://laysakura.github.io/img/2020/01-10-2.33.svg">
+<meta property="article:published_time" content="2020-01-13T06:25:41.000Z">
+<meta property="article:modified_time" content="2020-02-10T05:06:21.000Z">
+<meta property="article:author" content="Sho Nakatani a.k.a. laysakura">
+<meta property="article:tag" content="『コンピュータの構成と設計』">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://laysakura.github.io/img/2020/01-10-2.33.svg">
+
+  <!-- favicon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+  <link rel="icon" href="/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+  <link rel="manifest" href="/favicon/site.webmanifest">
+  <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#5bbad5">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="theme-color" content="#ffffff">
+
+  
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-22289437-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+  <!-- MathJax -->
+  <script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+  <div id="container">
+    <div class="mobile-nav-panel">
+	<i class="icon-reorder icon-large"></i>
+</div>
+<header id="header">
+	<h1 class="blog-title">
+		<a href="/">俺とお前とlaysakura</a>
+	</h1>
+	<nav class="nav">
+		<ul>
+			<li><a href="/archives">過去の投稿</a></li>
+			<li><a id="nav-search-btn" class="nav-icon" title="Search"></a></li>
+			<li><a href="http://cloud.feedly.com/#subscription%2Ffeed%2Fhttps%3A%2F%2Flaysakura.github.io%2Fatom.xml" target="_blank" rel="noopener" id="nav-rss-link" class="nav-icon" title="RSS Feed"></a></li>
+		</ul>
+	</nav>
+	<div id="search-form-wrap">
+		<form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://laysakura.github.io"></form>
+	</div>
+</header>
+    <div id="main">
+      <article id="post-『コンピュータの構成と設計-第5版』演習問題回答集-第2章" class="post">
+	<footer class="entry-meta-header">
+		<span class="meta-elements date">
+			<a href="/2020/01/13/Patterson-Hennessy-5th-Excersise02/" class="article-date">
+  <time datetime="2020-01-13T06:25:41.000Z" itemprop="datePublished">2020-01-13</time>
+</a>
+		</span>
+	</footer>
+	
+	<header class="entry-header">
+		
+  
+    <h1 class="article-title entry-title" itemprop="name">
+      『コンピュータの構成と設計 第5版』演習問題解答集 第2章
+    </h1>
+  
+
+	</header>
+	<div class="entry-content">
+		
+    	<iframe style="width:120px;height:240px;display:block;margin:0px auto;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="https://rcm-fe.amazon-adsystem.com/e/cm?ref=qf_sp_asin_til&t=laysakura-22&m=amazon&o=9&p=8&l=as1&IS2=1&detail=1&asins=B01M5FMGDL&linkId=93bb4e3be4ca3abe7e74716873f1aec2&bc1=000000&lt1=_top&fc1=333333&lc1=0066c0&bg1=ffffff&f=ifr">
+    </iframe>
+
+<p>“パタヘネ本” でおなじみの『コンピュータの構成と設計 第5版』の解答集です。読者は書籍を保有していることを前提として解答・解説を記載します。<br>訂正案などありましたら<a href="https://github.com/laysakura/laysakura.github.io/tree/ready/source/_posts" target="_blank" rel="noopener">本ブログ記事のリポジトリ</a> へPull-Requestくだされば幸いです😊</p>
+<p>この記事2章では、ひたすらMIPSアセンブリと戯れます。</p>
+<h2><span id="各章の解答集">各章の解答集</span></h2><ol>
+<li>『コンピュータの構成と設計 第5版』演習問題解答集 第1章 （執筆中）</li>
+<li><a href="/2020/01/10/Patterson-Hennessy-5th-Excersise02">『コンピュータの構成と設計 第5版』演習問題解答集 第2章</a> （この記事）</li>
+<li><a href="/2020/01/19/Patterson-Hennessy-5th-Excersise03">『コンピュータの構成と設計 第5版』演習問題解答集 第3章</a></li>
+<li><a href="/2020/01/28/Patterson-Hennessy-5th-Excersise04">『コンピュータの構成と設計 第5版』演習問題解答集 第4章</a></li>
+<li>『コンピュータの構成と設計 第5版』演習問題解答集 第5章 （執筆中）</li>
+<li>『コンピュータの構成と設計 第5版』演習問題解答集 第6章 （執筆中）</li>
+</ol>
+<a id="more"></a>
+
+<h2><span id="問題解答解説へジャンプ">問題・解答・解説へジャンプ</span></h2><!-- toc -->
+
+<ul>
+<li><a href="#21">2.1</a></li>
+<li><a href="#22">2.2</a></li>
+<li><a href="#23">2.3</a></li>
+<li><a href="#24">2.4</a></li>
+<li><a href="#25">2.5</a></li>
+<li><a href="#26">2.6</a><ul>
+<li><a href="#261">2.6.1</a></li>
+<li><a href="#262">2.6.2</a></li>
+</ul>
+</li>
+<li><a href="#27">2.7</a></li>
+<li><a href="#28">2.8</a></li>
+<li><a href="#29">2.9</a></li>
+<li><a href="#210">2.10</a></li>
+<li><a href="#211">2.11</a></li>
+<li><a href="#212">2.12</a><ul>
+<li><a href="#2121">2.12.1</a></li>
+<li><a href="#2122">2.12.2</a></li>
+<li><a href="#2123">2.12.3</a></li>
+<li><a href="#2124">2.12.4</a></li>
+<li><a href="#2125">2.12.5</a></li>
+<li><a href="#2126">2.12.6</a></li>
+</ul>
+</li>
+<li><a href="#213">2.13</a><ul>
+<li><a href="#2131">2.13.1</a></li>
+<li><a href="#2132">2.13.2</a></li>
+<li><a href="#2133">2.13.3</a></li>
+</ul>
+</li>
+<li><a href="#214">2.14</a></li>
+<li><a href="#215">2.15</a></li>
+<li><a href="#216">2.16</a></li>
+<li><a href="#217">2.17</a></li>
+<li><a href="#218">2.18</a><ul>
+<li><a href="#2181">2.18.1</a></li>
+<li><a href="#2182">2.18.2</a></li>
+<li><a href="#2183">2.18.3</a></li>
+</ul>
+</li>
+<li><a href="#219">2.19</a><ul>
+<li><a href="#2191">2.19.1</a></li>
+<li><a href="#2192">2.19.2</a></li>
+<li><a href="#2193">2.19.3</a></li>
+</ul>
+</li>
+<li><a href="#220">2.20</a></li>
+<li><a href="#221">2.21</a></li>
+<li><a href="#222">2.22</a></li>
+<li><a href="#223">2.23</a></li>
+<li><a href="#224">2.24</a></li>
+<li><a href="#225">2.25</a><ul>
+<li><a href="#2251">2.25.1</a></li>
+<li><a href="#2252">2.25.2</a></li>
+</ul>
+</li>
+<li><a href="#226">2.26</a><ul>
+<li><a href="#2261">2.26.1</a></li>
+<li><a href="#2262">2.26.2</a></li>
+<li><a href="#2263">2.26.3</a></li>
+</ul>
+</li>
+<li><a href="#227">2.27</a></li>
+<li><a href="#228">2.28</a></li>
+<li><a href="#229">2.29</a></li>
+<li><a href="#230">2.30</a></li>
+<li><a href="#231">2.31</a></li>
+<li><a href="#232">2.32</a></li>
+<li><a href="#233">2.33</a></li>
+<li><a href="#234">2.34</a></li>
+<li><a href="#235">2.35</a></li>
+<li><a href="#236">2.36</a></li>
+<li><a href="#237">2.37</a></li>
+<li><a href="#238">2.38</a></li>
+<li><a href="#239">2.39</a></li>
+<li><a href="#240">2.40</a></li>
+<li><a href="#241">2.41</a></li>
+<li><a href="#242">2.42</a></li>
+<li><a href="#243">2.43</a></li>
+<li><a href="#244">2.44</a></li>
+<li><a href="#245">2.45</a></li>
+<li><a href="#246">2.46</a><ul>
+<li><a href="#2461">2.46.1</a></li>
+<li><a href="#2462">2.46.2</a></li>
+</ul>
+</li>
+<li><a href="#247">2.47</a><ul>
+<li><a href="#2471">2.47.1</a></li>
+<li><a href="#2472">2.47.2</a></li>
+<li><a href="#2473">2.47.3</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="21">2.1</span></h2><h5><span id="問題">問題</span></h5><p>下のCステートメントに対応するMIPSアセンブリ・コードを示せ．変数f，g，h，iは与えられており，32ビットの整数としてCプログラム内に宣言されている，と想定する．最小限の数のMIPSアセンブリ命令を使用するようにせよ．</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">f = g + ( h - <span class="number">5</span> );</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解答">解答</span></h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"># 各変数のレジスタへの割付:</span><br><span class="line">#   $s0 &#x3D; f</span><br><span class="line">#   $s1 &#x3D; g</span><br><span class="line">#   $s2 &#x3D; h</span><br><span class="line"></span><br><span class="line">addi $s0, $s2, -5</span><br><span class="line">add  $s0, $s1, $s0</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解説">解説</span></h5><ul>
+<li>変数のレジスタへの割付は仮定するしかない。Callee-saveの汎用レジスタ <code>$s0 ~ $s7</code> を使っても良いし、保存の必要のない一時レジスタの <code>$t0 ~ $t7</code> を使っても良い。</li>
+<li><code>sub</code> 命令は即値を取れないので <code>addi</code> を使う。</li>
+<li>最終的に <code>f</code> を格納する <code>$s0</code> を、一時的に <code>(h - 5)</code> を格納するのに使用しているのが使用レジスタ数を少なくするポイント。</li>
+<li>MIPSの算術命令は基本的に2つまでしか入力値（レジスタ, 即値）を取れないので、3つの入力値 <code>g, h, -5</code> が絡むこのCコードは最小でも2命令を必要とする。</li>
+</ul>
+<h2><span id="22">2.2</span></h2><h5><span id="問題">問題</span></h5><p>下のMIPSアセンブリ命令に対応するCステートメントを示せ．</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">add f, g, h</span><br><span class="line">add f, i, f</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解答">解答</span></h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">f = g + h;</span><br><span class="line">f = i + f;</span><br></pre></td></tr></table></figure>
+
+<p>または</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">f = i + (g + h);</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解説">解説</span></h5><ul>
+<li>アセンブリを愚直にCに落とすと1つめのコードになる。</li>
+<li>普通は2つめのように書く。</li>
+<li>どちらで書いてもCからMIPSアセンブリへのコンパイル過程で同じアセンブリになることが期待できる。</li>
+</ul>
+<h2><span id="23">2.3</span></h2><h5><span id="問題">問題</span></h5><p>下のCステートメントに対応するMIPSアセンブリ・コードを示せ．変数f，g，h，i，jは与えられており，レジスタ$s0，$s1，$s2，$s3，$s4にそれぞれ割り当てられている，と想定する．また，配列AおよびBのベース・アドレスはレジスタ$s6と$s7にそれぞれ収められている，と想定する．</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">B[<span class="number">8</span>] = A[ i - j ];</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解答">解答</span></h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"># 各変数のレジスタへの割付:</span><br><span class="line">#   $s3 &#x3D; i (問題文で指定)</span><br><span class="line">#   $s4 &#x3D; j (問題文で指定)</span><br><span class="line">#   $s6 &#x3D; A (問題文で指定)</span><br><span class="line">#   $s7 &#x3D; B (問題文で指定)</span><br><span class="line"></span><br><span class="line">sub $t0, $s3, $s4  # $t0 &lt;- i - j</span><br><span class="line">sll $t0, $t0, 2    # $t0 &lt;- $t0 &lt;&lt; 2 &#x3D;&#x3D; $t0 * 4</span><br><span class="line">add $t0, $s6, $t0  # $t0 &lt;- $t0 + A &#x3D;&#x3D; A + (i - j) &#x3D;&#x3D; &amp;A[i - j]</span><br><span class="line">lw  $t0, 0($t0)    # $t0 &lt;- A[i - j]</span><br><span class="line">sw  $t0, 32($s7)   # *(B + 8) &#x3D;&#x3D; B[8] &lt;- $t0</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解説">解説</span></h5><ul>
+<li>まず <code>A</code> の添字の <code>i -j</code> を最初の <code>sub</code> で計算。</li>
+<li><code>A</code> を1語、すなわち4バイトの値の配列と仮定する（第2章全般で断りなければ1語の変数を使っているので）。</li>
+<li>C言語は、ポインタの加算や配列の添字計算では、ポインタの指す値や配列の要素の値のバイト数を勝手に考慮してくれる。 <code>A + 1</code> と <code>&amp;A[1]</code>  はともに「Aのアドレス + 4バイト」を表す。</li>
+<li>MIPSはバイトアドレッシングなので、 <code>A + (i - j)</code> を計算するために <code>4 * (i - j)</code> がほしい。そのために <code>sll</code> で左シフトする。</li>
+<li><code>add</code> で <code>A + (i - j)</code> を計算し、 <code>$t0</code> にそのアドレスを格納。</li>
+<li><code>lw</code> で <code>$t0</code> のアドレスの値を読み取る。 <code>lw</code> は、結果を格納するレジスタとメモリアドレスのベース値を指すレジスタで同じものを使える。</li>
+<li><code>B</code> も4バイトの値の配列と仮定する。 <code>&amp;B[8] == B + 8</code> は「Bのアドレス + 4*8バイト」であり、 <code>B</code> のベースアドレスは <code>$s6</code> なので、格納先は <code>32($s7)</code> になる。</li>
+</ul>
+<h2><span id="24">2.4</span></h2><h5><span id="問題">問題</span></h5><p>下のMIPSアセンブリ命令に対応するCステートメントを示せ．変数f，g，h，i，jはレジスタ$s0，$s1，$s2，$s3，$s4にそれぞれ割り当てられている，と想定する．また，配列AおよびBのベース・アドレスはレジスタ$s6と$s7にそれぞれ収められている，と想定する．</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">sll  $t0, $s0, 2    # $t0 &#x3D; f * 4</span><br><span class="line">add  $t0, $s6, $t0  # $t0 &#x3D; &amp;A[f]</span><br><span class="line">sll  $t1, $s1, 2    # $t1 &#x3D; g * 4</span><br><span class="line">add  $t1, $s7, $t1  # $t1 &#x3D; &amp;B[g]</span><br><span class="line">lw   $s0, 0($t0)    # f &#x3D; A[f]</span><br><span class="line">addi $t2, $t0, 4</span><br><span class="line">lw   $t0, 0($t2)</span><br><span class="line">add  $t0, $t0, $s0</span><br><span class="line">sw   $t0, 0($t1)</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解答">解答</span></h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">B[g] = A[f] + A[f + <span class="number">1</span>];</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解説">解説</span></h5><p>まずは、問題のMIPSを各行対応で愚直にCコードに落としていく。ただし、</p>
+<ul>
+<li>一時変数はすべて <code>int</code> 型を使う。 <code>int *</code> 型を持ち出すと、バイトアドレッシングのためにMIPSで行っている <code>* 4</code> の計算がCで現れなくなり対応が難しくなるため。</li>
+<li>一時変数は、レジスタと名前を合わせる。 <code>$t0</code> に対応する一時変数は <code>t0</code> とする。ただし、同じレジスタに値を上書きするケースでは、 <code>t0_v2</code> のように、何度目の上書きかをバージョン表記した命名を使う。</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> t0 = f &lt;&lt; <span class="number">2</span>;              <span class="comment">// sll  $t0, $s0, 2</span></span><br><span class="line"><span class="keyword">int</span> t0_v2 = (<span class="keyword">int</span>)A + t0;      <span class="comment">// add  $t0, $s6, $t0</span></span><br><span class="line"><span class="keyword">int</span> t1 = g &lt;&lt; <span class="number">2</span>;              <span class="comment">// sll  $t1, $s1, 2</span></span><br><span class="line"><span class="keyword">int</span> t1_v2 = (<span class="keyword">int</span>)B + t1;      <span class="comment">// add  $t1, $s7, $t1</span></span><br><span class="line"><span class="keyword">int</span> s0_v2 = *((<span class="keyword">int</span> *)t0_v2);  <span class="comment">// lw   $s0, 0($t0)</span></span><br><span class="line"><span class="keyword">int</span> t2 = t0_v2 + <span class="number">4</span>;           <span class="comment">// addi $t2, $t0, 4</span></span><br><span class="line"><span class="keyword">int</span> t0_v3 = *((<span class="keyword">int</span> *)t2);     <span class="comment">// lw   $t0, 0($t2)</span></span><br><span class="line"><span class="keyword">int</span> t0_v4 = t0_v3 + s0_v2;    <span class="comment">// add  $t0, $t0, $s0</span></span><br><span class="line">*((<span class="keyword">int</span> *)t1_v2) = *t0_v4;     <span class="comment">// sw   $t0, 0($t1)</span></span><br></pre></td></tr></table></figure>
+
+<p>はじめの2行は、</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> t0_v2 = (<span class="keyword">int</span>)A + (f &lt;&lt; <span class="number">2</span>);</span><br></pre></td></tr></table></figure>
+
+<p>と書き直せる。 <code>int *</code> 型の <code>A</code> をわざわざ <code>int</code> 型にキャストしなければ、これは</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> t0_v2 = (<span class="keyword">int</span>)(A + f);</span><br></pre></td></tr></table></figure>
+
+<p>すなわち</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> t0_v2 = (<span class="keyword">int</span>)(&amp;A[f]);</span><br></pre></td></tr></table></figure>
+
+<p>と同じである。</p>
+<p>次の2行も同様にして</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> t1_v2 = (<span class="keyword">int</span>)(&amp;B[g]);</span><br></pre></td></tr></table></figure>
+
+<p>とできる。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> s0_v2 = *((<span class="keyword">int</span> *)t0_v2);</span><br></pre></td></tr></table></figure>
+
+<p>の箇所は、最初の2行で <code>t0_v2</code> に格納した <code>&amp;A[f]</code> の指す値を <code>s0_v2</code> に格納しているだけである。<br>つまり、最初の5行はこのように短縮化できる。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> t1_v2 = (<span class="keyword">int</span>)(&amp;B[g]);</span><br><span class="line"><span class="keyword">int</span> t0_v2 = (<span class="keyword">int</span>)A[f];</span><br><span class="line"><span class="keyword">int</span> s0_v2 = A[f];</span><br></pre></td></tr></table></figure>
+
+<p>6行目では、 <code>t0_v2 + 4 == ((int)A + 4*f) + 4 == (int)A + 4*(f + 1) == (int)(&amp;A[f + 1])</code> を計算している。<br>7行目で、これが指す値を <code>t0_v3</code> へ代入しているので、結局 <code>int t0_v3 = A[f + 1]</code> となる。<br>つまり、7行目まではこのように短縮化できる。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> t1_v2 = (<span class="keyword">int</span>)(&amp;B[g]);</span><br><span class="line"><span class="keyword">int</span> t0_v2 = (<span class="keyword">int</span>)A[f];</span><br><span class="line"><span class="keyword">int</span> s0_v2 = A[f];</span><br><span class="line"><span class="keyword">int</span> t0_v3 = A[f + <span class="number">1</span>];</span><br></pre></td></tr></table></figure>
+
+<p>そして8行目で <code>s0_v2</code> と <code>t0_v3</code> 、すなわち <code>A[f]</code> と <code>A[f + 1]</code> を足している。</p>
+<p>最後の9行目で、その足した結果を <code>t1_v2</code> のアドレス <code>&amp;B[g]</code> に格納している。</p>
+<p>以上より、最終的に</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">B[g] = A[f] + A[f + <span class="number">1</span>];</span><br></pre></td></tr></table></figure>
+
+<p>まで短縮化することができる。</p>
+<h2><span id="25">2.5</span></h2><h5><span id="問題">問題</span></h5><p>問題2.4のMIPSアセンブリ命令と同じ機能を果たすのに必要な，（可能であれば）MIPSの命令の数を最小にするように，アセンブリ・コードを書き直せ．</p>
+<h5><span id="解答">解答</span></h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"># $t0 &#x3D; &amp;A[f]</span><br><span class="line">sll  $t0, $s0, 2</span><br><span class="line">add  $t0, $s6, $t0</span><br><span class="line"></span><br><span class="line"># $s0 &#x3D; A[f]</span><br><span class="line">lw   $s0, 0($t0)</span><br><span class="line"></span><br><span class="line"># $t0 &#x3D; A[f + 1]</span><br><span class="line">lw   $t0, 4($t0)</span><br><span class="line"></span><br><span class="line"># $t0 &#x3D; A[f] + A[f + 1]</span><br><span class="line">add  $t0, $s0, $t0</span><br><span class="line"></span><br><span class="line"># $t1 &#x3D; &amp;B[g]</span><br><span class="line">sll  $t1, $s1, 2</span><br><span class="line">add  $t1, $s7, $t1</span><br><span class="line"></span><br><span class="line"># *(&amp;B[g]) &#x3D; A[f] + [f + 1]</span><br><span class="line">sw   $t0, 0($t1)</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解説">解説</span></h5><ul>
+<li>2.4 のアセンブリでは、添字 <code>f + 1</code> を計算するのに <code>addi $t2, f, 4</code> を使っていた。しかし添字の中の <code>+1</code> では、アドレスのオフセットを表現したいだけなので、 <code>lw</code> 命令で <code>4($?)</code> とオフセットを使えばよい。</li>
+<li>余分な <code>addi</code> が減らせて、9命令が8命令になった。</li>
+<li>これが最小の命令数であることを証明するのは難しいので割愛😅</li>
+</ul>
+<h2><span id="26">2.6</span></h2><p>下の表はメモリ内に格納されている配列の32ビットの値を示す．</p>
+<table>
+<thead>
+<tr>
+<th>アドレス</th>
+<th>データ</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>24</td>
+<td>2</td>
+</tr>
+<tr>
+<td>28</td>
+<td>4</td>
+</tr>
+<tr>
+<td>32</td>
+<td>3</td>
+</tr>
+<tr>
+<td>36</td>
+<td>6</td>
+</tr>
+<tr>
+<td>40</td>
+<td>1</td>
+</tr>
+</tbody></table>
+<p><strong>2行目のアドレスは本には38と表記されていたが、4バイトずつにアラインされるべきなので28の誤植と判断した。</strong></p>
+<h3><span id="261">2.6.1</span></h3><h5><span id="問題">問題</span></h5><p>上の表に関して，データを昇順にソートして，最小の値を最小のメモリ・ロケーションに収める，Cコードを書け．示されたデータは，Arrayという名のC変数であり，int型の配列を構成し，配列中に示されている最初の数値は配列の最初の要素である，と想定する．また，このマシンはバイト・アドレス方式であり，1語は4バイトで構成される，と想定する．</p>
+<h5><span id="解答">解答</span></h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> tmp;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Array[0]</span></span><br><span class="line">tmp = Array[<span class="number">0</span>];</span><br><span class="line">Array[<span class="number">0</span>] = Array[<span class="number">4</span>];</span><br><span class="line">Array[<span class="number">4</span>] = tmp;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Array[1]</span></span><br><span class="line">tmp = Array[<span class="number">1</span>];</span><br><span class="line">Array[<span class="number">1</span>] = Array[<span class="number">4</span>];  <span class="comment">// はじめ Array[0] だった値</span></span><br><span class="line">Array[<span class="number">4</span>] = tmp;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Array[2] : 不要</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Array[3]</span></span><br><span class="line">tmp = Array[<span class="number">3</span>];</span><br><span class="line">Array[<span class="number">3</span>] = Array[<span class="number">4</span>];  <span class="comment">// はじめ Array[1] だった値</span></span><br><span class="line">Array[<span class="number">4</span>] = tmp;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Array[4] : Array[3] の処理で、はじめ Array[3] だった値に既になっている</span></span><br></pre></td></tr></table></figure>
+
+<h5><span id="解説">解説</span></h5><p>題意がわかりにくいが、 <code>&amp;Array[0] == (int *)24</code> なのだと解釈する。そして、 <code>Array</code> 配列を in-place で昇順ソートする問題だと解釈する。</p>
+<p>表に添字の列も加えると、元の配列は下記。</p>
+<table>
+<thead>
+<tr>
+<th>アドレス</th>
+<th>添字</th>
+<th>データ</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>24</td>
+<td>0</td>
+<td>2</td>
+</tr>
+<tr>
+<td>28</td>
+<td>1</td>
+<td>4</td>
+</tr>
+<tr>
+<td>32</td>
+<td>2</td>
+<td>3</td>
+</tr>
+<tr>
+<td>36</td>
+<td>3</td>
+<td>6</td>
+</tr>
+<tr>
+<td>40</td>
+<td>4</td>
+<td>1</td>
+</tr>
+</tbody></table>
+<p>データの昇順でソートすると下記。</p>
+<table>
+<thead>
+<tr>
+<th>アドレス</th>
+<th>添字</th>
+<th>データ</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>40</td>
+<td>4</td>
+<td>1</td>
+</tr>
+<tr>
+<td>24</td>
+<td>0</td>
+<td>2</td>
+</tr>
+<tr>
+<td>32</td>
+<td>2</td>
+<td>3</td>
+</tr>
+<tr>
+<td>28</td>
+<td>1</td>
+<td>4</td>
+</tr>
+<tr>
+<td>36</td>
+<td>3</td>
+<td>6</td>
+</tr>
+</tbody></table>
+<p>つまり、下記のようにしてやれば良い。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">newArray[<span class="number">0</span>] = Array[<span class="number">4</span>]</span><br><span class="line">newArray[<span class="number">1</span>] = Array[<span class="number">0</span>]</span><br><span class="line">newArray[<span class="number">2</span>] = Array[<span class="number">2</span>]  <span class="comment">// 省略可</span></span><br><span class="line">newArray[<span class="number">3</span>] = Array[<span class="number">1</span>]</span><br><span class="line">newArray[<span class="number">4</span>] = Array[<span class="number">3</span>]</span><br></pre></td></tr></table></figure>
+
+<p>一時変数を1つ用意し、2要素の交換に用いれば、配列の in-place ソートは可能である。</p>
+<h3><span id="262">2.6.2</span></h3><h5><span id="問題">問題</span></h5><p>上の表に関して，データを昇順にソートして，最小の値を最小のメモリ・ロケーションに収める，MIPSコードを書け．最小の数のMIPS命令を使用するようにせよ．Arrayのベース・アドレスはレジスタ$s6に収められているものとする．</p>
+<h5><span id="解答">解答</span></h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"># 各変数のレジスタへの割付:</span><br><span class="line">#   $s6 &#x3D; A    (問題文で指定)</span><br><span class="line"></span><br><span class="line">lw  $t0, 0($s6)</span><br><span class="line">lw  $t1, 4($s6)</span><br><span class="line">lw  $t3, 12($s6)</span><br><span class="line">lw  $t4, 16($s6)</span><br><span class="line"></span><br><span class="line">sw  $t4, 0($t0)</span><br><span class="line">sw  $t0, 0($t1)</span><br><span class="line">sw  $t1, 0($t3)</span><br><span class="line">sw  $t3, 0($t4)</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解説">解説</span></h5><p>この問題では命令数の最小化が求められる。<br>先のCのコードでは一時変数の数を最小化したが、それ故に毎回 <code>Array[4] = tmp</code> のような書き戻しが必要になっていた。それを防ぐため、一時レジスタをふんだんに使う。</p>
+<p>まずはCでコードを書く。一時変数 <code>t0</code> は、後でMIPSコードを考えるときに一時レジスタ <code>$t0</code> に割付けられる。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> t0, t1, t3;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Array[0]</span></span><br><span class="line">t0 = Array[<span class="number">0</span>];</span><br><span class="line">Array[<span class="number">0</span>] = Array[<span class="number">4</span>];</span><br><span class="line"></span><br><span class="line"><span class="comment">// Array[1]</span></span><br><span class="line">t1 = Array[<span class="number">1</span>];</span><br><span class="line">Array[<span class="number">1</span>] = Array[<span class="number">0</span>];</span><br><span class="line"></span><br><span class="line"><span class="comment">// Array[2] : 不要</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Array[3]</span></span><br><span class="line">t3 = Array[<span class="number">3</span>];</span><br><span class="line">Array[<span class="number">3</span>] = Array[<span class="number">1</span>];</span><br><span class="line"></span><br><span class="line"><span class="comment">// Array[4]</span></span><br><span class="line">Array[<span class="number">4</span>] = Array[<span class="number">3</span>];</span><br></pre></td></tr></table></figure>
+
+<p>MIPSではメモリからメモリへのコピーはできないので、 <code>Array[0] = Array[4]</code> などはレジスタを使うように書き換える必要がある。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> t0, t1, t3, t4;</span><br><span class="line"></span><br><span class="line">t0 = Array[<span class="number">0</span>];</span><br><span class="line">t1 = Array[<span class="number">1</span>];</span><br><span class="line">t3 = Array[<span class="number">3</span>];</span><br><span class="line">t4 = Array[<span class="number">4</span>];</span><br><span class="line"></span><br><span class="line"><span class="comment">// Array[0]</span></span><br><span class="line">Array[<span class="number">0</span>] = t4;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Array[1]</span></span><br><span class="line">Array[<span class="number">1</span>] = t0;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Array[2] : 不要</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Array[3]</span></span><br><span class="line">Array[<span class="number">3</span>] = t1;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Array[4]</span></span><br><span class="line">Array[<span class="number">4</span>] = t3;</span><br></pre></td></tr></table></figure>
+
+<p>随分シンプルになった。これを愚直にMIPSに落とし込んで解答を得る。</p>
+<p>命令数は8になったが、これは最小である。<a href="https://inst.eecs.berkeley.edu/~cs61c/resources/MIPS_Green_Sheet.pdf" target="_blank" rel="noopener">MIPS Reference Data</a>によると、以下が言えるため。</p>
+<ul>
+<li>メモリ上の4バイトの値をレジスタにロードするためには <code>lw</code> 1命令が必要。</li>
+<li>レジスタの4バイトの値をメモリににストアするためには <code>sw</code> 1命令が必要。</li>
+<li>メモリ同士のアドレッシングモードは存在しないので、配列の値を読んで配列の値に代入するには、 <code>lw, sw</code> の2命令が必要。</li>
+<li>配列の4つの要素に関してメモリのロード・ストアが必要なので、最低でも8命令が必要。</li>
+</ul>
+<h2><span id="27">2.7</span></h2><h5><span id="問題">問題</span></h5><p>値0xabcdef12がリトル・エンディアン方式およびビッグ・エンディアン方式のマシンのメモリにどのように収められるかを示せ．データを格納するアドレスは0から始まるものとする．</p>
+<h5><span id="解答">解答</span></h5><ul>
+<li>ビッグエンディアン: <code>1010 1011  1100 1101  1110 1111  0001 0010</code></li>
+<li>リトルエンディアン: <code>0001 0010  1110 1111  1100 1101  1010 1011</code></li>
+</ul>
+<h5><span id="解説">解説</span></h5><p>16進数は1桁で4ビット、2桁で1バイトなので、 0xabcdef12 は4バイトである。</p>
+<p>左から書き下せるビッグエンディアンの方から。</p>
+<ul>
+<li><code>0xab</code> : <code>0xa</code> は10進数で <code>10</code>, 2進数で <code>1010</code>。 <code>0xb</code> は2進数で <code>1011</code>。 したがって、 <code>0xab</code> は2進数で <code>1010 1011</code> 。</li>
+<li><code>0xcd</code> : 2進数で <code>1100 1101</code>。</li>
+<li><code>0xef</code> : 2進数で <code>1110 1111</code>。</li>
+<li><code>0x12</code> : 2進数で <code>0001 0010</code>。</li>
+</ul>
+<p>以上より、 <code>0xabcdef12</code> をビッグエンディアンで2進数表記すると <code>1010 1011  1100 1101  1110 1111  0001 0010</code> 。</p>
+<p>リトルエンディアンは、これを各バイトごとに区切って反転すれば良いので、 <code>0001 0010  1110 1111  1100 1101  1010 1011</code></p>
+<h2><span id="28">2.8</span></h2><h5><span id="問題">問題</span></h5><p>0xabcdef12を10進数に変換せよ．</p>
+<h5><span id="解答">解答</span></h5><p>2882400018</p>
+<h5><span id="解説">解説</span></h5><p><code>0xabcdef12 == 0xab * 16^6 + 0xcd * 16^4 + 0xef * 16^2 + 0x12 * 16^0 == 2882400018</code></p>
+<h2><span id="29">2.9</span></h2><h5><span id="問題">問題</span></h5><p>下のCコードをMIPSに変換せよ．変数f，g，h，i，jはレジスタ$s0，$s1，$s2，$s3，$s4にそれぞれ割り当てられている，と想定する．また，配列AおよびBのベース・アドレスはレジスタ$s6と$s7にそれぞれ収められている，と想定する．配列AおよびBの要素は4バイトからなる語であるものとする．</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">B[<span class="number">8</span>] = A[i] - B[j];</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解答">解答</span></h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"># $t0 &#x3D; A[i]</span><br><span class="line">sll  $t0, $s3, 2</span><br><span class="line">add  $t0, $s6, $t0</span><br><span class="line">lw   $t0, 0($t0)</span><br><span class="line"></span><br><span class="line"># $t1 &#x3D; B[j]</span><br><span class="line">sll  $t1, $s4, 2</span><br><span class="line">add  $t1, $s7, $t1</span><br><span class="line">lw   $t1, 0($t1)</span><br><span class="line"></span><br><span class="line"># $t1 &#x3D; A[i] - B[j]</span><br><span class="line">sub  $t1, $t0, $t1</span><br><span class="line"></span><br><span class="line"># B[8] &#x3D; A[i] - B[j]</span><br><span class="line">sw  $t1, 32($s7)</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解説">解説</span></h5><p>2.3 と同様。</p>
+<h2><span id="210">2.10</span></h2><h5><span id="問題">問題</span></h5><p>下のMIPSコードをCに変換せよ．変数f，g，h，i，jはレジスタ$s0，$s1，$s2，$s3，$s4にそれぞれ割り当てられている，と想定する．また，配列AおよびBのベース・アドレスはレジスタ$s6と$s7にそれぞれ収められている，と想定する．</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">addi $t0, $s6, 4</span><br><span class="line">add  $t1, $s6, $zero</span><br><span class="line">sw   $t1, 0($t0)</span><br><span class="line">lw   $t0, 0($t0)</span><br><span class="line">add  $s0, $t1, $t0</span><br></pre></td></tr></table></figure>
+
+<p><strong>2行目のaddの第3オペランドは、本には <code>$0</code> とあるが、わかりやすさのために <code>$zero</code> と表記（レジスタ指定子0はゼロレジスタに対応）。</strong></p>
+<h5><span id="解答">解答</span></h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">A[<span class="number">1</span>] = (<span class="keyword">int</span>)A;</span><br><span class="line">f = <span class="number">2</span> * (<span class="keyword">int</span>)A;</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解説">解説</span></h5><p>2.4 と同様に、問題のMIPSを各行対応で愚直にCコードに落としていく。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> t0 = (<span class="keyword">int</span>)A + <span class="number">4</span>;       <span class="comment">// addi $t0, $s6, 4</span></span><br><span class="line"><span class="keyword">int</span> t1 = (<span class="keyword">int</span>)A;           <span class="comment">// add  $t1, $s6, $zero</span></span><br><span class="line">*((<span class="keyword">int</span> *)t0) = t1;         <span class="comment">// sw   $t1, 0($t0)</span></span><br><span class="line"><span class="keyword">int</span> t0_v2 = *((<span class="keyword">int</span> *)t0);  <span class="comment">// lw   $t0, 0($t0)</span></span><br><span class="line">f = t1 + t0_v2;            <span class="comment">// add  $s0, $t1, $t0</span></span><br></pre></td></tr></table></figure>
+
+<p>各行をより自然にする。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> *t0 = &amp;A[<span class="number">1</span>];</span><br><span class="line"><span class="keyword">int</span> *t1 = &amp;A[<span class="number">0</span>];</span><br><span class="line">A[<span class="number">1</span>] = (<span class="keyword">int</span>)&amp;A[<span class="number">0</span>];</span><br><span class="line"><span class="keyword">int</span> t0_v2 = A[<span class="number">1</span>];             <span class="comment">// A[1] == (int)&amp;A[0]</span></span><br><span class="line">f = (<span class="keyword">int</span>)&amp;A[<span class="number">0</span>] + (<span class="keyword">int</span>)&amp;A[<span class="number">0</span>];  <span class="comment">// &amp;A[0] == A</span></span><br></pre></td></tr></table></figure>
+
+<p>発生している副作用は <code>A[1]</code> への代入と <code>f</code> への代入（それ以外は一時変数への代入）なので、その2行だけにまとめると下記。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">A[<span class="number">1</span>] = (<span class="keyword">int</span>)A;</span><br><span class="line">f = <span class="number">2</span> * (<span class="keyword">int</span>)A;</span><br></pre></td></tr></table></figure>
+
+<h2><span id="211">2.11</span></h2><h5><span id="問題">問題</span></h5><p>MIPSの各命令について，命令操作コード（OP），ソース・レジスタ（SR），ターゲット・レジスタ（TR）の各フィールドの値を示せ．I形式命令については，即値フィールドの値を示せ．R形式命令については，デスティネーション・レジスタ（DR）フィールドの値を示せ．</p>
+<p><strong>「MIPSの各命令」が何を指すか曖昧だが、原著によると、2.10の5つの命令のことを指している模様。</strong></p>
+<h5><span id="解答">解答</span></h5><p>各フィールドのエンコーディングはビッグエンディアンとする。</p>
+<p>| 命令 | 命令形式 | OP<br><code>bin</code> | SR<br><code>bin</code> | TR<br><code>bin</code> | DR<br><code>bin</code> | 即値<br><code>bin</code> |<br>|——|———-|—-|—-|—-|—-|<br>| addi $t0, $s6, 4 | I | addi<br><code>000100</code> | $s6<br><code>10110</code> | $t0<br><code>00100</code> | - | 4<br><code>00000000 00000100</code> |<br>| add  $t1, $s6, $zero | R | add<br><code>000000</code> | $s6<br><code>10110</code> | $zero<br><code>00000</code> | $t1<br><code>00101</code> | - |<br>| sw   $t1, 0($t0) | I | sw<br><code>000010</code> | $t0<br><code>00100</code> | $t1<br><code>00101</code> | - | 0<br><code>00000000 00000000</code> |<br>| lw   $t0, 0($t0) | I | lw<br><code>010111</code> | $t0<br><code>00100</code> | $t0<br><code>00100</code> | - | 0<br><code>00000000 00000000</code> |<br>| add  $s0, $t1, $t0 | R | add<br><code>000000</code> | $t1<br><code>00101</code> | $t0<br><code>00100</code> | $s0<br><code>10000</code> | - |</p>
+<h5><span id="解説">解説</span></h5><p><a href="https://inst.eecs.berkeley.edu/~cs61c/resources/MIPS_Green_Sheet.pdf" target="_blank" rel="noopener">MIPS Reference Data</a> と照らし合わせていく。</p>
+<ul>
+<li>最初の <code>addi</code> に関し、Referenceから読み取れること:<ul>
+<li>命令形式がI</li>
+<li>opcode は 0x8。opcodeは31~26ビット目の6桁で表されるので、 <code>000100</code> 。</li>
+<li><code>R[rt] = R[rs] + SignExtImm</code> なので、 <code>$s6</code> がrs, <code>$t0</code> がrt。</li>
+<li>rsは25<del>21ビット目の5桁、rtは20</del>15ビット目の5桁。</li>
+<li>“REGISTER NAME, NUMBER, USE, CALL CONVENTION” によると、<code>$s0 - $s7</code> は 16 - 23 で表されるので、 <code>$s6</code> は10進数で22であり、 <code>10110</code> 。</li>
+<li><code>$t0 - $t7</code> は 8 - 15 で表されるので <code>$t0</code> は <code>00100</code> 。</li>
+<li>I形式の即値は15~0ビット目の16桁で表されるので、10進数の4をビッグエンディアンで表すと <code>00000000 00000100</code> 。</li>
+</ul>
+</li>
+</ul>
+<p>これと同様に各命令を符号化していく。</p>
+<h2><span id="212">2.12</span></h2><p>レジスタ$s0と$s1にそれぞれ値0x80000000と0xD0000000が保持されているとする．</p>
+<h3><span id="2121">2.12.1</span></h3><h5><span id="問題">問題</span></h5><p>下記のアセンブリ・コード中の$t0の値はいくつか．</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">add $t0, $s0, $s1</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解答">解答</span></h5><p>0x50000000</p>
+<h5><span id="解説">解説</span></h5><ul>
+<li>桁あふれを考えなければ、 <code>0x80000000 + 0xD0000000 == 0x150000000</code> 。</li>
+<li>レジスタは4バイトまでしか保持できないので、最左の 0x1 はあふれ、結果として <code>0x50000000</code> となる。</li>
+</ul>
+<h3><span id="2122">2.12.2</span></h3><h5><span id="問題">問題</span></h5><p>$t0中の結果は期待どおりか，それともオーバフローが発生したか．</p>
+<h5><span id="解答">解答</span></h5><p>オーバーフローが発生した。</p>
+<h5><span id="解説">解説</span></h5><p>特になし。</p>
+<h3><span id="2123">2.12.3</span></h3><h5><span id="問題">問題</span></h5><p>上に示されたレジスタ$s0と$s1を使用した，下記のアセンブリ・コード中の$t0の値はいくつか．</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sub $t0, $s0, $s1</span><br></pre></td></tr></table></figure>
+<h5><span id="解答">解答</span></h5><p>0xB0000000</p>
+<h5><span id="解説">解説</span></h5><ul>
+<li><code>sub</code> 命令は、オペランドを符号付き整数として扱う。</li>
+<li><code>0xD0000000 == 0b 1101 0000 00000000 00000000 00000000</code> を符号反転する。2の補数をとって、 <code>0x30000000 == 0b 0011 0000 00000000 00000000 00000000</code> 。<ul>
+<li>1の補数 <code>0b 0010 1111 11111111 11111111 11111111</code> に <code>0b1</code> を足して2の補数が得られる。</li>
+</ul>
+</li>
+<li><code>sub $t0, 0x80000000, 0xD0000000</code> は <code>add $t0, 0x80000000, 0x30000000</code> と同じなので、 <code>$t0 = 0xB0000000</code> を得る。</li>
+</ul>
+<h3><span id="2124">2.12.4</span></h3><h5><span id="問題">問題</span></h5><p>$t0中の結果は期待どおりか，それともオーバフローが発生したか．</p>
+<h5><span id="解答">解答</span></h5><p>期待通り。</p>
+<h5><span id="解説">解説</span></h5><ul>
+<li><code>0x80000000</code> を符号付き4バイト整数とみなし10進数表現すると、 <code>-2,147,483,648</code><ul>
+<li>先頭ビットが1なので負数。</li>
+<li>絶対値を考えるために2の補数を取ると <code>0b 1000 0000 00000000 00000000 00000000</code> となり、また先頭ビットが1となってしまうが、32ビット符号付き整数において <code>0b 1000 0000 00000000 00000000 00000000</code> は最小の負数 <code>-2^31 == -2,147,483,648</code> であることを思い出そう。</li>
+</ul>
+</li>
+<li><code>0xD0000000</code> を符号付き4バイト整数とみなし10進数表現すると、 <code>-805,306,368</code><ul>
+<li>先頭ビットが1なので負数。</li>
+<li>絶対値を考えるために2の補数を取ると <code>0x30000000</code> 。したがって10進数表現すると <code>- 3 * (16^7) == -805,306,368</code>となる。</li>
+</ul>
+</li>
+<li><code>-2,147,483,648 - (-805,306,368) == -1,342,177,280</code> であり、これを符号付き4バイト変数として16進数表現すると <code>0B0000000</code> となる。</li>
+<li>したがって、2.12.3 の回答の <code>0xB0000000</code> は期待通りの計算値である。</li>
+</ul>
+<h3><span id="2125">2.12.5</span></h3><h5><span id="問題">問題</span></h5><p>上に示されたレジスタ$s0と$s1を使用した，下記のアセンブリ・コード中の$t0の値はいくつか．</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">add $t0, $s0, $s1</span><br><span class="line">add $t0, $t0, $s0</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解答">解答</span></h5><p>0xD0000000</p>
+<h5><span id="解説">解説</span></h5><ul>
+<li><code>add $t0, $s0, $s1</code> は <code>add $t0, 0x80000000, 0xD0000000</code> なので、 0x50000000 (オーバーフローしている)</li>
+<li><code>add $t0, $t0, $s0</code> は <code>add $t0, 0x50000000, 0x80000000</code> なので、 0xD0000000 (オーバーフローしていない)</li>
+</ul>
+<h3><span id="2126">2.12.6</span></h3><h5><span id="問題">問題</span></h5><p>$t0中の結果は期待どおりか，それともオーバフローが発生したか．</p>
+<h5><span id="解答">解答</span></h5><p>オーバーフローが発生した</p>
+<h5><span id="解説">解説</span></h5><p>桁あふれを気にしなければ、</p>
+<ul>
+<li><code>0x80000000 + 0xD0000000 == 0x150000000</code></li>
+<li><code>0x150000000 + 0x80000000 == 0x1D0000000</code></li>
+</ul>
+<p>2.12.5 の結果と比べ、オーバーフローしていることがわかる。</p>
+<h2><span id="213">2.13</span></h2><p>$s0に値 \((128)_{10}\) が保持されているものとする．</p>
+<h3><span id="2131">2.13.1</span></h3><h5><span id="問題">問題</span></h5><p>命令add $t0,$s0,$s1に関して，結果がオーバフローを起こすのは，$s1の値の範囲がどういうときか．</p>
+<h5><span id="解答">解答</span></h5><p>\(2^{31} - 128 \le $s1 \le 2^{31} - 1\) の場合にオーバーフロー。</p>
+<h5><span id="解説">解説</span></h5><ul>
+<li>\((128)_{10}\) は正の数なので、 <code>add</code> でオーバーフローが起こるのは <code>$s1</code> が正の数の場合のみ。</li>
+<li>符号付き4バイト整数が扱える上限値は \((01111111\ 11111111\ 11111111\ 11111111)_2 == (2^{31} - 1)_{10}\) 。</li>
+<li>\(128 + $s1 &gt; 2^{31} - 1\) つまり \($s1 &gt; 2^{31} - 129\) ならばオーバーフロー。</li>
+</ul>
+<h3><span id="2132">2.13.2</span></h3><h5><span id="問題">問題</span></h5><p>命令sub $t0,$s0,$s1に関して，結果がオーバフローを起こすのは，$s1の値の範囲がどういうときか．</p>
+<h5><span id="解答">解答</span></h5><p>\(-2^{31} \le $s1 \le -2^{31} + 128\) の場合にオーバーフロー。</p>
+<h5><span id="解説">解説</span></h5><ul>
+<li>\((128)_{10}\) は正の数なので、 <code>sub</code> でオーバーフローが起こるのは <code>$s1</code> が負の数の場合のみ。</li>
+<li>符号付き4バイト整数が扱える値の範囲は \([-2^{31}, 2^{31} - 1]\) 。</li>
+<li>\(128 - $s1 &gt; 2^{31} - 1\) つまり \($s1 &lt; -2^{31} + 129\) ならばオーバーフロー。</li>
+</ul>
+<h3><span id="2133">2.13.3</span></h3><h5><span id="問題">問題</span></h5><p>命令sub $t0,$s1,$s0に関して，結果がオーバフローを起こすのは，$s1の値の範囲がどういうときか．</p>
+<h5><span id="解答">解答</span></h5><p>\(-2^{31} \le $s1 \le -2^{31} + 127\) の場合にオーバーフロー。</p>
+<h5><span id="解説">解説</span></h5><ul>
+<li><code>sub $t0, $s1, 128</code> は <code>add $t0, $s1, -128</code> と同じ。</li>
+<li>\((-128)_{10}\) は負の数なので、 <code>sub</code> でオーバーフローが起こるのは <code>$s1</code> が負の数の場合のみ。</li>
+<li>符号付き4バイト整数が扱える値の範囲は \([-2^{31}, 2^{31} - 1]\) 。</li>
+<li>\($s1 - 128 &lt; 2^{31}\) つまり \($s1 &lt; -2^{31} + 128\) ならばオーバーフロー。</li>
+</ul>
+<h2><span id="214">2.14</span></h2><h5><span id="問題">問題</span></h5><p>2進値 0000 0010 0001 0000 1000 0000 0010 0000 のアセンブリ言語命令と形式を示せ．</p>
+<h5><span id="解答">解答</span></h5><p><code>add $s0, $s0, $s0</code>, R形式。</p>
+<h5><span id="解説">解説</span></h5><p><a href="https://inst.eecs.berkeley.edu/~cs61c/resources/MIPS_Green_Sheet.pdf" target="_blank" rel="noopener">MIPS Reference Data</a> と照らし合わせていく。</p>
+<ul>
+<li>31 ~ 26ビット目のopcodeは <code>000000</code> 。この時点で可能性のある命令は <code>add</code>, <code>addu</code>, <code>and</code>, <code>jr</code>, <code>nor</code>, <code>or</code>, <code>slt</code>, <code>sltu</code>, <code>sll</code>, <code>srl</code>, <code>sub</code>, <code>subu</code> 。<ul>
+<li>2章まででは “CORE INSTRUCTION SET” しか扱っていないので、 “ARITHMETIC CORE INSTRUCTION SET” は無視😏</li>
+</ul>
+</li>
+<li>これらはいずれもR形式なので、5 ~ 0ビット目はfunct。その値は \((100000)_2 == (20)_{16}\) 。 <code>add</code> がこれに該当。</li>
+<li><code>add</code> はR形式なので、<ul>
+<li>25 ~ 21ビット目はrsで、 \((10000)_2 == (16)_{10}\) 。つまり <code>$s0</code> 。</li>
+<li>20 ~ 16ビット目はrtで、 \((10000)_2 == (16)_{10}\) 。つまり <code>$s0</code> 。</li>
+<li>15 ~ 11ビット目はrdで、 \((10000)_2 == (16)_{10}\) 。つまり <code>$s0</code> 。</li>
+<li>10 ~ 6ビット目はshamtで、 <code>00000</code> 。 <code>add</code> においてはshamtは使われない。</li>
+<li>5 ~ 0 ビット目はfunctで、 <code>100000</code> 。</li>
+</ul>
+</li>
+</ul>
+<h2><span id="215">2.15</span></h2><h5><span id="問題">問題</span></h5><p>命令sw $t1,32($t2)の16進数表現と形式を示せ．</p>
+<h5><span id="解答">解答</span></h5><p>0xAD490020, I形式。</p>
+<h5><span id="解説">解説</span></h5><p><a href="https://inst.eecs.berkeley.edu/~cs61c/resources/MIPS_Green_Sheet.pdf" target="_blank" rel="noopener">MIPS Reference Data</a> と照らし合わせていく。</p>
+<ul>
+<li><code>sw</code> はI形式命令なので、<ul>
+<li>31 ~ 26ビット目はopcodeで、 <code>0x2b == 0b101011</code> 。</li>
+<li>25 ~ 21ビット目はrsで <code>$t2</code> 。エンコーディングは <code>10 == 0b01010</code> 。</li>
+<li>20 ~ 16ビット目はrtで <code>$t1</code> 。エンコーディングは <code>9 == 0b01001</code> 。</li>
+<li>15 ~ 0ビット目はimmediateで <code>32</code> 。エンコーディングは <code>32 == 0b 00000000 00100000</code> 。</li>
+<li>全体で <code>0b 1010 1101 0100 1001 0000 0000 0010 0000 == 0x A D 4 9 0 0 2 0</code></li>
+</ul>
+</li>
+</ul>
+<h2><span id="216">2.16</span></h2><h5><span id="問題">問題</span></h5><p>下記のMIPSのフィールドによって表される命令の，形式，アセンブリ言語命令，および2進数表現を示せ．</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">op&#x3D;0, rs&#x3D;3, rt&#x3D;2, rd&#x3D;3, shamt&#x3D;0, funct&#x3D;34</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解答">解答</span></h5><p>R形式, <code>sub $v1, $v1, $v0</code>, <code>0b 0000 0000 0110 0010 0001 1000 0010 0010</code></p>
+<h5><span id="解説">解説</span></h5><p><a href="https://inst.eecs.berkeley.edu/~cs61c/resources/MIPS_Green_Sheet.pdf" target="_blank" rel="noopener">MIPS Reference Data</a> と照らし合わせていく。</p>
+<ul>
+<li>functがあるのでR形式。</li>
+<li>アセンブリ言語命令:<ul>
+<li>op=0, funct=34 (0b10 0010 == 0x22) の命令は <code>sub</code> 。</li>
+<li>rs=3 は <code>$v1</code> に対応。</li>
+<li>rt=2 は <code>$v0</code> に対応。</li>
+<li>rd=3 は <code>$v1</code> に対応。</li>
+<li>したがって <code>sub $v1, $v1, $v0</code></li>
+</ul>
+</li>
+<li>2進数表現:<ul>
+<li>31 ~ 26ビット目はopで、 \((0)_{10} == (000000)_2\) 。</li>
+<li>25 ~ 21ビット目はrsで、 \((3)_{10} == (00011)_{2}\) 。</li>
+<li>20 ~ 16ビット目はrtで、 \((2)_{10} == (00010)_{2}\) 。</li>
+<li>15 ~ 11ビット目はrdで、 \((3)_{10} == (00011)_{2}\) 。</li>
+<li>10 ~ 6ビット目はshamtで、\((0)_{10} == (00000)_2\) 。</li>
+<li>5 ~ 0 ビット目はfunctで、\((34)_{10} == (100010)_2\) 。</li>
+<li>全体で <code>0b 000000 00011 00010 00011 00000 100010</code> 。</li>
+</ul>
+</li>
+</ul>
+<h2><span id="217">2.17</span></h2><h5><span id="問題">問題</span></h5><p>下記のMIPSのフィールドによって表される命令の，形式，アセンブリ言語命令，および2進数表現を示せ．</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">op&#x3D;0x23, rs&#x3D;1, rt&#x3D;2, const&#x3D;0x4</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解答">解答</span></h5><p>I形式, <code>lw $v0, 4($at)</code>, <code>0b 0101 1100001 00010 00000000 00000100</code></p>
+<h5><span id="解説">解説</span></h5><p><a href="https://inst.eecs.berkeley.edu/~cs61c/resources/MIPS_Green_Sheet.pdf" target="_blank" rel="noopener">MIPS Reference Data</a> と照らし合わせていく。</p>
+<ul>
+<li>constがあるのでI形式。</li>
+<li>アセンブリ言語命令:<ul>
+<li>op=0x23 の命令は <code>lw</code> 。</li>
+<li>rs=1 は <code>$at</code> に対応。</li>
+<li>rt=2 は <code>$v0</code> に対応。</li>
+<li>const=0x4 は即値 <code>4</code> に対応。</li>
+<li>したがって <code>lw $v0, 4($at)</code></li>
+</ul>
+</li>
+<li>2進数表現:<ul>
+<li>31 ~ 26ビット目はopで、 \((23)_{16} == (010111)_2\) 。</li>
+<li>25 ~ 21ビット目はrsで、 \((1)_{10} == (00001)_{2}\) 。</li>
+<li>20 ~ 16ビット目はrtで、 \((2)_{10} == (00010)_{2}\) 。</li>
+<li>15 ~ 0ビット目はconstで、 \((4)_{10} == (00000000\ 00000100)_{2}\) 。</li>
+<li>全体で <code>0b 010111 00001 00010 00000000 00000100</code> 。</li>
+</ul>
+</li>
+</ul>
+<h2><span id="218">2.18</span></h2><p>MIPSのレジスタ・ファイルの数を128に拡大し，命令セット中の命令の数を４倍に拡大したとする．</p>
+<h3><span id="2181">2.18.1</span></h3><h5><span id="問題">問題</span></h5><p>R形式命令中の各ビット・フィールドのサイズは，上記の変更によって，どのような影響を受けるか．</p>
+<h5><span id="解答">解答</span></h5><p>（設計方針次第なので複数の回答があり得る）</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>opcode</th>
+<th>rs</th>
+<th>rt</th>
+<th>rd</th>
+<th>shamt</th>
+<th>funct</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>今のサイズ [bit]</td>
+<td>6</td>
+<td>5</td>
+<td>5</td>
+<td>5</td>
+<td>5</td>
+<td>6</td>
+</tr>
+<tr>
+<td>拡大後のサイズ [bit]</td>
+<td>8</td>
+<td>7</td>
+<td>7</td>
+<td>7</td>
+<td>3</td>
+<td>0</td>
+</tr>
+</tbody></table>
+<h5><span id="解説">解説</span></h5><p><a href="https://inst.eecs.berkeley.edu/~cs61c/resources/MIPS_Green_Sheet.pdf" target="_blank" rel="noopener">MIPS Reference Data</a> と照らし合わせていく。</p>
+<ul>
+<li>レジスタファイルが32個の今、5bitを使ってレジスタを指定していた。128個になると7bitが必要となる。</li>
+<li>命令数が4倍になった場合、opcodeを2bit増やして8bitにすれば対応はできる。<ul>
+<li>ただし、増える命令がR形式だけならば、functを2bit増やすという手もあり得る。ここでは常識的に、どの形式の命令も4倍程度増えると仮定。</li>
+</ul>
+</li>
+<li>今の命令数は、 “CORE INSTRUCTION SET” と “ARITHMETIC CORE INSTRUCTION SET” を合わせて55個。opcode 6bitで64個表現できるので、 <strong>命令の区別のためには、6bitのopcodeだけで十分で、functフィールドは不要である。</strong><ul>
+<li>4章で、opcodeによりパイプラインの各ステージ全体の制御が成され、functでR命令に関するALU制御が成されることが説明される。考察が浅いが、6bitのopcodeだけにするとID (Instruction Decode)ステージのレイテンシが大きくなりすぎるのかな？</li>
+</ul>
+</li>
+<li>命令長を32bitのまま維持すると仮定すると、opcodeの +2bit とrs, rt, rdの 3 * +2bit の合計 + 8bit を、shamtとfunctから減らす必要がある。<ul>
+<li>55 * 4 個の命令を区別するためには8bitで十分。ここでもfunctは不要。funct分 -6bit 削減できる。<ul>
+<li>今の命令セットと互換性は捨てる方針。</li>
+</ul>
+</li>
+<li>shamt でも2bit削減する必要がある。</li>
+</ul>
+</li>
+</ul>
+<h3><span id="2182">2.18.2</span></h3><h5><span id="問題">問題</span></h5><p>I形式命令中の各ビット・フィールドのサイズは，上記の変更によって，どのような影響を受けるか．</p>
+<h5><span id="解答">解答</span></h5><p>|      | opcode | rs | rt | immediate |<br>|——|——–|—-|—-|—-|——-|——-|<br>| 今のサイズ [bit] | 6 | 5 | 5 | 16 |<br>| 拡大後のサイズ [bit] | 8 | 7 | 7 | 10 |</p>
+<h5><span id="解説">解説</span></h5><ul>
+<li>2.18.1 と同様、opcode, rs, rtはそれぞれ2bit拡大。</li>
+<li>命令長を32bitのまま維持すると仮定すると、immediateは6bit削減する必要がある。</li>
+</ul>
+<h3><span id="2183">2.18.3</span></h3><h5><span id="問題">問題</span></h5><p>上記の２つの変更のそれぞれは，MIPSのアセンブリ・プログラムのサイズを小さくする方向に，どのように働くか．逆に，MIPSのアセンブリ・プログラムのサイズを大きくする方向には，どのように働くか．</p>
+<h5><span id="解答">解答</span></h5><ul>
+<li><p>小さくする方向:</p>
+<ul>
+<li><p>命令の種類が増えたため、今までは複数種類の命令を組み合わせて行った演算が、新しい1つの演算でできるようなケースが期待できる。</p>
+</li>
+<li><p>レジスタの個数が増えたため、レジスタをスタックに退避するためのロード・ストア命令を減らすことができる。</p>
+</li>
+<li><p>レジスタの個数が増えたため、一時変数をスタック上に領域確保せずに直接レジスタ割当できるケースが多くなり、ロード・ストア命令を減らすことができる。</p>
+</li>
+</ul>
+</li>
+<li><p>大きくする方向:</p>
+<ul>
+<li>R命令でshamtが削減されたため、1命令で済んでいたシフトが2命令必要になることがある。</li>
+<li>I命令でimmediateが削減されたため、1命令で済んでいたI命令が2命令必要になることがある。</li>
+</ul>
+</li>
+</ul>
+<h5><span id="解説">解説</span></h5><p>特になし</p>
+<h2><span id="219">2.19</span></h2><p>レジスタの内容が下記のようになっているとする．</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$t0 &#x3D; 0xAAAAAAAA,  $t1 &#x3D; 0x12345678</span><br></pre></td></tr></table></figure>
+
+<h3><span id="2191">2.19.1</span></h3><h5><span id="問題">問題</span></h5><p>上記のレジスタを使用して下記の一連の命令を実行したら，$t2の値はどうなるか．</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sll $t2, $t0, 4</span><br><span class="line">or  $t2, $t2, $t1</span><br></pre></td></tr></table></figure>
+
+<p><strong>本にはsllのshamtが44とあったが、5bitで表せる数値ではないため、4の誤植と判断。</strong></p>
+<h5><span id="解答">解答</span></h5><p><code>0b 1011 1010 1011 1110 1111 1110 1111 1000</code></p>
+<h5><span id="解説">解説</span></h5><p>まず <code>sll $t2, $t0 == 0xAAAAAAAA, 4</code> 。</p>
+<p>\[<br>\begin{eqnarray}<br>  $t2 &amp;\leftarrow&amp; {\rm 0x}AAAAAAAA &lt;&lt; 4 \\<br>      &amp;==&amp;         {\rm 0b}\ 1010\ 1010\ 1010\ 1010\ 1010\ 1010\ 1010\ 1010 &lt;&lt; 4 \\<br>      &amp;==&amp;         {\rm 0b}\ 1010\ 1010\ 1010\ 1010\ 1010\ 1010\ 1010\ 0000<br>\end{eqnarray}<br>\]</p>
+<p>次に <code>or $t2, $t2 == 0b 10101010 10101010 10101010 10100000, $t1 == 0x12345678</code> 。</p>
+<p>\[<br>\begin{eqnarray}<br>  $t2 \leftarrow &amp;{\rm 0b}&amp; 1010\ 1010\ 1010\ 1010\ 1010\ 1010\ 1010\ 0000\ {\rm or}\ {\rm 0x}12345678 \\<br>      ==         &amp;{\rm 0b}&amp; 1010\ 1010\ 1010\ 1010\ 1010\ 1010\ 1010\ 0000\ {\rm or}\ \\<br>                 &amp;{\rm 0b}&amp; 0001\ 0010\ 0011\ 0100\ 0101\ 0110\ 0111\ 1000 \\<br>      ==         &amp;{\rm 0b}&amp; 1011\ 1010\ 1011\ 1110\ 1111\ 1110\ 1111\ 1000<br>\end{eqnarray}<br>\]</p>
+<h3><span id="2192">2.19.2</span></h3><h5><span id="問題">問題</span></h5><p>上記のレジスタを使用して下記の一連の命令を実行したら，$t2の値はどうなるか．</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sll  $t2, $t0, 4</span><br><span class="line">andi $t2, $t2, -1</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解答">解答</span></h5><p><code>0b 1010 1010 1010 1010 1010 1010 1010 0000</code></p>
+<h5><span id="解説">解説</span></h5><p><code>sll</code> は 2.19.1 と全く同じ。</p>
+<p><code>andi $t2, $t2 == 0b 10101010 10101010 10101010 10100000, -1 == 0b 1111 1111 1111 1111 1111 1111 1111 1111</code> を考える。<br><code>-1</code> は全ビットが <code>1</code> なので、これとANDを取ると、元の値のままになる。したがって、</p>
+<p>\[<br>  $t2 \leftarrow $t2\ {\rm and}\ -1 == $t2 == {\rm 0b}\ 1010\ 1010\ 1010\ 1010\ 1010\ 1010\ 1010\ 0000<br>\]</p>
+<h3><span id="2193">2.19.3</span></h3><h5><span id="問題">問題</span></h5><p>上記のレジスタを使用して下記の一連の命令を実行したら，$t2の値はどうなるか．</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">srl  $t2, $t0, 3</span><br><span class="line">andi $t2, $t2, 0xFFFF</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解答">解答</span></h5><p><code>0b 0000 0000 0000 0000 0101 0101 0101 0101</code></p>
+<h5><span id="解説">解説</span></h5><p>まず <code>srl $t2, $t0 == 0xAAAAAAAA, 3</code> 。</p>
+<p>\[<br>\begin{eqnarray}<br>  $t2 &amp;\leftarrow&amp; {\rm 0x}AAAAAAAA &gt;&gt; 3 \\<br>      &amp;==&amp;         {\rm 0b}\ 1010\ 1010\ 1010\ 1010\ 1010\ 1010\ 1010\ 1010 &gt;&gt; 3 \\<br>      &amp;==&amp;         {\rm 0b}\ 0001\ 0101\ 0101\ 0101\ 0101\ 0101\ 0101\ 0101<br>\end{eqnarray}<br>\]</p>
+<p><code>0xFFFF</code> とのANDは、下位2バイトだけを残すマスクと考えられるので、 <code>$t2</code> の上位2バイトが0になり、下位2バイトが保存された値となる。</p>
+<h2><span id="220">2.20</span></h2><h5><span id="問題">問題</span></h5><p>レジスタ$t0のビット16から11までを抽出し，その値でレジスタ$t1のビット31から26までを，残りの26ビットを変更せずに，置き換える，一連の最短の命令を示せ．</p>
+<h5><span id="解答">解答</span></h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">andi $t0, $t0, 0b 00000000 00000001 11111000 00000000</span><br><span class="line">sll  $t0, $t0, 15</span><br><span class="line"></span><br><span class="line">andi $t1, $t1, 0b 00000011 11111111 11111111 11111111</span><br><span class="line"></span><br><span class="line">or $t0, $t0, $t1</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解説">解説</span></h5><ul>
+<li><code>$t0</code> の 16~11ビット目を抽出するために、 <code>$t0 AND 0b 00000000 00000001 11111000 00000000</code> を計算。</li>
+<li>それを <code>$t1</code> の31~26ビット目にぶつけるために15ビット左シフトし、 <code>($t0 AND 0b 00000000 00000001 11111000 00000000) &lt;&lt; 15</code> を計算。</li>
+<li><code>$t1</code> の元々の31~26ビット目を0クリアし、残りの26ビットを保持するために、 <code>$t1 AND 0b 00000011 11111111 11111111 11111111</code> を計算。</li>
+<li><code>(($t0 AND 0b 00000000 00000001 11111000 00000000) &lt;&lt; 15) OR ($t1 AND 0b 00000011 11111111 11111111 11111111)</code> が最終的に得たい数。</li>
+<li>これが最小の命令数であることを証明するのは難しいので割愛😅</li>
+</ul>
+<h2><span id="221">2.21</span></h2><h5><span id="問題">問題</span></h5><p>下記の疑似命令を実現する，最小のMIPS命令セットを示せ．</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">not $t1, $t2   &#x2F;&#x2F; ビット単位の反転</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解答">解答</span></h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nor $t1, $t2, $zero</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解説">解説</span></h5><ul>
+<li><code>NOT x</code> 演算は、例えば <code>NOR x, 0</code> で実現できる。</li>
+<li>MIPSには <code>not</code> 命令はないが <code>nor</code> 命令と <code>$zero</code> レジスタがあるので、シンプルにNOT演算が実現できる。</li>
+</ul>
+<h2><span id="222">2.22</span></h2><h5><span id="問題">問題</span></h5><p>下記のCステートメントと同じ機能を果たす，一連の最短のMIPSアセンブリ命令を示せ．$t1=A，$t2=B，$s1は配列Cのベース・アドレスであるとする．</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">A = C[<span class="number">0</span>] &lt;&lt; <span class="number">4</span>;</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解答">解答</span></h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">lw  $t0, 0($s1)  # C[0] をレジスタにロード</span><br><span class="line">sll $t1, $t0, 4  # A &#x3D; C[0] &lt;&lt; 4</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解説">解説</span></h5><p>特になし</p>
+<h2><span id="223">2.23</span></h2><h5><span id="問題">問題</span></h5><p>$t0に値0x00101000が保持されているとする．下記の一連の命令を実行すると，$t2の値はどうなるか．</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">      slt  $t2, $zero, $t0</span><br><span class="line">      bne  $t2, $zero, ELSE</span><br><span class="line">      j    DONE</span><br><span class="line">ELSE: addi $t2, $t2, 2</span><br><span class="line">DONE:</span><br></pre></td></tr></table></figure>
+
+<p><strong>書籍中の $0 は $zero (ゼロレジスタ) と表記を変えた。</strong></p>
+<h5><span id="解答">解答</span></h5><p>3</p>
+<h5><span id="解説">解説</span></h5><ul>
+<li><code>slt $t2, $zero, $t0</code> で、 <code>0 &lt; 0x00101000</code> の真偽値が <code>$t2</code> にセットされる。 <code>0x00101000</code> は正の数なので <code>$t2 = 1</code> となる。</li>
+<li><code>bne $t2 == 1, $zero, ELSE</code> では “not-equal” が成り立つケースなので、ELSEへ分岐。</li>
+<li><code>addi $t2, $t2 == 1, 2</code> が実行され、 <code>$t2 == 3</code> となる。</li>
+</ul>
+<h2><span id="224">2.24</span></h2><h5><span id="問題">問題</span></h5><p>プログラム・カウンタ（PC）が0x20000000と設定されているとする．アドレス0x40000000をPCに設定するために，MIPSアセンブリ命令のjump(j)を使用することが可能か．それと同じ操作を行うために，MIPSアセンブリ命令のbranch-on-equal(beq)を使用することが可能か．</p>
+<h5><span id="解答">解答</span></h5><ul>
+<li>j 命令の使用は不可。</li>
+<li>beq 命令の使用は不可。</li>
+</ul>
+<h5><span id="解説">解説</span></h5><ul>
+<li><p>j 命令:</p>
+<ul>
+<li><p>本文2.10節の “分岐とジャンプにおけるアドレシング” の項目に記載してあることを要約すると、ジャンプ先のアドレス（バイトアドレッシング）は、</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"> 現在のPCの上位4ビット   j命令のオペランド   00</span><br><span class="line">31              28 27            2  1 0</span><br></pre></td></tr></table></figure></li>
+<li><p>PCが <code>0x20000000</code> のとき、「現在のPCの上位4ビット」は <code>0x2</code> なので、ジャンプできるのは高々 <code>0x2FFFFFF</code> まで。</p>
+</li>
+<li><p>今回のジャンプ先の <code>0x40000000</code> には届かない。</p>
+</li>
+</ul>
+</li>
+<li><p>beq 命令:</p>
+<ul>
+<li>本文2.10節の “分岐とジャンプにおけるアドレシング” の項目に記載してあることを要約すると、<ul>
+<li>PC相対アドレシングを使い、現在のPCから \([-2^{15}, 2^{15} - 1]\) 語離れた命令にジャンプできる。</li>
+</ul>
+</li>
+<li>現在のPCが <code>0x20000000</code> のとき、そこから前方にジャンプできるのは <code>0x2000FFFF</code> まで。 <code>0x40000000</code> には届かない。</li>
+</ul>
+</li>
+</ul>
+<h2><span id="225">2.25</span></h2><p>MIPSの命令セットには，下記の命令は含まれていない．</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">rpt  $t2, loop  # R[rs] &gt; 0 であれば、</span><br><span class="line">                # R[rs] &#x3D; R[rs] - 1, PC &#x3D; PC + 4 + 分岐先アドレス</span><br></pre></td></tr></table></figure>
+
+<h3><span id="2251">2.25.1</span></h3><h5><span id="問題">問題</span></h5><p>MIPSの命令セットにこの命令を組み込むならば，どの命令形式が最も適切であるか．</p>
+<h5><span id="解答">解答</span></h5><p>I形式。</p>
+<h5><span id="解説">解説</span></h5><ul>
+<li>（ラベルの名前や、R[rs] をカウントダウンして0と比較し、0より大きければ分岐先アドレスの直後に戻ることから、 <code>rpt</code> は repeat の略称と思われる）</li>
+<li><code>beq</code> と近しい機能なので、 <code>beq</code> と同じくI形式。</li>
+</ul>
+<h3><span id="2252">2.25.2</span></h3><h5><span id="問題">問題</span></h5><p>この機能を果たすMIPSの一連の命令で最短のものを示せ．</p>
+<h5><span id="解答">解答</span></h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">loop:  ...                 # ループ内処理</span><br><span class="line">       addi $t0, $t0, -1</span><br><span class="line">       bne  $t0, $zero, loop</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解説">解説</span></h5><p><code>$t0</code> をカウントダウン用のレジスタとしている。</p>
+<h2><span id="226">2.26</span></h2><p>下記のMIPSのループがあるとする．</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">LOOP:  slt  $t2, $zero, $t1</span><br><span class="line">       beq  $t2, $zero, DONE</span><br><span class="line">       subi $t1, $t1, 1</span><br><span class="line">       addi $s2, $s2, 2</span><br><span class="line">       j    LOOP</span><br><span class="line">DONE:</span><br></pre></td></tr></table></figure>
+
+<p><strong>書籍中の $0 は $zero と表記を変えた。</strong></p>
+<h3><span id="2261">2.26.1</span></h3><h5><span id="問題">問題</span></h5><p>レジスタ$t1の値が10に初期化されているとする．$t2の初期値がゼロであったならば，レジスタ$t2の値はどうなるか．</p>
+<h5><span id="解答">解答</span></h5><p>0</p>
+<h5><span id="解説">解説</span></h5><ul>
+<li><code>DONE</code> へジャンプするのは、 <code>$t2</code> が0になったとき。</li>
+<li>ループ内で <code>$t1</code> がデクリメントされるので、 <code>$t1</code> の初期値が0以上であれば、必ず <code>DONE</code> へジャンプする。</li>
+</ul>
+<h3><span id="2262">2.26.2</span></h3><h5><span id="問題">問題</span></h5><p>上記のループに相当する，Cコード・ルーチンを書け．ただし，レジスタ$s1，$s2，$t1，$t2はそれぞれ整数A，B，i，tempとする．</p>
+<h5><span id="解答">解答</span></h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> ( ; i != <span class="number">0</span>; ++i) &#123; B += <span class="number">2</span>; &#125;</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解説">解説</span></h5><ul>
+<li>アセンブリから、カウンタ変数は <code>$t1</code> で、カウントダウンに使われている。 <code>$t1</code> は <code>i</code> に割当てられている。</li>
+<li>ループが終了する条件は <code>i == 0</code> になったとき。</li>
+<li>ループ内では、 <code>i</code> のデクリメントと <code>$s2 == B</code> の +2 が行われている。</li>
+<li>for 文を使って自然に書ける。</li>
+</ul>
+<h3><span id="2263">2.26.3</span></h3><h5><span id="問題">問題</span></h5><p>MIPSのアセンブリ・コードで書かれた上記のループに関して，レジスタ$t1の値がNに初期化されているとする．実行されるMIPSの命令の数はいくつになるか．</p>
+<h5><span id="解答">解答</span></h5><p>5 * N + 2</p>
+<h5><span id="解説">解説</span></h5><ul>
+<li><code>beq</code> の条件が不成立のとき、1回のループあたりの命令数は5個。</li>
+<li><code>beq</code> の条件が不成立なのはN回なので、 5 * N 個の命令が実行される。</li>
+<li><code>beq</code> の条件が成立するときは、2個の命令が実行される。</li>
+</ul>
+<h2><span id="227">2.27</span></h2><h5><span id="問題">問題</span></h5><p>下記のCコードをMIPSのアセンブリ・コードに翻訳せよ．使用する命令の数を最小限にせよ．値a，b，i，jはそれぞれレジスタ$s0，$s1，$t0，$t1に収められているものとする．また，レジスタ$s2に配列Dのベース・アドレスが収められているものとする．</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; a; i++)</span><br><span class="line">  <span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; b; j++)</span><br><span class="line">    D[<span class="number">4</span>*j] = i + j;</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解答">解答</span></h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">         add  $t0, $zero, $zero   # i &#x3D; 0</span><br><span class="line">LOOP_i:  slt  $t2, $t0, $s0       # $t2 &#x3D; i &lt; a</span><br><span class="line">         beq  $t2, $zero, DONE_i</span><br><span class="line">         add  $t1, $zero, $zero   # j &#x3D; 0</span><br><span class="line">LOOP_j:  slt  $t2, $t1, $s1       # $t2 &#x3D; j &lt; b</span><br><span class="line">         beq  $t2, $zero, DONE_j</span><br><span class="line">         add  $t2, $t0, $t1       # $t2 &#x3D; i + j</span><br><span class="line">         sll  $t3, $t1, 4         # $t3 &#x3D; (4*j) * 4</span><br><span class="line">         add  $t3, $s2, $t3       # $t3 &#x3D; D + (4*j) * 4</span><br><span class="line">         sw   $t2, 0($t3)</span><br><span class="line">         addi $t1, $t1, 1         # j++</span><br><span class="line">         j    LOOP_j</span><br><span class="line">DONE_j:  addi $t0, $t0, 1         # i++</span><br><span class="line">         j    LOOP_i</span><br><span class="line">DONE_i:</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解説">解説</span></h5><p>特になし</p>
+<h2><span id="228">2.28</span></h2><h5><span id="問題">問題</span></h5><p>問題2.27のCコードを実現するためには，MIPSの命令がいくつ必要か．変数のaとbがそれぞれ10と1に初期化されており，配列Dのすべての要素が0に初期化されていたならば，ループが完了するまでにMIPSの命令がいくつ実行されるか．</p>
+<h5><span id="解答">解答</span></h5><ul>
+<li>命令数は14個。</li>
+<li>命令実行回数は153回。</li>
+</ul>
+<h5><span id="解説">解説</span></h5><ul>
+<li>命令数は、2.27のものを数えて14個。</li>
+<li>内側のループの条件分岐 <code>j &lt; b</code> が成立する回数は \(a \times b\) 回。その際に実行される命令列は \([LOOP\_j, DONE\_j)\) の8個。</li>
+<li>内側のループの条件分岐 <code>j &lt; b</code> が成立しなくなったとき、 <code>LOOP_j</code> で始まる <code>slt</code>, <code>beq</code> の2命令だけが実行される。その回数は \(a\) 回。</li>
+<li>外側のループの条件分岐 <code>i &lt; a</code> が成立する回数は \(a\) 回。その際に実行される \([LOOP\_i, LOOP\_j), [DONE\_j, DONE\_i)\) の命令数は5個。</li>
+<li>外側のループの条件分岐 <code>i &lt; a</code> が成立しなくなったとき、 <code>LOOP_j</code> で始まる <code>slt</code>, <code>beq</code> の2命令だけが実行される。その回数は1回。</li>
+<li>外側のループの初期化は、 <code>add $t0, $zero, $zero</code> 1命令のみ。</li>
+<li>したがって、合計の実行回数は \(8ab + 2a + 5a + 2 + 1 == 8ab + 7a + 3\)</li>
+</ul>
+<h2><span id="229">2.29</span></h2><h5><span id="問題">問題</span></h5><p>下記のループをCコードに翻訳せよ．Cレベルの整数iがレジスタ$t1に保持されており，resultという名前のCレベルの整数がレジスタ$s2に保持されており，整数MemArrayのベース・アドレスがレジスタ$s0に保持されているものとする．</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">       addi $t1, $zero, 0</span><br><span class="line">LOOP:  lw   $s1, 0($s0)</span><br><span class="line">       add  $s2, $s2, $s1</span><br><span class="line">       addi $s0, $s0, 4</span><br><span class="line">       addi $t1, $t1, 1</span><br><span class="line">       slti $t2, $t1, 100</span><br><span class="line">       bne  $t2, $zero, LOOP</span><br></pre></td></tr></table></figure>
+
+<p><strong>1行目の命令は本では <code>addi $t1, $0, $0</code> となっていたが、意図を汲み取って訂正。また、bneのrtは $s0 となっていたが、MemArrayのポインタと直近の条件分岐結果の 0/1 とを比較するのはあまりにナンセンスなので、 $zero と解釈した。</strong></p>
+<h5><span id="解答">解答</span></h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (i = <span class="number">0</span>, <span class="keyword">int</span> *p = MemArray; ; ) &#123;</span><br><span class="line">  result += *(p++);</span><br><span class="line">  <span class="keyword">if</span> (++i &gt;= <span class="number">100</span>) <span class="keyword">break</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>または</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (i = <span class="number">0</span>; ; ) &#123;</span><br><span class="line">  result += MemArray[i++];</span><br><span class="line">  <span class="keyword">if</span> (i &gt;= <span class="number">100</span>) <span class="keyword">break</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解説">解説</span></h5><ul>
+<li><code>$t1</code> に割付けられている <code>i</code> に着目すると、 <code>addi $t1, $zero, 0</code> でゼロに初期化され、 <code>addi $t1, $t1, 1</code> でインクリメントされ、 <code>slti $t2, $t1, 100</code> で <code>i &lt; 100</code> と比較される、100回のループを実現するためのカウンタ変数であることがわかる。<ul>
+<li><code>slti</code> の条件分岐が LOOP の先頭に来ていないので、 for 文の2番目のパラメータに <code>i &lt; 100</code> と書くことはできない。</li>
+<li><code>addi</code> のインクリメントが LOOP の末尾に来ていないので、for 文の3番目のパラメータに <code>i++</code> と書くことはできない。</li>
+</ul>
+</li>
+<li><code>$s0</code> に着目すると、一番初めは <code>MemArray</code> の先頭アドレスを指しており、 <code>addi $s0, $s0, 4</code> で配列の次要素を指すようになっている。<code>$s0</code> は <code>int *p</code> の一時変数に対応付けて、ループ内でポインタをインクリメントすると自然な処理になる。</li>
+</ul>
+<p>元のアセンブリからCを書くと <code>int *p = MemArray</code> を使ったコードが自然だが、できあがったCコードを見ると、 <code>i</code> を添え字として使うアイディアも自然に思いつく。</p>
+<h2><span id="230">2.30</span></h2><h5><span id="問題">問題</span></h5><p>実行されるMIPSの命令の数を減らすように，問題2.29のループを書き直せ．</p>
+<h5><span id="解答">解答</span></h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">lw   $s1, 0($s0)    # $s1 &#x3D; MemArray[0]</span><br><span class="line">add  $s2, $s2, $s1  # result +&#x3D; MemArray[0]</span><br><span class="line"></span><br><span class="line">lw   $s1, 4($s0)    # $s1 &#x3D; MemArray[1]</span><br><span class="line">add  $s2, $s2, $s1  # result +&#x3D; MemArray[1]</span><br><span class="line"></span><br><span class="line"># ...</span><br><span class="line"></span><br><span class="line">lw   $s1, 396($s0)    # $s1 &#x3D; MemArray[99]</span><br><span class="line">add  $s2, $s2, $s1  # result +&#x3D; MemArray[99]</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解説">解説</span></h5><ul>
+<li>2.29で得たCコードから、起こすべき副作用は「 <code>result</code> に <code>MemArray[0], MemArray[1], ..., MemArray[99]</code> の和を格納すること」と分かっている。</li>
+<li>ループアンローリングを使えば、以下の理由で実行命令数が削減できる。<ul>
+<li>ループ変数に関する命令実行が不要になる。</li>
+<li><code>MemArray</code> のベースアドレスからのオフセットが即値で指定できるので、アドレス計算が不要になる。</li>
+</ul>
+</li>
+</ul>
+<h2><span id="231">2.31</span></h2><h5><span id="問題">問題</span></h5><p>下記のCコードをMIPSのアセンブリ・コードに翻訳せよ．この関数を実行するために必要な，MIPSの命令の数は全部でいくつか．</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">fib</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (n == <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">else</span> <span class="keyword">if</span> (n == <span class="number">1</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">    <span class="keyword">return</span> fib(n - <span class="number">1</span>) + fib(n - <span class="number">2</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解答">解答</span></h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">fib:</span><br><span class="line">           # if (n &#x3D;&#x3D; 0)</span><br><span class="line">           beq  $a0, $zero, return_0</span><br><span class="line"></span><br><span class="line">           # if (n &#x3D;&#x3D; 1)</span><br><span class="line">           addi $t0, $zero, 1</span><br><span class="line">           beq  $a0, $t0, return_1</span><br><span class="line"></span><br><span class="line">           # else</span><br><span class="line"></span><br><span class="line">           # 以下のコードから、スタックに退避する値は</span><br><span class="line">           # $a0, $ra (関数呼び出しに関する caller-save レジスタ) と、</span><br><span class="line">           # $s0 (汎用的に使える caller-save レジスタ) の3つ。</span><br><span class="line">           # スタックポインタを予め12バイト伸ばしておく。</span><br><span class="line">           addi $sp, $sp, -12</span><br><span class="line">           sw   $a0, 8($sp)</span><br><span class="line">           sw   $ra, 4($sp)</span><br><span class="line">           sw   $s0, 0($sp)</span><br><span class="line"></span><br><span class="line">           # call fib(n - 1)</span><br><span class="line">           addi $a0, $a0, -1</span><br><span class="line">           jal  fib</span><br><span class="line"></span><br><span class="line">           # fib(n - 1) の戻り値を $v0 に入れたまま fib(n - 2) を呼び出すと値が破壊されるので、</span><br><span class="line">           # caller-save レジスタの $s0 に退避しておく。</span><br><span class="line">           addi $s0, $v0, 0</span><br><span class="line"></span><br><span class="line">           # 退避していたnの値をスタックからロード。</span><br><span class="line">           lw   $t0, 4($sp)</span><br><span class="line"></span><br><span class="line">           # call fib(n - 2)</span><br><span class="line">           addi $a0, $t0, -2</span><br><span class="line">           jal fib</span><br><span class="line"></span><br><span class="line">           # return fib(n - 1) + fib(n - 2)</span><br><span class="line">           add  $v0, $s0, $v0</span><br><span class="line"></span><br><span class="line">           # スタックから callee-save レジスタをpop</span><br><span class="line">           lw   $s0, 0($sp)</span><br><span class="line">           lw   $ra, 4($sp)</span><br><span class="line">           lw   $a0, 8($sp)</span><br><span class="line">           addi $sp, $sp, 12</span><br><span class="line"></span><br><span class="line">           jr   $ra</span><br><span class="line">return_0:</span><br><span class="line">           addi $v0, $zero, 0</span><br><span class="line">           jr   $ra</span><br><span class="line">return_1:</span><br><span class="line">           addi $v0, $zero, 1</span><br><span class="line">           jr   $ra</span><br></pre></td></tr></table></figure>
+
+<p>命令数は20個。</p>
+<h5><span id="解説">解説</span></h5><p>まずは、条件分岐によらない決め事をいくつか。</p>
+<ul>
+<li>引数 <code>n</code> は <code>$a0</code> を割付ける。</li>
+<li>戻り値は <code>$v0</code> を使う。</li>
+</ul>
+<p>条件分岐ごとに順を追ってアセンブリを書いていく。</p>
+<h6><span id="n-0-のケース">n == 0 のケース</span></h6><ul>
+<li>分岐自体は、ゼロレジスタと比較する形で <code>beq $a0, $zero, return_0</code> と容易に書ける。</li>
+<li>分岐先で行うべき処理は、戻り値に <code>0</code> をセットし、return するだけ。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">           beq  $a0, $zero, return_0</span><br><span class="line">return_0:</span><br><span class="line">           addi $v0, $zero, 0</span><br><span class="line">           jr   $ra</span><br></pre></td></tr></table></figure>
+
+<h6><span id="n-1-のケース">n == 1 のケース</span></h6><ul>
+<li><code>n == 0</code> と比べて面倒なのは、常に値が1であるレジスタが存在しないので、 <code>beq</code> 命令の前に一時レジスタに1をセットする必要がある点だけ。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">           addi $t0, $zero, 1</span><br><span class="line">           beq  $a0, $t0, return_1</span><br><span class="line">return_1:</span><br><span class="line">           addi $v0, $zero, 1</span><br><span class="line">           jr   $ra</span><br></pre></td></tr></table></figure>
+
+<h6><span id="else-のケース">else のケース</span></h6><ul>
+<li><p>（末尾再帰ではない）関数呼び出しが出てくるので、スタックの利用が必要になる。</p>
+</li>
+<li><p>まずはじめに、必ず使う caller-save レジスタをスタックに退避させるコードを書く。今回は関数呼び出しの引数・戻り値に対応する <code>$a0</code> と <code>$ra</code> が対象。</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">addi $sp, $sp, -8  # スタックを変数2個分下に伸ばす</span><br><span class="line">sw   $a0, 4($sp)</span><br><span class="line">sw   $ra, 0($sp)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>fib(n - 1)</code> を呼び出す。この時点では <code>n</code> の値は <code>$a0</code> に入っているので、 <code>$a0 = $a0 - 1</code> してから <code>jal</code> で再帰呼び出し。</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">addi $a0, $a0, -1</span><br><span class="line">jal  fib</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>$v0</code> に <code>fib(n - 1)</code> の戻り値が格納されている。 <code>$v0</code> は caller-save レジスタなので、次の <code>fib(n - 2)</code> 呼び出しの中で破壊される可能性がある（実際される）ので、</p>
+<ul>
+<li><code>$v0</code> の値をスタックに退避</li>
+<li><code>$v0</code> の値を別の caller-save レジスタにコピー</li>
+</ul>
+<p>のいずれかを行う。今回は後者で <code>$s0</code> を使う。はじめのスタック退避コードを修正し、</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">addi $sp, $sp, -12  # スタックを変数3個分下に伸ばす</span><br><span class="line">sw   $a0, 8($sp)</span><br><span class="line">sw   $ra, 4($sp)</span><br><span class="line">sw   $s0, 0($sp)</span><br></pre></td></tr></table></figure>
+
+<p>そして <code>$s0 = $v0</code> する。</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">addi $s0, $v0, 0</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>fib(n - 1)</code> の戻り値も無事 <code>$s0</code> にコピーできたので、 <code>fib(n - 2)</code> を呼び出す。その前に <code>n - 2</code> を計算するが、元々 <code>n</code> の値が入っていた <code>$a0</code> は caller-save レジスタなので、 <code>fib(n - 1)</code> 呼び出しの中で破壊されている可能性がある（実際再帰呼び出しの中で、 <code>$a0 == 1</code> まで減らされている）。スタックに退避していた <code>n</code> をロードし、 <code>fib(n - 1)</code> を呼び出す。</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">lw   $t0, 4($sp)</span><br><span class="line">addi $a0, $t0, -2</span><br><span class="line">jal fib</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>もうこれ以上関数呼び出しはない（ <code>fib(n - 2)</code> はリーフ呼び出しである）ので、 <code>$v0</code> を退避させる必要はない。 <code>fib(n - 1)</code> の返り値は <code>$s0</code> にコピーしていたので、これと <code>$v0</code> の和が <code>fib(n - 1) + fib(n - 2)</code> となり、 <code>fib(n)</code> が戻り値とすべきもの。</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">add  $v0, $s0, $v0</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>return する前に、スタックから callee-save レジスタをpopしておく。</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># スタックから callee-save レジスタをpop</span><br><span class="line">lw   $s0, 0($sp)</span><br><span class="line">lw   $ra, 4($sp)</span><br><span class="line">lw   $a0, 8($sp)</span><br><span class="line">addi $sp, $sp, 12</span><br><span class="line">jr   $ra</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<p>以上を組み合わせると解答のコードができる。</p>
+<h2><span id="232">2.32</span></h2><h5><span id="問題">問題</span></h5><p>コンパイラによって，関数が「インライン」実装されることがよくある．それは，関数の本体をプログラムの中にコピーすることである．それによって，関数を呼び出すオーバヘッドなくすことができる．上記のCコードのインライン版をMIPSのアセンブリ・コードで作成せよ．その関数を完了させるのに必要なMIPSのアセンブリ命令の数が全部でいくつ削減されるか．ただし，Cの変数nは5に初期化されているものとする．</p>
+<h5><span id="解答">解答</span></h5><p><strong>複数通りの考え方があるので、解説から見ることを推奨。</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br></pre></td><td class="code"><pre><span class="line">fib:</span><br><span class="line">           # if (n &#x3D;&#x3D; 0)</span><br><span class="line">           beq  $a0, $zero, return_0</span><br><span class="line"></span><br><span class="line">           # if (n &#x3D;&#x3D; 1)</span><br><span class="line">           addi $t0, $zero, 1</span><br><span class="line">           beq  $a0, $t0, return_1</span><br><span class="line"></span><br><span class="line">           # else</span><br><span class="line"></span><br><span class="line">           # 以下のコードから、スタックに退避する値は</span><br><span class="line">           # $a0, $ra (関数呼び出しに関する caller-save レジスタ) と、</span><br><span class="line">           # $s0, $s1 の4つ。</span><br><span class="line">           # スタックポインタを予め16バイト伸ばしておく。</span><br><span class="line">           addi $sp, $sp, -16</span><br><span class="line">           sw   $a0, 12($sp)</span><br><span class="line">           sw   $ra, 8($sp)</span><br><span class="line">           sw   $s0, 4($sp)</span><br><span class="line">           sw   $s1, 0($sp)</span><br><span class="line"></span><br><span class="line">           # call fib(n - 1)</span><br><span class="line">           addi $a0, $a0, -1</span><br><span class="line">           jal  fib</span><br><span class="line"></span><br><span class="line">           # fib(n - 1) の戻り値を caller-save レジスタの $s0 に退避しておく。</span><br><span class="line">           addi $s0, $v0, 0</span><br><span class="line"></span><br><span class="line">           # 退避していたnの値をスタックからロード。</span><br><span class="line">           lw   $t0, 4($sp)</span><br><span class="line"></span><br><span class="line">           # ここから、インライン展開した fib(n - 2) のコード。</span><br><span class="line">           # int f2;</span><br><span class="line">           # &#123;</span><br><span class="line">           #   int n2 &#x3D; n - 2;</span><br><span class="line">           #   if (n2 &#x3D;&#x3D; 0)</span><br><span class="line">           #     f2 &#x3D; 0;</span><br><span class="line">           #   else if (n2 &#x3D;&#x3D; 1)</span><br><span class="line">           #     f2 &#x3D; 1;</span><br><span class="line">           #   else</span><br><span class="line">           #     f2 &#x3D; fib(n2 - 1) + fib(n2 - 2);</span><br><span class="line">           # &#125;</span><br><span class="line">           #</span><br><span class="line">           # n2 は $t0, f2 は $t2 に割付ける。</span><br><span class="line">           addi $t0, $t0, -2  # n2 &#x3D; n - 2</span><br><span class="line"></span><br><span class="line">           # n2 &#x3D;&#x3D; 0</span><br><span class="line">           beq  $t0, $zero, f2_0</span><br><span class="line"></span><br><span class="line">           # n2 &#x3D;&#x3D; 1</span><br><span class="line">           addi $t1, $zero, 1</span><br><span class="line">           beq  $t0, $t1, f2_1</span><br><span class="line"></span><br><span class="line">           # else</span><br><span class="line"></span><br><span class="line">           # call fib(n2 - 1)</span><br><span class="line">           addi $a0, $t0, -1</span><br><span class="line">           jal  fib</span><br><span class="line"></span><br><span class="line">           # fib(n2 - 1) の戻り値を caller-save レジスタの $s1 に退避しておく。</span><br><span class="line">           addi $s1, $v0, 0</span><br><span class="line"></span><br><span class="line">           # call fib(n2 - 1)</span><br><span class="line">           addi $a0, $t0, -2</span><br><span class="line">           jal  fib</span><br><span class="line"></span><br><span class="line">           # f2 &#x3D; fib(n2 - 1) + fib(n2 - 2)</span><br><span class="line">           add  $t2, $s1, $v0</span><br><span class="line"></span><br><span class="line">           j    f2_done</span><br><span class="line">f2_0:</span><br><span class="line">           addi $t2, $zero, 0  # f2 &#x3D; 0</span><br><span class="line">           j    f2_done</span><br><span class="line">f2_1:</span><br><span class="line">           addi $t2, $zero, 1  # f2 &#x3D; 1</span><br><span class="line">           j    f2_done</span><br><span class="line">f2_done:</span><br><span class="line">           # return fib(n - 1) + fib(n - 2)</span><br><span class="line">           add  $v0, $s0, $t2</span><br><span class="line"></span><br><span class="line">           # スタックから callee-save レジスタをpop</span><br><span class="line">           lw   $s1, 0($sp)</span><br><span class="line">           lw   $s0, 4($sp)</span><br><span class="line">           lw   $ra, 8($sp)</span><br><span class="line">           lw   $a0, 12($sp)</span><br><span class="line">           addi $sp, $sp, 16</span><br><span class="line"></span><br><span class="line">           jr   $ra</span><br><span class="line">return_0:</span><br><span class="line">           addi $v0, $zero, 0</span><br><span class="line">           jr   $ra</span><br><span class="line">return_1:</span><br><span class="line">           addi $v0, $zero, 1</span><br><span class="line">           jr   $ra</span><br></pre></td></tr></table></figure>
+
+<p><code>n == 5</code> で呼び出したとき、2.31のコードだと実行命令数は120, このインライン版のコードだと実行命令数は131。</p>
+<h5><span id="解説">解説</span></h5><p>妥協点が難しい問題である。</p>
+<p>一般の再帰関数は停止性が実行時にしかわからない場合があり、インライン展開を完全に行おうとしたとき、コード長が無限大になり得る。<br>今回のフィボナッチ数に関して言えば停止性は人間の目から見ると自明であり、コンパイル時計算でインライン展開もできそうだが、それを言ってしまうと</p>
+<p>\[<br>\begin{eqnarray}<br>  {\rm fib}(5) &amp;==&amp; {\rm fib}(4) + {\rm fib}(3) \\<br>         &amp;==&amp; ({\rm fib}(3) + {\rm fib}(2)) + ({\rm fib}(2) + {\rm fib}(1)) \\<br>         &amp;==&amp; (({\rm fib}(2) + {\rm fib}(1)) + ({\rm fib}(1) + {\rm fib}(0))) + (({\rm fib}(1) + {\rm fib}(0)) + {\rm fib}(1)) \\<br>         &amp;==&amp; ((({\rm fib}(1) + {\rm fib}(0)) + {\rm fib}(1)) + ({\rm fib}(1) + {\rm fib}(0))) + (({\rm fib}(1) + {\rm fib}(0)) + {\rm fib}(1)) \\<br>         &amp;==&amp; 1 + 0 + 1 + 1 + 0 + 1 + 0 + 1 \\<br>         &amp;==&amp; 5<br>\end{eqnarray}<br>\]</p>
+<p>という風にコンパイル時に答えが出せてしまう。</p>
+<p>今回は妥協点として、 <code>fib(n - 2)</code> 呼び出しを一段階だけインライン展開した下記のコードをMIPSコードに翻訳することを考える。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">fib</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (n == <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">else</span> <span class="keyword">if</span> (n == <span class="number">1</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">  <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">int</span> f1 = fib(n - <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> f2;</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="keyword">int</span> n2 = n - <span class="number">2</span>;</span><br><span class="line">      <span class="keyword">if</span> (n2 == <span class="number">0</span>)</span><br><span class="line">        f2 = <span class="number">0</span>;</span><br><span class="line">      <span class="keyword">else</span> <span class="keyword">if</span> (n2 == <span class="number">1</span>)</span><br><span class="line">        f2 = <span class="number">1</span>;</span><br><span class="line">      <span class="keyword">else</span></span><br><span class="line">        f2 = fib(n2 - <span class="number">1</span>) + fib(n2 - <span class="number">2</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> f1 + f2;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>MIPSコードは解答のもの。</p>
+<p>実行命令数を数える。まずは2.31のコードから。</p>
+<ul>
+<li>else句に入るケース (n = 5, 4, 3, 2) では、実行命令数は各々16個。</li>
+<li>n = 1 のケースでは、実行命令数は5個。</li>
+<li>n = 0 のケースでは、実行命令数は3個。</li>
+<li>関数呼び出しの回数を数えると、<ul>
+<li>fib(5): 1回</li>
+<li>fib(4): 1回</li>
+<li>fib(3): 2回</li>
+<li>fib(2): 3回</li>
+<li>fib(1): 5回</li>
+<li>fib(0): 3回</li>
+</ul>
+</li>
+<li>合計実行命令数は \((1 + 1 + 2 + 3) \times 16 + 5 + 3 = 120\)</li>
+</ul>
+<p>次に2.32のコードの実行命令数を数える。そのために、インライン展開を反映した式展開を書き下す。</p>
+<p>\[<br>\begin{eqnarray}<br>{\rm fib}(5) &amp;==&amp; {\rm fib}(4) + ({\rm fib}(2) + {\rm fib}(1)) \\<br>       &amp;==&amp; ({\rm fib}(3) + ({\rm fib}(1) + {\rm fib}(0))) + (({\rm fib}(1) + 0) + {\rm fib}(1)) \\<br>       &amp;==&amp; (({\rm fib}(2) + 1) + ({\rm fib}(1) + {\rm fib}(0))) + (({\rm fib}(1) + 0) + {\rm fib}(1)) \\<br>       &amp;==&amp; ((({\rm fib}(1) + 0) + 1) + ({\rm fib}(1) + {\rm fib}(0))) + (({\rm fib}(1) + 0) + {\rm fib}(1))<br>\end{eqnarray}<br>\]</p>
+<ul>
+<li>n = 5, 4 のケースでは、2箇所の条件分岐において、両方ともelse句に入る。このときの実行命令数は26個。</li>
+<li>n = 3 のケースでは、最初の条件分岐はelse句、次の条件分岐は <code>n2 == 1</code> のpath。このときの実行命令数は20個。</li>
+<li>n = 2 のケースでは、最初の条件分岐はelse句、次の条件分岐は <code>n2 == 0</code> のpath。このときの実行命令数は18個。</li>
+<li>n = 1 のケースでは、最初の条件分岐で <code>n == 1</code> のpathに入って終わる。このときの実行命令数は5個。</li>
+<li>n = 0 のケースでは、最初の条件分岐で <code>n == 0</code> のpathに入って終わる。このときの実行命令数は3個。</li>
+<li>関数呼び出しの回数を数えると、<ul>
+<li>fib(5): 1回</li>
+<li>fib(4): 1回</li>
+<li>fib(3): 1回</li>
+<li>fib(2): 2回</li>
+<li>fib(1): 4回</li>
+<li>fib(0): 1回</li>
+</ul>
+</li>
+<li>合計実行命令数は \((1 + 1) \times 26 + 20 + 2 \times 18 + 4 \times 5 + 3 = 131\)</li>
+</ul>
+<p>インライン展開なしのものよりも実行命令数が増えてしまった。</p>
+<h2><span id="233">2.33</span></h2><h5><span id="問題">問題</span></h5><p>各関数呼び出しに関して，関数呼び出しがなされた後の，スタックの内容を示せ．スタック・ポインタは当初はアドレス0x7ffffffcを指しており，図2.11に示されているレジスタ規約に従っているものとする．</p>
+<p><strong>「各関数呼び出し」は、2.31における関数呼び出しを指すものと想定する。</strong></p>
+<h5><span id="解答">解答</span></h5><p><code>fib(4)</code> 呼び出しを考える。</p>
+<img src="/img/2020/01-10-2.33.svg" alt="fib(n)のスタック" width="auto" height="auto">
+
+<h5><span id="解説">解説</span></h5><ul>
+<li>2.31 のコードを見ると、<ul>
+<li>n == 1, 0 の場合、スタックの拡大は行わない。</li>
+<li>n &gt; 2 の場合、「スタックの拡大」「<code>fib(n - 1)</code> 呼び出し」「<code>fib(n - 2)</code> 呼び出し」の順序で行っている。<ul>
+<li>各呼び出しでは、高位から低位に向けて <code>$a0, $ra, $s0</code> の順にスタックにpushしている。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>以上のことから、解答の図がかける。</p>
+<h2><span id="234">2.34</span></h2><h5><span id="問題">問題</span></h5><p>下記の関数fをMIPSのアセンブリ・コードに翻訳せよ．レジスタ$t0から$t7までを使用する必要があれば，番号が小さいものから順に使用せよ．funcの関数宣言はint f(int a,int b)となっているものとする．関数fのコードは下記のとおりである．</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">f</span><span class="params">(<span class="keyword">int</span> a, <span class="keyword">int</span> b, <span class="keyword">int</span> c, <span class="keyword">int</span> d)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> func(func(a, b), c + d);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解答">解答</span></h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">f:</span><br><span class="line">    # caller-save レジスタの退避。</span><br><span class="line">    addi $sp, -8</span><br><span class="line">    sw   $ra, 0($sp)</span><br><span class="line">    sw   $s0, 4($sp)</span><br><span class="line"></span><br><span class="line">    # $s0 &#x3D; c + d</span><br><span class="line">    add $s0, $a2, $a3</span><br><span class="line"></span><br><span class="line">    # 内側の func 呼び出し。既に $a0 &#x3D; a, $a1 &#x3D; b と割当てられているので、引数セットは不要。</span><br><span class="line">    jal func</span><br><span class="line"></span><br><span class="line">    # 外側の func 呼び出し</span><br><span class="line">    addi $a0, $v0, 0  # $a0 &#x3D; func(a, b)</span><br><span class="line">    addi $a1, $s0, 0  # $a1 &#x3D; c + d</span><br><span class="line">    jal  func</span><br><span class="line"></span><br><span class="line">    # 外側の func 呼び出し後は $v0 に戻り値が入っていて、それをそのまま返せば良いので、戻り値セットは不要。</span><br><span class="line"></span><br><span class="line">    # スタックから callee-save レジスタをpop</span><br><span class="line">    lw   $s0, 4($sp)</span><br><span class="line">    lw   $ra, 0($sp)</span><br><span class="line">    addi $sp, 8</span><br><span class="line"></span><br><span class="line">    jr   $ra</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解説">解説</span></h5><ul>
+<li><code>f</code> の引数 <code>a, b, c, d</code> はそれぞれレジスタ <code>$a0, $a1, $a2, $a3</code> に割り当てられているとする。</li>
+<li>外側の <code>func</code> 呼び出しの第一引数を決定するために、まずは内側の <code>func</code> を呼び出す必要がある。内側の <code>func</code> を呼び出したあとは <code>a</code>, <code>b</code> を使わないので、 <code>$a0, $a1</code> はスタックに退避する必要はない。</li>
+<li>内側の <code>func</code> を呼び出した結果、後ほど <code>c + d</code> で使う <code>$a2, $a3</code> の値が破壊される可能性があるので、これらはスタックに退避する必要がある。<ul>
+<li>ただし、 <code>c</code> と <code>d</code> それぞれをスタックに退避するよりは、 <code>c + d</code> の結果を一つだけ callee-save レジスタの <code>$s0</code> に格納するほうが効率が良いのでそうした。</li>
+</ul>
+</li>
+</ul>
+<h2><span id="235">2.35</span></h2><h5><span id="問題">問題</span></h5><p>この関数において，末尾呼出し最適化を適用できるか．もし，適用できない場合は，その理由を説明せよ．適用できる場合は，最適化した場合としない場合とで，f内の実行される命令の数はどれだけ異なるか．</p>
+<p><strong>「この関数」は、2.34の f だと解釈する。</strong></p>
+<h5><span id="解答">解答</span></h5><p>適用できる。命令数は3個削減できる。</p>
+<h5><span id="解説">解説</span></h5><p>末尾呼び出し最適化を適用したアセンブリを示す。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">f:</span><br><span class="line">    # caller-save レジスタの退避。</span><br><span class="line">    # fのcallerへ戻る役割は外側のfuncに任せるので、 $ra を退避する必要がなくなった。</span><br><span class="line">    addi $sp, -4</span><br><span class="line">    sw   $s0, 0($sp)</span><br><span class="line"></span><br><span class="line">    # $s0 &#x3D; c + d</span><br><span class="line">    add $s0, $a2, $a3</span><br><span class="line"></span><br><span class="line">    # 内側の func 呼び出し。既に $a0 &#x3D; a, $a1 &#x3D; b と割当てられているので、引数セットは不要。</span><br><span class="line">    jal func</span><br><span class="line"></span><br><span class="line">    # 外側の func を呼び出す前に、この時点でスタックから callee-save レジスタをpop</span><br><span class="line">    lw   $s0, 0($sp)</span><br><span class="line">    addi $sp, 4</span><br><span class="line"></span><br><span class="line">    # 外側の func へジャンプする。</span><br><span class="line">    # ただし、ここに制御を戻す必要はなく、fのcallerへ一気に戻れば良いので、jal ではなく j を使う。</span><br><span class="line">    addi $a0, $v0, 0  # $a0 &#x3D; func(a, b)</span><br><span class="line">    addi $a1, $s0, 0  # $a1 &#x3D; c + d</span><br><span class="line">    j    func</span><br></pre></td></tr></table></figure>
+
+<p>ポイントは以下。</p>
+<ul>
+<li><code>$ra</code> のスタックへの退避が不要になる。</li>
+<li><code>jr</code> 命令が不要になる。</li>
+<li>末尾呼び出しをする前に忘れずにスタックを縮めておく。</li>
+</ul>
+<p>2.24 では命令数が12個、ここでは命令数が9個である。</p>
+<h2><span id="236">2.36</span></h2><h5><span id="問題">問題</span></h5><p>問題2.34の関数fから戻る直前の，レジスタ$t5，$s3，$ra，$spの内容はどうなっているか．関数fについては内容が分かっているが，関数funcについては関数宣言しか分かっていないことに，留意せよ．</p>
+<h5><span id="解答">解答</span></h5><ul>
+<li><code>$t5</code> : 不明。</li>
+<li><code>$s3</code> : <code>f</code> の caller が <code>f</code> を呼び出した時点の <code>$s3</code> の値。</li>
+<li><code>$ra</code> : <code>f</code> の caller が <code>f</code> を呼び出した命令の次の命令アドレス。</li>
+<li><code>$sp</code> : <code>f</code> の caller が <code>f</code> を呼び出した時点の <code>$sp</code> の値。</li>
+</ul>
+<h5><span id="解説">解説</span></h5><ul>
+<li><code>$t5</code> : caller-save レジスタなので、 <code>func</code> 内でどのような値に書き換えられていても不思議ではない。</li>
+<li><code>$s3</code> : callee-save レジスタなので、 <code>func</code> から返ってくる時点で必ず元の値に戻っている。 <code>f</code> 自体はそもそも書き換えていない（もし書き換えていたら元に戻してからreturnする義務がある）。</li>
+<li><code>$ra</code> : <code>f</code> の初めにスタックに退避したものを、 <code>f</code> から戻る前にpopしているので、 <code>f</code> の初め時点の値になっている。それは <code>f</code> のcallerが（おそらく <code>jal</code> 命令で）セットした、 <code>f</code> 呼び出しの直後の命令アドレス。</li>
+<li><code>$sp</code> : <code>f</code> から戻る直前にスタックを元通り縮めている。</li>
+</ul>
+<h2><span id="237">2.37</span></h2><h5><span id="問題">問題</span></h5><p>正および負の整数の10進数字列が含まれる１つのASCII数字列を，１つの整数に変換する，プログラムをMIPSアセンブリ言語で書け．数字0から9までの何らかの組み合わせが含まれる，終端がゼロで区切られた数字列のアドレスが，レジスタ$a0に保持されているものとする．その数字列に対応する整数値を算出して，結果をレジスタ$v0に収めよ．その数字列内に数字以外の文字が含まれていた場合には，レジスタ$v0に-1を収めて，プログラムを停止せよ．たとえば， \(50_{10}\) と \(52_{10}\) と \(0_{10}\) の3バイトの数字列（終端がゼロで区切られた数字列「24」）をレジスタ$a0が指している場合，プログラムが終了したときに，レジスタ$v0には値 \(24_{10}\) が収められているはずである．</p>
+<h5><span id="解答">解答</span></h5><p>問題文で曖昧な箇所に以下の制約を設ける。</p>
+<ul>
+<li>文字列の1文字目は、ASCIIの数字だけでなく、 <code>&#39;-&#39;</code> も許容される。一文字目が <code>&#39;-&#39;</code> であった場合には負の数として扱う。</li>
+<li>結果は32ビット符号付き整数として扱う。</li>
+<li>オーバーフローは考慮しない。</li>
+<li>数字列が0文字である場合は結果は0とする。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line">    addi $t0, $a0, 0     # $t0 は文字をたどるポインタとして使う</span><br><span class="line">    addi $t1, $zer0, 0   # $t1 は、先頭文字が &#39;-&#39; であるかのフラグ</span><br><span class="line">    addi $t2, $zero, 0   # $t2 は結果を格納</span><br><span class="line"></span><br><span class="line">    # 一文字目を取り出し、 &#39;-&#39; であるかを判定</span><br><span class="line">    lbu  $t3, 0($t0)</span><br><span class="line">    addi $t4, $zero, 45  # 45は &#39;-&#39; に対応</span><br><span class="line">    bne  $t3, $t4, LOOP_START:</span><br><span class="line"></span><br><span class="line">    # 一文字目が &#39;-&#39; であった場合は、 $t1 のフラグを立てて、一文字先に進める。</span><br><span class="line">    addi $t1, $zero, 1</span><br><span class="line">    addi $t0, $t0, 1    # ASCIIを一文字先に進めるのは、4バイトではなく1バイトの加算であることに注意。</span><br><span class="line"></span><br><span class="line">LOOP_START:</span><br><span class="line">    lbu  $t3, 0(t0)            # $t3 &#x3D; *$t0</span><br><span class="line"></span><br><span class="line">    slti $t4, $t3, 48          # $t4 &#x3D; $t3 &lt; &#39;0&#39;</span><br><span class="line">    bne  $t4, $zero, LOOP_END  # goto LOOP_END if $t3 &lt; &#39;0&#39;</span><br><span class="line"></span><br><span class="line">    addi $t5, $zero, 58        # &#39;9&#39; &#x3D;&#x3D; 58</span><br><span class="line">    slti $t4, $t3, $t5         # $t4 &#x3D; $t3 &lt; &#39;9&#39; + 1</span><br><span class="line">    beq  $t4, $zero, LOOP_END  # goto LOOP_END if $t3 &gt;&#x3D; &#39;9&#39; + 1</span><br><span class="line"></span><br><span class="line">    # 新しい桁が見つかったので、 result &#x3D; 10 * result する。</span><br><span class="line">    # 10回足し算するよりは、</span><br><span class="line">    # - r2 &#x3D; result + result</span><br><span class="line">    # - r4 &#x3D; r2 + r2</span><br><span class="line">    # - r8 &#x3D; r4 + 4f</span><br><span class="line">    # - r10 &#x3D; r8 + r2</span><br><span class="line">    # と計算したほうが早い。</span><br><span class="line">    add  $t5, $t2, $t2  # $t5 &#x3D; result + result &#x3D;&#x3D; 2 * result</span><br><span class="line">    add  $t4, $t5, $t5  # $t4 &#x3D; $t5 + $t5 &#x3D;&#x3D; 4 * result</span><br><span class="line">    add  $t4, $t4, $t4  # $t4 &#x3D; $t4 + $t4 &#x3D;&#x3D; 8 * result</span><br><span class="line">    add  $t2, $t4, $t5  # result &#x3D; 8 * result + 2 * result</span><br><span class="line"></span><br><span class="line">    # 新しい桁を足す</span><br><span class="line">    addi $t3, $t3, -48  # $t3 &#x3D; $t3 - &#39;0&#39;</span><br><span class="line">    add  $t2, $t2, $t3  # result &#x3D; result + $t3</span><br><span class="line"></span><br><span class="line">    # 次の桁を指すように $t0 を1バイト進める</span><br><span class="line">    addi $t0, $t0, 1</span><br><span class="line"></span><br><span class="line">    j    LOOP_START</span><br><span class="line">LOOP_END:</span><br><span class="line"></span><br><span class="line">    # NULL文字以外のASCII数字以外が現れた場合は異常終了</span><br><span class="line">    bne $t3, $zero, ERROR</span><br><span class="line"></span><br><span class="line">    # 負数の場合は、最後に符号反転する</span><br><span class="line">    beq  $t1, $zero, SUCCESS</span><br><span class="line">    sub  $t2, $zero, $t2</span><br><span class="line">    j    SUCCESS</span><br><span class="line"></span><br><span class="line">ERROR:</span><br><span class="line">    addi $v0, $zero, -1</span><br><span class="line">    j    END</span><br><span class="line"></span><br><span class="line">SUCCESS:</span><br><span class="line">    addi $v0, $t2, 0</span><br><span class="line"></span><br><span class="line">END:</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解説">解説</span></h5><p>（筆者はいきなりアセンブリは厳しいので😭）まずはCで書いていく。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> v0;</span><br><span class="line"><span class="keyword">char</span> *a0;</span><br><span class="line"></span><br><span class="line"><span class="keyword">char</span> *p = a0;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> is_negative = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">int</span> result = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 正負判定</span></span><br><span class="line"><span class="keyword">if</span> (*p == <span class="string">'-'</span>) &#123;</span><br><span class="line">  is_negative = <span class="number">1</span>;</span><br><span class="line">  p++;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 左の桁から順に足し合わせていく。</span></span><br><span class="line"><span class="keyword">while</span> (<span class="string">'0'</span> &lt;= *p &amp;&amp; *p &lt;= <span class="string">'9'</span>) &#123;</span><br><span class="line">  <span class="comment">// 新しい桁が見つかったので、 result = 10 * result する。</span></span><br><span class="line">  <span class="comment">// 10回足し算するよりは、</span></span><br><span class="line">  <span class="comment">// - r2 = result + result</span></span><br><span class="line">  <span class="comment">// - r4 = r2 + r2</span></span><br><span class="line">  <span class="comment">// - r8 = r4 + 4f</span></span><br><span class="line">  <span class="comment">// - r10 = r8 + r2</span></span><br><span class="line">  <span class="comment">// と計算したほうが早い。</span></span><br><span class="line">  <span class="keyword">int</span> r2 = result + result;</span><br><span class="line">  <span class="keyword">int</span> r4 = r2 + r2;</span><br><span class="line">  <span class="keyword">int</span> r8 = r4 + r4;</span><br><span class="line">  result = r8 + r2;</span><br><span class="line"></span><br><span class="line">  result += *p - <span class="string">'0'</span>;  <span class="comment">// 新しい桁を足す</span></span><br><span class="line">  p++;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// NULL文字以外のASCII数字以外が現れた場合は異常終了</span></span><br><span class="line"><span class="keyword">if</span> (*p != <span class="number">0</span>) &#123;</span><br><span class="line">  v0 = <span class="number">-1</span>;</span><br><span class="line">  <span class="keyword">goto</span> END;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 負数の場合は、最後に符号反転する。</span></span><br><span class="line">result = <span class="number">0</span> - result;</span><br><span class="line"></span><br><span class="line">v0 = result;</span><br><span class="line"></span><br><span class="line">END:</span><br></pre></td></tr></table></figure>
+
+<p>あとはこれをMIPSアセンブリに変換して、解答を得る。<br>レジスタ割付は、 <code>$t0: p</code>, <code>$t1: is_negative</code>, <code>$t2: result</code> としている。</p>
+<h2><span id="238">2.38</span></h2><h5><span id="問題">問題</span></h5><p>下記のコードがある．</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">lbu $t0, 0($t1)</span><br><span class="line">sw  $t0, 0($t2)</span><br></pre></td></tr></table></figure>
+
+<p>レジスタ$t1にはアドレス0x10000000が保持されており，レジスタ$t2にはアドレス0x10000010が保持されているものとする．MIPSアーキテクチャでは，ビッグ・エンディアン・アドレシング方式が取られていることに，留意すること．アドレス0x10000000に収められているデータ（16進数）は0x11223344であるとする．レジスタ$t2によって指されるアドレスには，どんな値が収められるか．</p>
+<p><strong>書籍には「アドレス0x10000010に収められているデータ（16進数）は0x11223344であるとする」とあるが、これは「アドレス0x10000000に収められているデータ（16進数）は0x11223344であるとする」の誤植と判断する（原著など参照の結果）。</strong></p>
+<h5><span id="解答">解答</span></h5><p><code>0x00000011</code></p>
+<h5><span id="解説">解説</span></h5><p>命令列実行前のメモリレイアウトは下記。</p>
+<table>
+<thead>
+<tr>
+<th>アドレス</th>
+<th>データ</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0x1000001C</td>
+<td>??</td>
+</tr>
+<tr>
+<td>0x10000018</td>
+<td>??</td>
+</tr>
+<tr>
+<td>0x10000014</td>
+<td>??</td>
+</tr>
+<tr>
+<td>0x10000010</td>
+<td>??</td>
+</tr>
+<tr>
+<td>0x1000000C</td>
+<td>0x44</td>
+</tr>
+<tr>
+<td>0x10000008</td>
+<td>0x33</td>
+</tr>
+<tr>
+<td>0x10000004</td>
+<td>0x22</td>
+</tr>
+<tr>
+<td>0x10000000</td>
+<td>0x11</td>
+</tr>
+</tbody></table>
+<p><code>lbu $t0, 0(0x10000000)</code> を実行すると、 <code>$t0 = 0x00000011</code> となる。<br><code>sw  $t0, 0(0x10000010)</code> を実行すると、 メモリレイアウトは下記のようになる。</p>
+<table>
+<thead>
+<tr>
+<th>アドレス</th>
+<th>データ</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0x1000001C</td>
+<td>0x11</td>
+</tr>
+<tr>
+<td>0x10000018</td>
+<td>0x00</td>
+</tr>
+<tr>
+<td>0x10000014</td>
+<td>0x00</td>
+</tr>
+<tr>
+<td>0x10000010</td>
+<td>0x00</td>
+</tr>
+<tr>
+<td>0x1000000C</td>
+<td>0x44</td>
+</tr>
+<tr>
+<td>0x10000008</td>
+<td>0x33</td>
+</tr>
+<tr>
+<td>0x10000004</td>
+<td>0x22</td>
+</tr>
+<tr>
+<td>0x10000000</td>
+<td>0x11</td>
+</tr>
+</tbody></table>
+<p><code>$t2</code> が指すアドレス <code>0x0000010</code> は、32ビットで考えると、値 <code>0x00000011</code> が収められている。</p>
+<h2><span id="239">2.39</span></h2><h5><span id="問題">問題</span></h5><p>32ビットの定数 \(0010\ 0000\ 0000\ 0001\ 0100\ 1001\ 0010\ 0100_2\) を作成して，その結果をレジスタ$t1に収める，MIPSのアセンブリ・コードを書け．</p>
+<h5><span id="解答">解答</span></h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">addi $t1, $zero, 536955172</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解説">解説</span></h5><p>特になし</p>
+<h2><span id="240">2.40</span></h2><h5><span id="問題">問題</span></h5><p>PCの現在の値が0x00000000であるならば，単一のジャンプ命令を使用して，問題2.39に示されているような，PCのアドレスを入手することができるか．</p>
+<h5><span id="解答">解答</span></h5><p>できない。</p>
+<h5><span id="解説">解説</span></h5><p>最も遠くにジャンプできる単一のジャンプ命令は <code>j</code> 。<br>2.24に記載の通り、ジャンプ先のアドレス（バイトアドレッシング）は</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"> 現在のPCの上位4ビット   j命令のオペランド   00</span><br><span class="line">31              28 27            2  1 0</span><br></pre></td></tr></table></figure>
+
+<p>である。</p>
+<p>2.39 のアドレスの上位4ビットは <code>0010</code> で、これはPCの現在値の上位4ビットの <code>0000</code> と異なるため、単一ジャンプ命令では到達できない。</p>
+<h2><span id="241">2.41</span></h2><h5><span id="問題">問題</span></h5><p>PCの現在の値が0x00000600であるならば，単一の分岐命令を使用して，問題2.39に示されているような，PCのアドレスを入手することができるか．</p>
+<h5><span id="解答">解答</span></h5><p>できない。</p>
+<h5><span id="解説">解説</span></h5><p>2.40 と同じ理由につき不可。</p>
+<h2><span id="242">2.42</span></h2><h5><span id="問題">問題</span></h5><p>PCの現在の値が0x1FFFF000であるならば，単一の分岐命令を使用して，問題2.39に示されているような，PCのアドレスを入手することができるか．</p>
+<h5><span id="解答">解答</span></h5><p>できない。</p>
+<h5><span id="解説">解説</span></h5><p>2.40 と同じ理由につき不可。</p>
+<h2><span id="243">2.43</span></h2><h5><span id="問題">問題</span></h5><p>下記のCコードを実現する，MIPSのアセンブリ・コードを書け．</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">lock(lk);</span><br><span class="line">shvar = <span class="built_in">max</span>(shvar, x);</span><br><span class="line">unlock(lk);</span><br></pre></td></tr></table></figure>
+
+<p>変数lkのアドレスは$a0に，変数shvarのアドレスは$a1に，変数xの値は$a2に，それぞれ収められているものとする．中核部分には，関数呼び出しを含んではならない．lock()操作を行うためには，ll/sc命令を使用する．unlock()操作は単なる通常の格納命令である．</p>
+<p><strong>書籍中の明らかなtypoを修正。”1k -&gt; lk”, “shcar -&gt; shvar”。</strong></p>
+<h5><span id="解答">解答</span></h5><p>解説に合わせたコメントを付ける。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">    addi $t0, $zero, 1   # $t0 に、ロック変数にセットする 1 をセット。</span><br><span class="line"></span><br><span class="line">AGAIN:</span><br><span class="line">    ll  $t1, 0($a0)       # $t1 &#x3D; lk</span><br><span class="line">    beq $t1, $t0, AGAIN   # すでにロック変数が 1 だったら、他のプロセッサがロック中なので、最初に戻る</span><br><span class="line">    sc  $t0, 0($a0)       # *($t1) &#x3D; 1</span><br><span class="line"></span><br><span class="line">    # scの成功フラグを確認し、失敗だったら最初に戻る</span><br><span class="line">    beq $t0, $zero, AGAIN</span><br><span class="line"></span><br><span class="line">    # ここからクリティカルセクション</span><br><span class="line"></span><br><span class="line">    # $t0 &#x3D; max(shvar, x)</span><br><span class="line">    lw   $t0, 0($a1)           # $t0 &#x3D; shvar</span><br><span class="line">    slt  $t1, $t0, $a2         # $t1 &#x3D; shvar &lt; x</span><br><span class="line">    beq  $t1, $zero, MAX_DONE  # shvar &gt;&#x3D; x ならば、 $a1 の指す値 (shvar) は書き換える必要なし</span><br><span class="line">    sw   $a2, 0($a1)           # shvar &#x3D; x</span><br><span class="line"></span><br><span class="line">MAX_DONE:</span><br><span class="line">    # クリティカルセクション終了。unlockをかける。</span><br><span class="line">    sw   $zero, 0($a0)</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解説">解説</span></h5><ul>
+<li>「<code>shvar</code> の値を書き換えるコードpathに突入できるプロセッサを1個に限定しよう」という <strong>ミューテックス</strong> ロックの考え方。</li>
+<li>ロックが取れる条件は、「他のプロセッサに邪魔されず、 0 であるロック変数を 1 にできる」ことと設計する。</li>
+<li>ロックを取りたいプロセッサは、 <code>lock()</code> 命令を通じて以下のことを行う:<ul>
+<li>レジスタに、 <code>ll</code> 命令でロック変数の値をロードする。</li>
+<li>ロック変数の値が既に 1 であったら他のプロセッサがロック中ということ。最初に戻る。</li>
+<li><code>sc</code> 命令で、ロック変数に 1 を書き込む。<ul>
+<li><code>sc</code> 命令で指定したレジスタには成功フラグが格納されている。それが 0 だったら、「他のプロセッサも同時期にロックを取りたがっていて、そちらのほうが早く <code>sc</code> に成功した」と判断できる（これ以外にも割り込みなどの理由はあり得るが、とにかくロックは失敗したと判断すれば良い）。</li>
+<li>成功フラグが 1 だったら、このプロセッサがロックに成功した。ここから先はクリティカルセクション。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>ロックを取れたプロセッサは、クリティカルセクションでやるべき処理実行。</li>
+<li>ロックを取れたプロセッサは、 <code>unlock()</code> 命令を通じて以下のことを行う。<ul>
+<li>ロック変数に 0 をストアする。これにより、他のプロセッサがロックを取ることを許す（クリティカルセクションを終了する）。</li>
+</ul>
+</li>
+</ul>
+<h2><span id="244">2.44</span></h2><h5><span id="問題">問題</span></h5><p>問題2.43と同様の処理を行え．ただし，この問題では，lock()およびunlock()を使用しないで，ll/scを使用して，変数shvarの不可分な更新を直接行うものとする．この問題では，変数lkがないことに注意．</p>
+<h5><span id="解答">解答</span></h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">AGAIN:</span><br><span class="line">    ll  $t0, 0($a0)  # $t0 &#x3D; shvar</span><br><span class="line"></span><br><span class="line">    # $t0 &#x3D; max(shvar, x)</span><br><span class="line">    slt  $t1, $t0, $a2         # $t1 &#x3D; shvar &lt; x</span><br><span class="line">    beq  $t1, $zero, MAX_DONE  # shvar &gt;&#x3D; x ならば、 $t0 は shvar のまま書き換える必要なし</span><br><span class="line">    addi $t0, $a2, 0           # $t0 &#x3D; x</span><br><span class="line"></span><br><span class="line">MAX_DONE:</span><br><span class="line">    sc   $t0, 0($a0)           # try: *($a0) &#x3D; max(shvar, x)</span><br><span class="line">    beq  $t0, $zero, AGAIN     # sc までに $a0 の指す値が別プロセッサに書き換えられていたら、AGAINに処理を戻す</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解説">解説</span></h5><ul>
+<li>「<code>shvar</code> をまず書き換えようとしてみて、書き換える前に他のプロセッサからの更新を検知したら書き換えをやめる」という <strong>楽観ロック</strong> の考え方。</li>
+<li><code>ll</code>, <code>sc</code> 命令で対象にする <code>$a0</code> が指すアドレスには、 <code>shvar</code> の値を格納する。</li>
+<li><code>ll</code> の時点では、アセンブリプログラマは特にケアすることはない。ハードウェア側で「プロセッサXがこのメモリアドレスを予約したぞ」ということが記録される。<ul>
+<li>プロセッサXが <code>sc</code> を行う前に、別のプロセッサYが同じメモリアドレスに対して変更を加えた場合、上記の「予約」マークは消される</li>
+<li>プロセッサXが <code>sc</code> を行う際に「予約」マークを確認し、まだ残っていた場合にのみメモリ更新を成功させる。</li>
+</ul>
+</li>
+</ul>
+<h2><span id="245">2.45</span></h2><h5><span id="問題">問題</span></h5><p>問題2.43で書いたコードを例に使用して，2つのプロセッサが同時にその中核部分の実行を開始したときには，何が起こるかを説明せよ．だたし，どちらのプロセッサもサイクル当たり1命令だけを実行するものとする．</p>
+<h5><span id="解答">解答</span></h5><p>2つのプロセッサが全く同時に同じ <code>sc</code> 命令を成功実行することはできない（同一メモリアドレスへの書き込み時点で処理が直列化される）ことは仮定する。</p>
+<p>また、第3のプロセッサがロックを取得していることもないとする。</p>
+<p>プロセッサAとプロセッサBが、2.43のコードの1~4行目( <code>addi</code> ~ <code>sc</code> )までを、全く同時刻の4サイクルで、実行したとする。<br><code>sc</code> 実行直前では、両方のプロセッサのレジスタは、 <code>$t0 == 1</code>, <code>$t1 == 0</code> となっている。<br><code>sc</code> 実行開始は同時刻でも、メモリ書き込みで直列化されるので、この時点で時間的な前後関係が出てくる。最初にメモリへ書き込みにいけたプロセッサをAとする。<br><code>sc</code> 実行直後、プロセッサAのレジスタは <code>$t0 == 1</code> (更新成功)、プロセッサBのレジスタは <code>t0 == 0</code> (更新失敗) となる。<br>したがって、次の <code>beq</code> 命令時実行した結果、プロセッサAのPCはその次の <code>lw</code> 命令に移り、プロセッサBのPCは再び <code>ll</code> に戻る。<br>プロセッサAがunlockのコード、すなわち <code>sw $zero, 0($a0)</code> を完了させるまで、プロセッサBは最初の3行の命令を繰り返すことになる。</p>
+<h5><span id="解説">解説</span></h5><p>特になし</p>
+<h2><span id="246">2.46</span></h2><p>算術命令のCPIが1，ロード／ストア命令のCPIが10，分岐命令のCPIが3である，プロセッサがあるとする．このプロセッサ上で実行されるあるプログラムの命令数の内訳が，算術命令が５億，ロード／ストア命令が３億，分岐命令が１億であるとする．</p>
+<h3><span id="2461">2.46.1</span></h3><h5><span id="問題">問題</span></h5><p>新しいもっと強力な算術命令が命令セットに追加された，と仮定する．それらの新しくて強力な算術命令を使用すると，プログラムを実行するのに必要な算術命令の数を，平均して25%削減できる．他方，そのコストとして，クロック・サイクル時間が10%長くなる．これは良い設計案であるか．その理由はなぜか．</p>
+<h5><span id="解答">解答</span></h5><p>（本来は、「あるプログラム」の実行時間の変化だけを見て設計案の良し悪しは語れないが、）「あるプログラム」の実行クロック数の変化を考える。</p>
+<p>もとのプロセッサでは、 \(1 \times 5億 + 10 \times 3億 + 3 \times 1億 = 38億\) クロックを要する。新しいプロセッサでは、 \(1.1 \times (0.75 \times 5億) + 11 \times 3億 + 3.3 \times 1億 = 40.425億\) クロックを要する。</p>
+<p>実行クロック数が伸びているので、良い設計案とは言えない。</p>
+<h5><span id="解説">解説</span></h5><p>特になし。</p>
+<h3><span id="2462">2.46.2</span></h3><h5><span id="問題">問題</span></h5><p>算術命令の性能を倍増させる方法を見つけた，と仮定する．プロセッサ全体では，どれだけ速度が向上するか．算術命令の性能を10倍向上させる方法を見つけた場合は，どうなるか．</p>
+<h5><span id="解答">解答</span></h5><p>ここでも「あるプログラム」の実行クロック数の変化で速度向上を測る。</p>
+<p>算術命令の性能が倍増とは、算術命令のCPIが半減したと考えられるので、</p>
+<p>\[<br>  \frac{1 \times 5億 + 10 \times 3億 + 3 \times 1億}{0.5 \times 5億 + 10 \times 3億 + 3 \times 1億} = \frac{38億}{35.5億} = 1.07 倍<br>\]</p>
+<p>同様に、算術命令の性能が10倍向上したときは、</p>
+<p>\[<br>  \frac{1 \times 5億 + 10 \times 3億 + 3 \times 1億}{0.1 \times 5億 + 10 \times 3億 + 3 \times 1億} = \frac{38億}{35.5億} = 1.13 倍<br>\]</p>
+<h5><span id="解説">解説</span></h5><p>「あるプログラム」の実行時間において支配的なのはロード・ストア命令の時間なので、算術命令がいかに早くなろうと、プログラム全体での性能向上はたかが知れている。</p>
+<h2><span id="247">2.47</span></h2><p>あるプログラムを実行したときの命令数の内訳が，算術命令が70%，ロード／ストア命令が10%，分岐命令が20%であるとする．</p>
+<h3><span id="2471">2.47.1</span></h3><h5><span id="問題">問題</span></h5><p>上記のプログラムを実行するプロセッサの命令当たりのサイクル数が，算術命令の場合は2，ロード／ストア命令の場合は6，分岐命令の場合は3であるとする．平均CPIはいくつか．</p>
+<h5><span id="解答">解答</span></h5><p>2.6</p>
+<h5><span id="解説">解説</span></h5><p>\(0.7 \times 2 + 0.1 \times 6 + 0.2 \times 3 = 2.6\)</p>
+<h3><span id="2472">2.47.2</span></h3><h5><span id="問題">問題</span></h5><p>ロード／ストア命令と分岐命令はまったく改善されないとして，性能を25%向上させるためには，算術命令の命令当たりのサイクル数は平均いくつであるべきか．</p>
+<h5><span id="解答">解答</span></h5><p>1.07</p>
+<h5><span id="解説">解説</span></h5><p>\[<br>\begin{eqnarray}<br>  0.7 \times CPI_A + 0.1 \times 6 + 0.2 \times 3 &amp;=&amp; 0.75 \times 2.6 \\<br>  CPI_A &amp;=&amp; 1.07<br>\end{eqnarray}<br>\]</p>
+<h3><span id="2473">2.47.3</span></h3><h5><span id="問題">問題</span></h5><p>ロード／ストア命令と分岐命令はまったく改善されないとして，性能を50%向上させるためには，算術命令の命令当たりのサイクル数は平均いくつであるべきか．</p>
+<h5><span id="解答">解答</span></h5><p>0.142</p>
+<h5><span id="解説">解説</span></h5><p>\[<br>\begin{eqnarray}<br>  0.7 \times CPI_A + 0.1 \times 6 + 0.2 \times 3 &amp;=&amp; 0.5 \times 2.6 \\<br>  CPI_A &amp;=&amp; 0.142<br>\end{eqnarray}<br>\]</p>
+
+    
+	</div>
+	<footer class="entry-footer">
+		<div class="entry-meta-footer">
+			<span class="category">
+				
+			</span>
+			<span class="tags">
+				
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E3%80%8E%E3%82%B3%E3%83%B3%E3%83%94%E3%83%A5%E3%83%BC%E3%82%BF%E3%81%AE%E6%A7%8B%E6%88%90%E3%81%A8%E8%A8%AD%E8%A8%88%E3%80%8F/" rel="tag">『コンピュータの構成と設計』</a></li></ul>
+
+			</span>
+		</div>
+	</footer>
+    
+    <footer class="author-info clearfix">
+      <img class="author-picture circle" src="https://www.gravatar.com/avatar/cb02a2b3f429b7c938d1fe2665e8e342">
+      <div class="author-content right">
+        <div class="author-caption">
+          <span class="label">author</span>
+          Sho Nakatani a.k.a. laysakura
+        </div>
+        <p class="author-description">
+          東京大学大学院 情報理工学系研究科 電子情報学専攻 修士課程で並列分散処理・ストリーム処理・データベースを研究。<br>
+          2014年4月に株式会社ディー・エヌ・エーにエンジニアスペシャリストとして入社し、ソーシャルゲームのサーバサイド共通基盤の開発に従事。<br>
+          2016年8月より、オンライン証券会社<a href="https://folio-sec.com" target="_blank" rel="noopener">株式会社FOLIO</a>に入社。バックエンドシステム開発・プロジェクトマネージメント・Engineering Managementに従事。<br>
+          2020年3月より<a href="https://idein.jp" target="_blank" rel="noopener">Idein株式会社</a>所属。<br>
+          随時副業募集中です: <a href="https://github.com/laysakura/resume-jp-for-side-job" target="_blank" rel="noopener">職務経歴書や募集職種</a>
+        </p>
+        <ul class="author-social-buttons">
+          <li class="author-social-button"><a class="fa fa-lg fa-twitter-square" href="https://twitter.com/laysakura" target="_blank" rel="noopener"></a></li>
+          <li class="author-social-button"><a class="fa fa-lg fa-github-square" href="https://github.com/laysakura" target="_blank" rel="noopener"></a></li>
+          <li class="author-social-button"><a class="fa fa-lg fa-facebook-square" href="https://www.facebook.com/lay.sakura" target="_blank" rel="noopener"></a></li>
+        </ul>
+      </div>
+    </footer>
+    
+	
+    
+<nav id="article-nav">
+  
+    <a href="/2020/01/19/Patterson-Hennessy-5th-Excersise03/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          『コンピュータの構成と設計 第5版』演習問題解答集 第3章
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/12/25/rust-DataStructures-Algorithm-BinarySearchTree/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          二分探索木 - Rustではじめるデータ構造とアルゴリズム（第2回）
+        
+      </div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+
+
+<section id="comments">
+  <div id="disqus_thread">
+
+  <!-- comment service provided by disqus -->
+  <script>
+    /**
+     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+     */
+    var disqus_config = function () {
+        this.page.url = https://laysakura.github.io/2020/01/13/Patterson-Hennessy-5th-Excersise02/;  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = https://laysakura.github.io/2020/01/13/Patterson-Hennessy-5th-Excersise02/; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    (function() {  // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        
+        s.src = '//laysakura.disqus.com/embed.js';
+        
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript" target="_blank" rel="noopener">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+    </div>
+    <div class="mb-search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:laysakura.github.io">
+  </form>
+</div>
+<footer id="footer">
+	<h1 class="footer-blog-title">
+		<a href="/">俺とお前とlaysakura</a>
+	</h1>
+	<span class="copyright">
+		&copy; 2020 Sho Nakatani a.k.a. laysakura<br>
+		Modify from <a href="https://sanographix.github.io/tumblr/apollo/" target="_blank">Apollo</a> theme, designed by <a href="https://www.sanographix.net/" target="_blank">SANOGRAPHIX.NET</a><br>
+		Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+	</span>
+</footer>
+
+    
+<script>
+  var disqus_shortname = 'laysakura';
+  
+  var disqus_url = 'https://laysakura.github.io/2020/01/13/Patterson-Hennessy-5th-Excersise02/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+
+  <!-- https://github.com/vfeskov/vanilla-back-to-top -->
+  <script src="https://unpkg.com/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js"></script>
+  <script>addBackToTop({
+    diameter: 50,
+    backgroundColor: '#33a6b880',
+    textColor: '#fff'
+  })</script>
+
+</body>
+</html>

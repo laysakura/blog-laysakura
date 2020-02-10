@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Amazon EC2でクライアント証明書認証のVPNを構築 | 俺とお前とlaysakura</title>
+  
+  <link rel="canonical" href="https://laysakura.github.io/2016/07/24/cir0gtu71000kibiu1skemk6c/"/>
+  <meta name="viewport" content="width=device-width">
+  <meta name="description" content="高いセキュリティが要求されるLAN内のサーバに自宅などのリモートからSSHログインしたい場合、VPNが有効です。VPNを使うと、リモートからLAN内に仮想的に参加することができるので、プライベートIPアドレスのみが割り振られたサーバにもSSHログインできるようになります。 VPNには色々な認証方式がありますが、SSL-VPNプロトコルでクライアント証明書方式の認証を行えば、誰がいつVPNに参加">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Amazon EC2でクライアント証明書認証のVPNを構築">
+<meta property="og:url" content="https://laysakura.github.io/2016/07/24/cir0gtu71000kibiu1skemk6c/index.html">
+<meta property="og:site_name" content="俺とお前とlaysakura">
+<meta property="og:description" content="高いセキュリティが要求されるLAN内のサーバに自宅などのリモートからSSHログインしたい場合、VPNが有効です。VPNを使うと、リモートからLAN内に仮想的に参加することができるので、プライベートIPアドレスのみが割り振られたサーバにもSSHログインできるようになります。 VPNには色々な認証方式がありますが、SSL-VPNプロトコルでクライアント証明書方式の認証を行えば、誰がいつVPNに参加">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:image" content="https://laysakura.github.io/img/2016/07-14-structure.png">
+<meta property="og:image" content="https://laysakura.github.io/img/2016/07-14-tunnelblick-DnD.png">
+<meta property="og:image" content="https://laysakura.github.io/img/2016/07-14-tunnelblick-connecting.png">
+<meta property="og:image" content="https://laysakura.github.io/img/2016/07-14-structure.png">
+<meta property="og:image" content="https://laysakura.github.io/img/2016/07-14-create-vpc.png">
+<meta property="og:image" content="https://laysakura.github.io/img/2016/07-14-create-subnet.png">
+<meta property="og:image" content="https://laysakura.github.io/img/2016/07-14-create-internet-gateway.png">
+<meta property="og:image" content="https://laysakura.github.io/img/2016/07-14-attach-internet-gateway-to-vpc.png">
+<meta property="og:image" content="https://laysakura.github.io/img/2016/07-14-create-routing-table.png">
+<meta property="og:image" content="https://laysakura.github.io/img/2016/07-14-add-internet-gateway-to-routing-table.png">
+<meta property="og:image" content="https://laysakura.github.io/img/2016/07-14-create-security-group-for-step.png">
+<meta property="og:image" content="https://laysakura.github.io/img/2016/07-14-inbound-rule-for-step.png">
+<meta property="og:image" content="https://laysakura.github.io/img/2016/07-14-create-security-group-for-vpn.png">
+<meta property="og:image" content="https://laysakura.github.io/img/2016/07-14-create-ec2-instance-vpn-network.png">
+<meta property="og:image" content="https://laysakura.github.io/img/2016/07-14-create-ec2-instance-vpn-primary-ip.png">
+<meta property="og:image" content="https://laysakura.github.io/img/2016/07-14-create-ec2-instance-vpn-security-group.png">
+<meta property="og:image" content="https://laysakura.github.io/img/2016/07-14-create-ec2-instance-vpn-public-ip.png">
+<meta property="article:published_time" content="2016-07-24T10:30:00.000Z">
+<meta property="article:modified_time" content="2020-02-10T05:06:21.000Z">
+<meta property="article:author" content="Sho Nakatani a.k.a. laysakura">
+<meta property="article:tag" content="Linuxオペレーション">
+<meta property="article:tag" content="テクノロジー">
+<meta property="article:tag" content="セキュリティ">
+<meta property="article:tag" content="VPN">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://laysakura.github.io/img/2016/07-14-structure.png">
+
+  <!-- favicon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+  <link rel="icon" href="/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+  <link rel="manifest" href="/favicon/site.webmanifest">
+  <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#5bbad5">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="theme-color" content="#ffffff">
+
+  
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-22289437-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+  <!-- MathJax -->
+  <script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+  <div id="container">
+    <div class="mobile-nav-panel">
+	<i class="icon-reorder icon-large"></i>
+</div>
+<header id="header">
+	<h1 class="blog-title">
+		<a href="/">俺とお前とlaysakura</a>
+	</h1>
+	<nav class="nav">
+		<ul>
+			<li><a href="/archives">過去の投稿</a></li>
+			<li><a id="nav-search-btn" class="nav-icon" title="Search"></a></li>
+			<li><a href="http://cloud.feedly.com/#subscription%2Ffeed%2Fhttps%3A%2F%2Flaysakura.github.io%2Fatom.xml" target="_blank" rel="noopener" id="nav-rss-link" class="nav-icon" title="RSS Feed"></a></li>
+		</ul>
+	</nav>
+	<div id="search-form-wrap">
+		<form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://laysakura.github.io"></form>
+	</div>
+</header>
+    <div id="main">
+      <article id="post-Amazon-EC2でクライアント証明書認証のVPNを構築" class="post">
+	<footer class="entry-meta-header">
+		<span class="meta-elements date">
+			<a href="/2016/07/24/cir0gtu71000kibiu1skemk6c/" class="article-date">
+  <time datetime="2016-07-24T10:30:00.000Z" itemprop="datePublished">2016-07-24</time>
+</a>
+		</span>
+	</footer>
+	
+	<header class="entry-header">
+		
+  
+    <h1 class="article-title entry-title" itemprop="name">
+      Amazon EC2でクライアント証明書認証のVPNを構築
+    </h1>
+  
+
+	</header>
+	<div class="entry-content">
+		
+    	<img src="/img/2016/07-14-structure.png" alt="構成図" width="auto" height="auto">
+
+<p>高いセキュリティが要求されるLAN内のサーバに自宅などのリモートからSSHログインしたい場合、VPNが有効です。<br>VPNを使うと、リモートからLAN内に仮想的に参加することができるので、プライベートIPアドレスのみが割り振られたサーバにもSSHログインできるようになります。</p>
+<p>VPNには色々な認証方式がありますが、SSL-VPNプロトコルでクライアント証明書方式の認証を行えば、誰がいつVPNに参加したのかを高い信頼度でログに記録することができます。</p>
+<p>本記事では、OpenVPNを使ったSSL-VPNの構築方法をAmazon EC2での構築も踏まえ詳しく紹介します。</p>
+<a id="more"></a>
+
+<h2><span id="目的-プライベートネットワークに閉じた環境にリモートアクセスしたい">目的: プライベートネットワークに閉じた環境にリモートアクセスしたい</span></h2><p>社内に置かれたサーバは、基本的にはインターネットからのアクセスをできないようにプライベートネットワークに置くことが多いかと思います。<br>「WebサーバはHTTP(S)のTCPポート80番(443番)だけをインターネットに開放する」などはありますが、そういうものを除けば各サーバにはプライベートIPアドレスのみを割り当て、同じLAN内のマシンのみからアクセスされるようにするのがセキュリティ上望ましいでしょう。</p>
+<p>一方で、LAN内からしかアクセスできないサーバにもリモートからアクセスしたい場合があります。<br>管理者が自宅から緊急対応をする場合などですね。</p>
+<p>このようなケースでは、物理的には別々のLANに属していても(例: 社内LANと管理者の自宅のLAN)、仮想的に同一のLANに所属させる <strong>VPN</strong> (Virtual Private Network) が有効です。<br>管理者のマシンでVPNに参加することで、管理者はプライベートIPアドレスのみが割り当てられたLAN内のサーバにアクセスすることができます。</p>
+<p>ただし、誰でもVPNに参加できてしまったら、せっかくプライベートネットワークに閉じたサーバ群も格好の攻撃の的となってしまいます。<br><strong>クライアント証明書</strong> を使うことで、VPNに接続することのできる人を限定し、また誰がいつ接続したかを記録することができます。</p>
+<p>この記事では、</p>
+<ul>
+<li>VPNを構築し、物理的なLANの外にあるマシンを仮想的にLANに参加させる方法</li>
+<li>VPNに接続できるクライアントを認証により限定し、どのクライアントがVPNに接続したかを記録できる方法</li>
+<li>AWSを使ってVPNサーバと踏み台サーバを構築し、プライベートIPアドレスのみが割り振られた踏み台サーバに対してVPN経由でSSHログインする実践</li>
+</ul>
+<p>について解説します。</p>
+<p>構築や動作確認に利用するコマンドが出てきますが、サーバサイドはLinux (Debian, Ubuntu系統)、クライアントサイドはMac OS Xを想定しています。</p>
+<!-- toc -->
+
+<ul>
+<li><a href="#クイックスタート-最初のvpn接続">クイックスタート: 最初のVPN接続</a><ul>
+<li><a href="#vpnサーバを立ち上げる">VPNサーバを立ち上げる</a></li>
+<li><a href="#vpnクライアントを設定">VPNクライアントを設定</a></li>
+<li><a href="#vpnに接続">VPNに接続</a></li>
+</ul>
+</li>
+<li><a href="#amazon-ec2でサンプル環境を構築">Amazon EC2でサンプル環境を構築</a><ul>
+<li><a href="#ネットワークの設定">ネットワークの設定</a><ul>
+<li><a href="#vpcの作成">VPCの作成</a></li>
+<li><a href="#サブネットの作成">サブネットの作成</a></li>
+<li><a href="#インターネットゲートウェイの作成">インターネットゲートウェイの作成</a></li>
+<li><a href="#ルートテーブルの設定">ルートテーブルの設定</a></li>
+<li><a href="#セキュリティグループの作成">セキュリティグループの作成</a></li>
+</ul>
+</li>
+<li><a href="#vpnサーバ-踏み台サーバ用インスタンスの作成">VPNサーバ, 踏み台サーバ用インスタンスの作成</a></li>
+<li><a href="#動作確認">動作確認</a></li>
+</ul>
+</li>
+<li><a href="#証明書と鍵の生成">証明書と鍵の生成</a><ul>
+<li><a href="#caの証明書と秘密鍵の生成">CAの証明書と秘密鍵の生成</a></li>
+<li><a href="#vpnサーバの証明書と秘密鍵-dhパラメータの生成">VPNサーバの証明書と秘密鍵、DHパラメータの生成</a></li>
+<li><a href="#vpnクライアントの証明書と秘密鍵の生成">VPNクライアントの証明書と秘密鍵の生成</a></li>
+</ul>
+</li>
+<li><a href="#vpnサーバの設定">VPNサーバの設定</a><ul>
+<li><a href="#openvpnの設定">OpenVPNの設定</a></li>
+<li><a href="#ipフォワード">IPフォワード</a></li>
+<li><a href="#tunフォワード">TUNフォワード</a></li>
+</ul>
+</li>
+<li><a href="#クライアントからvpn越しに踏み台サーバへ接続">クライアントからVPN越しに踏み台サーバへ接続</a></li>
+<li><a href="#まとめと発展的な話題">まとめと発展的な話題</a><ul>
+<li><a href="#セキュリティの強化">セキュリティの強化</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="クイックスタート-最初のvpn接続">クイックスタート: 最初のVPN接続</span></h2><p>まずはじめに、サーバ・クライアント構成でシンプルなVPNを構築します。<br>VPNの機能は、 <a href="https://openvpn.net/" target="_blank" rel="noopener">OpenVPN</a> で提供します。<br>ネットワークスイッチやルータでVPNの機能が使える製品もありますが、本記事では普通のLinuxサーバ上でVPNを使うための方法を記載します。</p>
+<p>Linuxサーバはroot権限が取れればどんなものでも構いませんが、Amazon EC2でゼロから構築する場合は先に <a href="#amazon-ec2でサンプル環境を構築">Amazon EC2でサンプル環境を構築</a> から読み進めても良いでしょう。</p>
+<h3><span id="vpnサーバを立ち上げる">VPNサーバを立ち上げる</span></h3><p>Linuxサーバ上での作業です。<br>まずはOpenVPNをインストールします。</p>
+<figure class="highlight bash"><figcaption><span>OpenVPNのインストール</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo apt-get install openvpn</span><br></pre></td></tr></table></figure>
+
+<p>この時点ではまだOpenVPNのデーモンは立ち上がっていません。<br>“openvpn” パッケージには各種のサンプルファイルが含まれているので、OpenVPNサーバの立ち上げに必要な設定ファイル・証明書・秘密鍵を一箇所にまとめておきましょう。</p>
+<figure class="highlight bash"><figcaption><span>設定ファイル・証明書・秘密鍵をコピー</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$ mkdir -p ~/openvpn-test/server</span><br><span class="line">$ <span class="built_in">cd</span> ~/openvpn-test/server/</span><br><span class="line"> </span><br><span class="line"><span class="comment">## 設定ファイルのコピー</span></span><br><span class="line">$ zcat /usr/share/doc/openvpn/examples/sample-config-files/server.conf.gz &gt; server.conf</span><br><span class="line">$ zcat /usr/share/doc/openvpn/examples/sample-keys/server.crt.gz &gt; server.crt</span><br><span class="line">$ cp /usr/share/doc/openvpn/examples/sample-keys/&#123;ca.crt,server.key,dh1024.pem&#125; .</span><br><span class="line">$ ls</span><br><span class="line">ca.crt  dh1024.pem  server.conf  server.crt  server.key</span><br></pre></td></tr></table></figure>
+
+<p>この時点でOpenVPNサーバを立ち上げることができます。</p>
+<figure class="highlight bash"><figcaption><span>OpenVPNサーバの起動</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ sudo openvpn server.conf</span><br><span class="line">...</span><br><span class="line">Thu Jul 21 23:05:11 2016 Initialization Sequence Completed</span><br></pre></td></tr></table></figure>
+
+<p>現時点の設定ファイルの内容は、以下のようになっている想定です。<br>(空行、コメント行は除く)</p>
+<figure class="highlight plain"><figcaption><span>server.conf</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">port 1194</span><br><span class="line">proto udp</span><br><span class="line">dev tun</span><br><span class="line">ca ca.crt</span><br><span class="line">cert server.crt</span><br><span class="line">key server.key  # This file should be kept secret</span><br><span class="line">dh dh1024.pem</span><br><span class="line">server 10.8.0.0 255.255.255.0</span><br><span class="line">ifconfig-pool-persist ipp.txt</span><br><span class="line">keepalive 10 120</span><br><span class="line">comp-lzo</span><br><span class="line">persist-key</span><br><span class="line">persist-tun</span><br><span class="line">status openvpn-status.log</span><br><span class="line">verb 3</span><br></pre></td></tr></table></figure>
+
+<p>UDPの1194番ポートを使用していることに注意してください。<br>VPN接続が確立できないよくある理由の一つに、VPNで利用しているポートがファイアーウォールで遮断されていることがあります。<br>予め、VPN用ポートが開放できているか確認しておきましょう。</p>
+<figure class="highlight bash"><figcaption><span>サーバ側でUDP 1194番ポートを待ち受ける</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ nc -l -u -p 1194</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><figcaption><span>クライアント側でUDP 1194番ポートへメッセージを送る</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ nc -u your-vpn-server.com 1194</span><br><span class="line">hello</span><br></pre></td></tr></table></figure>
+
+<p>ポート開放がうまく行っていれば、サーバ側で “hello” と出力されます。</p>
+<p>失敗した場合、VPNサーバ側のファイアーウォールを見なおしてみてください。<br>EC2を利用している場合、後述の <a href="#セキュリティグループの作成">セキュリティグループの作成</a> でUDP 1194番ポートを開放しています。</p>
+<h3><span id="vpnクライアントを設定">VPNクライアントを設定</span></h3><p>Macでの作業です。<br>Mac用のVPNクライアントのソフトウェアとして、 <a href="https://tunnelblick.net/" target="_blank" rel="noopener">Tunnelblick</a> を使います。<br>OpenVPNのGUIクライアントで、OpenVPN形式の設定ファイルが使えるのが便利です。<br>以下、Tunnelblickがインストールされた前提で進めます。</p>
+<p>クライアント側でも設定ファイル・証明書・秘密鍵が必要になるので、OpenVPNのサンプルファイルをクライアント上に配置します。</p>
+<figure class="highlight bash"><figcaption><span>[サーバ側作業] クライアント用の設定ファイル・証明書・秘密鍵をコピー</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$ mkdir -p ~/openvpn-test/client</span><br><span class="line">$ <span class="built_in">cd</span> ~/openvpn-test/client/</span><br><span class="line"> </span><br><span class="line"><span class="comment">## 設定ファイルのコピー</span></span><br><span class="line">$ cp /usr/share/doc/openvpn/examples/sample-config-files/client.conf .</span><br><span class="line">$ zcat /usr/share/doc/openvpn/examples/sample-keys/client.crt.gz &gt; client.crt</span><br><span class="line">$ cp /usr/share/doc/openvpn/examples/sample-keys/&#123;ca.crt,client.key&#125; .</span><br><span class="line">$ ls</span><br><span class="line">ca.crt  client.conf  client.crt  client.key</span><br></pre></td></tr></table></figure>
+
+<p><code>scp</code> などの手段で、Mac上に上記ファイルを配置します。</p>
+<figure class="highlight bash"><figcaption><span>サーバからクライアント用の設定ファイル・証明書・秘密鍵を取得</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ scp -r you@your-server:~/openvpn-test/client .</span><br><span class="line"> </span><br><span class="line">$ <span class="built_in">cd</span> client/</span><br><span class="line">$ ls</span><br><span class="line">ca.crt      client.conf client.crt  client.key</span><br></pre></td></tr></table></figure>
+
+<p>クライアントの設定ファイルは現時点で以下のようになっている想定です。</p>
+<figure class="highlight plain"><figcaption><span>client.conf</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">client</span><br><span class="line">dev tun</span><br><span class="line">proto udp</span><br><span class="line">remote my-server-1 1194</span><br><span class="line">resolv-retry infinite</span><br><span class="line">nobind</span><br><span class="line">persist-key</span><br><span class="line">persist-tun</span><br><span class="line">ca ca.crt</span><br><span class="line">cert client.crt</span><br><span class="line">key client.key</span><br><span class="line">ns-cert-type server</span><br><span class="line">comp-lzo</span><br><span class="line">verb 3</span><br></pre></td></tr></table></figure>
+
+<p><code>remote my-server-1 1194</code> の行は修正が必要です。<code>my-server-1</code> の箇所を、利用しているLinuxサーバのIPアドレスまたはFQDNに書き換えてください。</p>
+<p>そこまで終わったら、クライアントの設定ファイルをTunnelblickに反映させます。<br>Finderから、画面上部のTunnelblickアイコンにドラッグ＆ドロップしてください。</p>
+<img src="/img/2016/07-14-tunnelblick-DnD.png" alt="Tunnelblickに設定ファイルをD&D" width="auto" height="auto">
+
+<h3><span id="vpnに接続">VPNに接続</span></h3><p>Mac上の作業です。<br>いよいよVPNに接続します。<br>Tunnelblickのアイコンから “client に接続” を選んでください。</p>
+<p>サーバのログに接続を表すログが流れ、Tunnelblickでも接続に成功した旨が表示されるはずです。</p>
+<img src="/img/2016/07-14-tunnelblick-connecting.png" alt="VPN接続に成功" width="auto" height="auto">
+
+<p>この時点でVPNサーバによりプライベートIPアドレス <strong>10.8.0.6</strong> が割り振られているかと思います。<br><strong>10.8.0.0/24</strong> 内での疎通確認をしましょう。</p>
+<figure class="highlight bash"><figcaption><span>VPNサーバへのプライベートIPアドレスでの疎通確認</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ ping 10.8.0.1</span><br></pre></td></tr></table></figure>
+
+
+<h2><span id="amazon-ec2でサンプル環境を構築">Amazon EC2でサンプル環境を構築</span></h2><img src="/img/2016/07-14-structure.png" alt="構成図" width="auto" height="auto">
+
+<p>ここまではVPNサーバとクライアントのみのシンプルな構成でしたが、ここからはVPNを構築する目的をイメージして、上図のような環境を構築します。</p>
+<p><strong>client1</strong> は、 <strong>10.0.0.0/16</strong> のLAN内にある各種 <strong>その他インスタンス</strong> にリモートからSSHログインしたいとします。<br><strong>その他インスタンス</strong> には <strong>踏み台サーバ</strong> 経由でのみSSHログインが許可されていて、かつ <strong>踏み台サーバ</strong> プライベートIPアドレスしか振られていないため、リモートから直接SSHログインする手立てがありません。<br>そこで、VPNを構築し、 <strong>client1</strong> に <strong>10.0.255.0/24</strong> のプライベートIPアドレスを割り振り、その後で踏み台サーバにSSHログインできるようにしましょう。</p>
+<p>このシナリオの下、Amazon EC2で</p>
+<ul>
+<li><strong>vpn</strong>: VPNサーバ</li>
+<li><strong>step</strong>: 踏み台サーバ</li>
+</ul>
+<p>の２台を構築します。<br>(<strong>その他インスタンス</strong> の構築については本記事のスコープ外とします。)</p>
+<p><strong>vpn</strong> と <strong>step</strong> を共に <strong>10.0.0.0/16</strong> のネットワークに参加させるために、Amazon VPC (Virtual Private Cloud) を構築しつつネットワーク周りの設定をいくつかする必要がありますが、これについても本記事で解説します。</p>
+<p>IPアドレスがいくつか出てきますので、割り当てられているNICの名称と共にこちらでまとめておきます。</p>
+<ul>
+<li><strong>client1</strong><ul>
+<li>VPNに参加した際に割り当てられるIPアドレス<ul>
+<li>IPアドレス: <strong>10.0.255.6</strong></li>
+<li>NIC: <strong>utun0</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>vpn</strong><ul>
+<li>10.0.0.0/16 のLAN内のプライベートIPアドレス<ul>
+<li>IPアドレス: <strong>10.0.1.2</strong></li>
+<li>NIC: <strong>eth0</strong></li>
+<li>(リモートからグローバルIPアドレスでのアクセスもNATによりここに到達している)</li>
+</ul>
+</li>
+<li>VPNに参加したクライアントと疎通するプライベートIPアドレス<ul>
+<li>IPアドレス: <strong>10.0.255.1</strong></li>
+<li>NIC: <strong>tun0</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>step</strong><ul>
+<li><strong>10.0.0.0/16</strong> のLAN内のプライベートIPアドレス<ul>
+<li>IPアドレス: <strong>10.0.2.2</strong></li>
+<li>NIC: <strong>eth0</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>client1</strong> と <strong>vpn</strong> 間のVPN接続には、 <strong>クライアント証明書方式</strong> を使います。<br>これにより、VPNに参加したのが誰であるかをログから確認できます。<br>(ただし、特定のクライアント証明書を特定の個人のみが所有しているという前提のもとです。)</p>
+<h3><span id="ネットワークの設定">ネットワークの設定</span></h3><h4><span id="vpcの作成">VPCの作成</span></h4><p>まずはLANに相当するVPCを作成します。<br>AWSのコンソールから、 <strong>サービス -&gt; VPC</strong> と遷移し、 <strong>office-lan</strong> という名称で作成します。</p>
+<img src="/img/2016/07-14-create-vpc.png" alt="AWSでのVPCの作成" width="auto" height="auto">
+
+<h4><span id="サブネットの作成">サブネットの作成</span></h4><p>先ほどの <strong>office-lan</strong> VPCの中のサブネットを切ります。<br>今回の構成ではVPCと全く同じ <strong>10.0.0.0/16</strong> で切れば良いです。<br>名称は <strong>office-lan-subnet</strong> としました。</p>
+<img src="/img/2016/07-14-create-subnet.png" alt="サブネットの作成" width="auto" height="auto">
+
+
+<h4><span id="インターネットゲートウェイの作成">インターネットゲートウェイの作成</span></h4><p><strong>10.0.0.0/16</strong> のLAN内のインスタンスでは、セキュリティのためインバウンドは絞りますが、アウトバウンドはインターネット接続を許可しましょう。<br>そのために、インターネットゲートウェイを作成します。<br>名称は <strong>office-inet-gw</strong> としました。</p>
+<img src="/img/2016/07-14-create-internet-gateway.png" alt="AWSでのインターネットゲートウェイの作成" width="auto" height="auto">
+
+<p>作成したインターネットゲートウェイを選択し、 <strong>office-lan</strong> のVPCにアタッチします。</p>
+<img src="/img/2016/07-14-attach-internet-gateway-to-vpc.png" alt="インターネットゲートウェイをVPCにアタッチ" width="auto" height="auto">
+
+
+<h4><span id="ルートテーブルの設定">ルートテーブルの設定</span></h4><p><strong>office-lan</strong> の中からインターネットへのアウトバウンド接続ができるようにするため、VPCのルーティングテーブルを設定します。<br><strong>route-office-lan</strong> という名称でルートテーブルを作成します。</p>
+<img src="/img/2016/07-14-create-routing-table.png" alt="ルートテーブルの作成" width="auto" height="auto">
+
+<p><strong>route-office-lan</strong> を選択し、 <strong>ルート</strong> タブから <strong>office-inet-gw</strong> を追加しましょう。</p>
+<img src="/img/2016/07-14-add-internet-gateway-to-routing-table.png" alt="ルートテーブルにインターネットゲートウェイを追加" width="auto" height="auto">
+
+
+<h4><span id="セキュリティグループの作成">セキュリティグループの作成</span></h4><p>セキュリティグループは、ファイアーウォールのようなものです。<br><strong>vpn</strong> 用のものと <strong>step</strong> 用のものをそれぞれ作りましょう。</p>
+<p>まずはシンプルな <strong>step</strong> 用のものを作成します。</p>
+<img src="/img/2016/07-14-create-security-group-for-step.png" alt="step用のセキュリティグループの作成" width="auto" height="auto">
+
+<p>作成した <strong>step</strong> を選択し、 <strong>インバウンドルール</strong> を設定します。<br>踏み台サーバは <strong>10.0.0.0/16</strong> のLAN内のみからSSH接続を受け付けます。</p>
+<img src="/img/2016/07-14-inbound-rule-for-step.png" alt="step用のインバウンドルール" width="auto" height="auto">
+
+<p>同様にして、 <strong>vpn</strong> のインバウンドルールも設定します。<br>VPNサーバは、VPN接続のためにUDPの1194番ポートをグローバルに開放します。<br>ただし、VPNサーバの設定中はSSHも許可する必要があります。 <strong>VPNの設定が完了したらSSHのインバウンドルールは忘れずに削除しましょう。</strong></p>
+<img src="/img/2016/07-14-create-security-group-for-vpn.png" alt="vpn用のセキュリティグループの作成" width="auto" height="auto">
+
+
+<h3><span id="vpnサーバ-踏み台サーバ用インスタンスの作成">VPNサーバ, 踏み台サーバ用インスタンスの作成</span></h3><p><strong>サービス -&gt; EC2</strong> に遷移し、VPNサーバと踏み台サーバのEC2インスタンスを作成します。<br><strong>インスタンスの作成</strong> ボタンを押し、ウィザードに従って作成していきます。</p>
+<p>まずは下記のように、 <strong>vpn</strong> 用のインスタンスを作成します。</p>
+<ul>
+<li><strong>1.AMIの選択</strong><ul>
+<li>Ubuntu Server 14.04 LTS (HVM), SSD Volume Type - ami-a21529cc</li>
+</ul>
+</li>
+<li><strong>2.インスタンスタイプの選択</strong><ul>
+<li>t2.micro</li>
+</ul>
+</li>
+<li><strong>3.インスタンスの詳細の設定</strong><ul>
+<li>ネットワーク: <strong>office-lan</strong></li>
+<li>サブネット: <strong>office-lan-subnet</strong></li>
+<li>自動割当パブリックIP: <strong>有効化</strong><img src="/img/2016/07-14-create-ec2-instance-vpn-network.png" alt="vpnのインスタンスの作成 - ネットワーク設定" width="auto" height="auto"></li>
+<li>eth0のプライマリIP: <strong>10.0.1.2</strong><img src="/img/2016/07-14-create-ec2-instance-vpn-primary-ip.png" alt="vpnのインスタンスの作成 - プライマリIP" width="auto" height="auto"></li>
+</ul>
+</li>
+<li><strong>5.インスタンスのタグ付け</strong><ul>
+<li>Name: <strong>vpn</strong></li>
+</ul>
+</li>
+<li><strong>6.セキュリティグループの設定</strong><ul>
+<li><strong>vpn</strong> を選択<img src="/img/2016/07-14-create-ec2-instance-vpn-security-group.png" alt="vpnのインスタンスの作成 - セキュリティグループの選択" width="auto" height="auto">
+
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>step</strong> 用のインスタンスも同様にして作成しますが、以下の点が異なります。</p>
+<ul>
+<li><strong>3.インスタンスの詳細の設定</strong><ul>
+<li>自動割当パブリックIP: <strong>無効化</strong></li>
+<li>eth0のプライマリIP: <strong>10.0.2.2</strong></li>
+</ul>
+</li>
+<li><strong>5.インスタンスのタグ付け</strong><ul>
+<li>Name: <strong>step</strong></li>
+</ul>
+</li>
+<li><strong>6.セキュリティグループの設定</strong><ul>
+<li><strong>step</strong> を選択</li>
+</ul>
+</li>
+</ul>
+<p>特に、 <strong>自動割当パブリックIP</strong> を設定してしまうと、踏み台サーバがインターネットに晒されてしまうためご注意ください。</p>
+<h3><span id="動作確認">動作確認</span></h3><p>しばらくして作成が完了したら、 <strong>client1</strong> からSSHの接続を確認します。<br><strong>vpn</strong> のパブリックIPは、インスタンスの一覧画面から参照してください。<br><img src="/img/2016/07-14-create-ec2-instance-vpn-public-ip.png" alt="vpnのインスタンスのパブリックIP確認" width="auto" height="auto"></p>
+<figure class="highlight bash"><figcaption><span>client1からvpnへのSSH接続</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ ssh -i ~/.ssh/secret-key.pem ubuntu@X.X.X.X</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><figcaption><span>vpnからstepへのSSH接続</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ ssh -i ~/.ssh/secret-key.pem 10.0.2.2</span><br></pre></td></tr></table></figure>
+
+<p>これでVPNサーバと踏み台サーバの構築は完了です。</p>
+<p>以降、クライアント証明書認証のための証明書や鍵を生成することと、 <strong>client1</strong> から <strong>step</strong> へ直接SSH接続するための設定を解説します。<br>( <strong>client1</strong> から <strong>vpn</strong> へのSSH接続は、あくまでもVPN設定を完了させるまでの一時的なものであることを忘れないでください。VPN設定が完了したらセキュリティグループで塞ぎましょう。)</p>
+<h2><span id="証明書と鍵の生成">証明書と鍵の生成</span></h2><p><a href="#クイックスタート-最初のvpn接続">クイックスタート: 最初のVPN接続</a> では、証明書や秘密鍵はOpenVPNのサンプルファイルをそのまま使っていました。<br>これは言うまでもなく脆弱です。<br>各VPNサーバ・クライアントごとに独自の証明書や秘密鍵を生成しましょう。</p>
+<p>以下、 <strong>vpn</strong> でのroot作業となります。</p>
+<figure class="highlight bash"><figcaption><span>rootユーザになる</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo su</span><br></pre></td></tr></table></figure>
+
+<p>証明書や秘密鍵を生成するためのパッケージ、 <strong>easy-rsa</strong> をインストールします。</p>
+<figure class="highlight bash"><figcaption><span>easy-rsaのインストール</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root&gt; apt-get install easy-rsa</span><br></pre></td></tr></table></figure>
+
+<p><strong>easy-rsa</strong> は複数のシェルスクリプトから成ります。<br><code>dpkg -L easy-rsa |grep build-ca</code> などで、シェルスクリプト群が置かれたディレクトリを探して <code>cd</code> します。</p>
+<figure class="highlight bash"><figcaption><span>easy-rsaのディレクトリにcd</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">root&gt; dpkg -L easy-rsa |grep build-ca</span><br><span class="line">/usr/share/easy-rsa/build-ca</span><br><span class="line"> </span><br><span class="line">root&gt; <span class="built_in">cd</span> /usr/share/easy-rsa/</span><br></pre></td></tr></table></figure>
+
+<p>ここからの作業を理解するためには <strong>PKI (Public Key Infrastructure; 公開鍵基盤)</strong> の知識が必要になります。<br>(HTTPSを理解していれば問題ないです)</p>
+<h3><span id="caの証明書と秘密鍵の生成">CAの証明書と秘密鍵の生成</span></h3><p>まずはCAの証明書に入る基本的な情報を設定します。<br><code>vars</code> ファイルを編集し、以下の6行を適当に変更してください。</p>
+<figure class="highlight bash"><figcaption><span>/usr/share/easy-rsa/vars の編集箇所</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> KEY_COUNTRY=<span class="string">"US"</span></span><br><span class="line"><span class="built_in">export</span> KEY_PROVINCE=<span class="string">"CA"</span></span><br><span class="line"><span class="built_in">export</span> KEY_CITY=<span class="string">"SanFrancisco"</span></span><br><span class="line"><span class="built_in">export</span> KEY_ORG=<span class="string">"Fort-Funston"</span></span><br><span class="line"><span class="built_in">export</span> KEY_EMAIL=<span class="string">"me@myhost.mydomain"</span></span><br><span class="line"><span class="built_in">export</span> KEY_OU=<span class="string">"MyOrganizationalUnit"</span></span><br></pre></td></tr></table></figure>
+
+<p>編集後、以下のコマンドでCAの証明書と鍵を生成します。</p>
+<figure class="highlight bash"><figcaption><span>CAの証明書と秘密鍵の生成</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">root&gt; . ./vars     <span class="comment"># 設定値の読込み</span></span><br><span class="line">root&gt; ./clean-all  <span class="comment"># 既に生成済みの証明書や鍵があれば削除</span></span><br><span class="line">root&gt; ./build-ca   <span class="comment"># 証明書と秘密鍵の対話的生成</span></span><br><span class="line">...</span><br><span class="line">Common Name (eg, your name or your server<span class="string">'s hostname) [Fort-Funston CA]:Office-CA</span></span><br><span class="line"><span class="string">...</span></span><br><span class="line"><span class="string"> </span></span><br><span class="line"><span class="string">root&gt; ls keys/</span></span><br><span class="line"><span class="string">ca.crt  ca.key  index.txt  serial</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>Common Name</strong> は <code>vars</code> ファイルで指定していないので、必要に応じて入力してください。<br>(上記例では <strong>Office-CA</strong> としました)</p>
+<h3><span id="vpnサーバの証明書と秘密鍵-dhパラメータの生成">VPNサーバの証明書と秘密鍵、DHパラメータの生成</span></h3><p>VPNサーバの証明書と秘密鍵の生成は、コマンドを1つ打つだけです。<br>ただし、第一引数はVPNサーバの <strong>Common Name</strong> です。</p>
+<figure class="highlight bash"><figcaption><span>VPNサーバの証明書と秘密鍵の生成</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">root&gt; ./build-key-server server  <span class="comment"># 証明書と秘密鍵の対話的生成</span></span><br><span class="line">...</span><br><span class="line">Sign the certificate? [y/n]:y</span><br><span class="line"> </span><br><span class="line">1 out of 1 certificate requests certified, commit? [y/n]y</span><br><span class="line"> </span><br><span class="line">root&gt; ls keys/server.*</span><br><span class="line">keys/server.crt  keys/server.csr  keys/server.key</span><br></pre></td></tr></table></figure>
+
+<p>次に、通信の暗号化に使うDH(Diffie Hellman)パラメータを生成します。</p>
+<figure class="highlight bash"><figcaption><span>DHパラメータの生成</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">root&gt; ./build-dh</span><br><span class="line"> </span><br><span class="line">root&gt; ls keys/dh*</span><br><span class="line">keys/dh2048.pem</span><br></pre></td></tr></table></figure>
+
+
+<h3><span id="vpnクライアントの証明書と秘密鍵の生成">VPNクライアントの証明書と秘密鍵の生成</span></h3><p>VPNクライアントの証明書と秘密鍵の生成もコマンドを1つ打つだけです。<br>第一引数はVPNクライアントの <strong>Common Name</strong> です。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">root&gt; ./build-key client1</span><br><span class="line">...</span><br><span class="line">Sign the certificate? [y/n]:y</span><br><span class="line"> </span><br><span class="line">1 out of 1 certificate requests certified, commit? [y/n]y</span><br><span class="line"> </span><br><span class="line">root&gt; ls keys/client1.*</span><br><span class="line">keys/client1.crt  keys/client1.csr  keys/client1.key</span><br></pre></td></tr></table></figure>
+
+<p>クライアントの証明書と秘密鍵・CA証明書は、 <strong>client1</strong> に安全な方法で転送してください。<br><strong>クライアント証明書が流出した場合、誰からのVPN接続であるかが不明瞭になったり、最悪の場合許可していないクライアントがLAN内に侵入するのを許してしまいます。</strong></p>
+<p>ここでは、あまり安全な方法ではありませんが、 <code>scp</code> で転送します。</p>
+<figure class="highlight bash"><figcaption><span>[vpnでの作業]</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">## 一時的に、ubuntuユーザから秘密鍵がreadできるようにする</span></span><br><span class="line"> </span><br><span class="line">root&gt; chmod 755 keys</span><br><span class="line">root&gt; chmod 644 keys/client1.key</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><figcaption><span>[client1での作業] client1から、クライアント証明書と秘密鍵を取得する</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> ~/openvpn-test/client/  <span class="comment"># 本記事冒頭で作成したディレクトリ</span></span><br><span class="line">$ rm ca.crt client.&#123;crt,key&#125;</span><br><span class="line">$ ls</span><br><span class="line">client.conf</span><br><span class="line"></span><br><span class="line">$ scp -i ~/.ssh/secret-key.pem ubuntu@X.X.X.X:/usr/share/easy-rsa/keys/ca.crt .</span><br><span class="line">$ scp -i ~/.ssh/secret-key.pem ubuntu@X.X.X.X:/usr/share/easy-rsa/keys/client1.&#123;crt,key&#125; .</span><br><span class="line">$ ls</span><br><span class="line">ca.crt      client.conf client1.crt client1.key</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><figcaption><span>[vpnでの作業]</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">## 各種パーミッションを戻す</span></span><br><span class="line"> </span><br><span class="line">root&gt; chmod 700 keys</span><br><span class="line">root&gt; chmod 600 keys/client1.key</span><br></pre></td></tr></table></figure>
+
+
+<h2><span id="vpnサーバの設定">VPNサーバの設定</span></h2><p>PKIが整ったので、いよいよVPNサーバの設定に移ります。<br>最終目標は <strong>client1</strong> から <strong>step</strong> へSSH接続をすることですが、その際 <strong>vpn</strong> にはルータの役割をさせる必要もあるので、その方法も説明します。</p>
+<h3><span id="openvpnの設定">OpenVPNの設定</span></h3><p><strong>vpn</strong> でOpenVPNをインストールします。</p>
+<figure class="highlight bash"><figcaption><span>OpenVPNのインストール</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root&gt; apt-get install openvpn</span><br></pre></td></tr></table></figure>
+
+<p>設定ファイルと証明書・秘密鍵・DHパラメータを <code>/etc/openvpn/</code> 以下に配置しましょう。</p>
+<figure class="highlight bash"><figcaption><span>設定ファイルの配置</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root&gt; zcat /usr/share/doc/openvpn/examples/sample-config-files/server.conf.gz &gt; /etc/openvpn/server.conf</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><figcaption><span>証明書・秘密鍵・DHパラメータの配置</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">root&gt; cp /usr/share/easy-rsa/keys/ca.crt /etc/openvpn/</span><br><span class="line">root&gt; cp /usr/share/easy-rsa/keys/server.&#123;crt,key&#125; /etc/openvpn/</span><br><span class="line">root&gt; cp /usr/share/easy-rsa/keys/dh2048.pem /etc/openvpn/</span><br><span class="line"> </span><br><span class="line">root&gt; ls /etc/openvpn/</span><br><span class="line">ca.crt  server.crt  server.key  update-resolv-conf</span><br></pre></td></tr></table></figure>
+
+<p><code>/etc/openvpn/server.conf</code> の次の箇所を変更します。</p>
+<figure class="highlight diff"><figcaption><span>server.conf の変更箇所</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="addition">+ dh dh2048.pem</span></span><br><span class="line"><span class="deletion">- dh dh1024.pem</span></span><br><span class="line"><span class="addition">+ server 10.0.255.0 255.255.255.0</span></span><br><span class="line"><span class="deletion">- server 10.8.0.0 255.255.255.0</span></span><br><span class="line"><span class="addition">+ push "route 10.0.0.0 255.255.0.0"</span></span><br><span class="line"><span class="addition">+ status openvpn-status.log</span></span><br><span class="line"><span class="addition">+ log openvpn.log</span></span><br></pre></td></tr></table></figure>
+
+<p><code>push &quot;route 10.0.0.0 255.255.0.0&quot;</code> では、 <strong>client1</strong> に対して「 <strong>10.0.0.0/16</strong> への通信はVPNサーバを経由せよ」というルーティングを足しています。</p>
+<p>現時点の設定ファイルの内容は、以下のようになっている想定です。<br>(空行、コメント行は除く)</p>
+<figure class="highlight plain"><figcaption><span>server.conf</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">port 1194</span><br><span class="line">proto udp</span><br><span class="line">dev tun</span><br><span class="line">ca ca.crt</span><br><span class="line">cert server.crt</span><br><span class="line">key server.key  # This file should be kept secret</span><br><span class="line">dh dh2048.pem</span><br><span class="line">server 10.0.255.0 255.255.255.0</span><br><span class="line">ifconfig-pool-persist ipp.txt</span><br><span class="line">push &quot;route 10.0.0.0 255.255.0.0&quot;</span><br><span class="line">keepalive 10 120</span><br><span class="line">comp-lzo</span><br><span class="line">persist-key</span><br><span class="line">persist-tun</span><br><span class="line">status openvpn-status.log</span><br><span class="line">verb 3</span><br><span class="line">status openvpn-status.log</span><br><span class="line">log openvpn.log</span><br></pre></td></tr></table></figure>
+
+<p>この時点で <code>cd /etc/openvpn/ ; openvpn /etc/openvpn/server.conf</code> と起動し、 <code>/etc/openvpn/openvpn.log</code> に起動ログが正しく流れていることを確認しましょう。</p>
+<p><code>/etc/init.d/openvpn</code> もあるので、 <code>service openvpn {start|stop|status}</code> などでデーモンとして管理することができます。<br>マシンが再起動した時にデーモンが自動起動されるようにしましょう。</p>
+<figure class="highlight bash"><figcaption><span>openvpnの自動起動設定</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root&gt; update-rc.d openvpn defaults</span><br></pre></td></tr></table></figure>
+
+
+<h3><span id="ipフォワード">IPフォワード</span></h3><p><strong>client1</strong> から <strong>step</strong> に接続するためには、必ず <strong>vpn</strong> を経由しなければなりません。<br><strong>client1</strong> と <strong>step</strong> の間には、L2レイヤでの直接の接続がないためです。</p>
+<p><strong>vpn</strong> が <strong>client1</strong> から受け取ったパケットを <strong>step</strong> に転送するためには、 <strong>vpn</strong> にルータとしての設定をしてやる必要があります。</p>
+<figure class="highlight bash"><figcaption><span>vpnをルータにする</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root&gt; <span class="built_in">echo</span> 1 &gt; /proc/sys/net/ipv4/ip_forward</span><br></pre></td></tr></table></figure>
+
+<p>この設定は再起動をすると消えてしまうので、 <code>/etc/sysctl.conf</code> のファイルから一行コメントインして永続化します。</p>
+<figure class="highlight diff"><figcaption><span>/etc/sysctl.confの編集(vpnをルータにする設定の永続化)</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="addition">+ net.ipv4.ip_forward=1</span></span><br><span class="line"><span class="deletion">- #net.ipv4.ip_forward=1</span></span><br></pre></td></tr></table></figure>
+
+
+<h3><span id="tunフォワード">TUNフォワード</span></h3><p><strong>client1</strong>, <strong>vpn</strong>, <strong>step</strong> のNICレベルでの接続を簡易化すると、下図のようになります。</p>
+<figure class="highlight plain"><figcaption><span>L2ネットワーク図</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">client1 [utun0]</span><br><span class="line">           ^</span><br><span class="line">           |</span><br><span class="line">           v</span><br><span class="line">         [tun0] vpn [eth0]</span><br><span class="line">                      ^</span><br><span class="line">                      |</span><br><span class="line">                      v</span><br><span class="line">                    [eth0] step</span><br></pre></td></tr></table></figure>
+
+<p><strong>vpn:tun0</strong> は <strong>step:eth0</strong> と直接接続されていないので、 <strong>client1</strong> から <strong>step</strong> にパケットを送るためには、 <strong>vpn</strong> の中で <strong>tun0 -&gt; eth0</strong> というフォワーディングが必要になります。<br>更に、 <strong>step</strong> に到達したパケットが <strong>vpn</strong> 経由で <strong>client1</strong> に返ってくるように、NAT変換する必要もあります。<br>やることは単純なNAT変換です。</p>
+<figure class="highlight bash"><figcaption><span>vpnにおいて、TUNフォーワードとNAT変換</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root&gt; iptables -A FORWARD -i tun0 -o eth0 -j ACCEPT</span><br><span class="line">root&gt; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE</span><br></pre></td></tr></table></figure>
+
+<p><a href="#ipフォワード">IPフォワード</a> と同様、これも永続化する必要があります。<br>Debian系では <code>iptables-persistent</code> パッケージを使って永続化するのが簡単です。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root&gt; apt-get install iptables-persistent</span><br></pre></td></tr></table></figure>
+
+<p>初回は、インストール時の画面で “Yes” と答えるだけで保存されますが、次回以降は <code>service iptables-persistent save</code> コマンドで永続化できます。</p>
+<h2><span id="クライアントからvpn越しに踏み台サーバへ接続">クライアントからVPN越しに踏み台サーバへ接続</span></h2><p><a href="#クイックスタート-最初のvpn接続">クイックスタート: 最初のVPN接続</a> と同様、Tunnelblickを使って接続します。</p>
+<p>まずは設定ファイルの編集です。 <code>remote</code> , <code>cert</code> , <code>key</code> の行を編集します。</p>
+<figure class="highlight plain"><figcaption><span>client.conf</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">client</span><br><span class="line">dev tun</span><br><span class="line">proto udp</span><br><span class="line">remote X.X.X.X 1194</span><br><span class="line">resolv-retry infinite</span><br><span class="line">nobind</span><br><span class="line">persist-key</span><br><span class="line">persist-tun</span><br><span class="line">ca ca.crt</span><br><span class="line">cert client1.crt</span><br><span class="line">key client1.key</span><br><span class="line">ns-cert-type server</span><br><span class="line">comp-lzo</span><br><span class="line">verb 3</span><br></pre></td></tr></table></figure>
+
+<p>Tunnelblickに設定ファイルをドラッグ＆ドロップし接続すると、 <strong>client1</strong> から <strong>step</strong> へSSH接続できるようになっているはずです。</p>
+<figure class="highlight bash"><figcaption><span>client1からstepへのSSH接続</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ ssh -i ~/.ssh/secret-key.pem 10.0.2.2</span><br></pre></td></tr></table></figure>
+
+<p>これで、プライベートアドレスのみが割り振られたLAN内のサーバにリモートから接続することができました。</p>
+<p>また、VPNサーバのログを確認すると、接続元がクライアント証明書のCommon Name単位で記録されていることも確認できます。<br>(ここでは <strong>[client1]</strong> と記録されている)</p>
+<figure class="highlight bash"><figcaption><span>VPN接続元情報がクライアント証明書のCommon Name単位で記録されている</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">root&gt; less /etc/openvpn/openvpn.log</span><br><span class="line">...</span><br><span class="line">Sun Jul 24 09:35:09 2016 60.236.44.98:54522 [client1] Peer Connection Initiated with [AF_INET]Y.Y.Y.Y:54522</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+
+<h2><span id="まとめと発展的な話題">まとめと発展的な話題</span></h2><p>本記事では、Amazon EC2を使ってクライアント証明書認証方式のSSL-VPNを構築し、プライベートIPアドレスのみが割り振られた踏み台サーバへリモートのクライアントからSSHするまでの実践的な方法を記載しました。<br>また、PKIに基づくCA, サーバ, クライアントの証明書と秘密鍵の生成方法も紹介しました。</p>
+<p>以下、本記事でカバーできなかった重要なセキュリティに関する話題に簡潔に触れます。</p>
+<h3><span id="セキュリティの強化">セキュリティの強化</span></h3><p>クライアント証明書方式の認証は、 <strong>クライアント証明書を所有しているのが特定の個人に限定される場合</strong> 、セキュリティ面でもロギングの面でも有効です。<br>しかし、クライアント証明書の入ったマシンの盗難などに備え、認証は「所有」だけではなく「知っていること」と組み合わせるのが良いでしょう。<br>典型的には、ID/パスワード認証との併用が考えられます。<br>詳しくは <a href="http://www.openvpn.jp/document/authentication-methods/" target="_blank" rel="noopener">OpenVPNで使用できる認証方法</a> を参照してください。</p>
+<p>また、クライアント証明書はVPNサーバ側で <strong>失効</strong> させることができます。<br><a href="http://www.openvpn.jp/document/how-to/#Revoking" target="_blank" rel="noopener">How To - 証明書の失効</a> などを読み、マシンの紛失などがあった際に即座に失効の対応を取れるようにしておきましょう。</p>
+<p>本記事ではサーバ・クライアントの証明書・秘密鍵を <strong>vpn</strong> 上で生成しましたが、これはあまり褒められた方法ではありません。<br>VPNサーバのセキュリティが突破された場合、攻撃者が秘密鍵を入手できてしまうからです。<br>この記事のVPNサーバはグローバルIPアドレスが割り振られており、セキュリティレベルは決して高くありません。<br>証明書・秘密鍵の生成は、インターネットから隔離されたマシンで行うことなどを検討してください。<br>クライアントの数が多くなった場合の鍵の配布などは、 <a href="http://www.viva-musen.net/archives/cat_883975.html" target="_blank" rel="noopener">ActiveDirectoryによるユーザ証明書の自動配布</a> なども参考になるかと思います。</p>
+<p><strong>client1</strong> から <strong>step</strong> に接続する際、 <strong>vpn</strong> がNATの役割をしているため、 <strong>step</strong> 側のログに <strong>client1</strong> のIPアドレスを記録することができません。<br>VPNから <strong>client1</strong> に <strong>10.0.255.6</strong> というIPアドレスが割り当てられても、 <strong>step</strong> サーバから見える送信元IPアドレスは <strong>vpn</strong> の <strong>eth0</strong> の <strong>10.0.1.2</strong> となってしまうのです。<br><strong>step</strong> 側のログに「誰がログインしたか」を記録する要件がある場合、SSHのログインユーザのレベルでしか記録できない点に注意してください。<br>(client-config-dirを使ってVPN参加クライアントのIPアドレスを固定しつつ、 <code>iptables</code> のSNATルールをクライアントの数だけ記載すれば、 <strong>vpn</strong> から <strong>step</strong> へのIPアドレスをクライアントごとに固定することがおそらく可能ですが、未検証です)</p>
+<p>その他にも、 <a href="http://www.openvpn.jp/document/how-to/#Security" target="_blank" rel="noopener">How To - OpenVPNのセキュリティを強化する</a> にはOpenVPNのセキュリティを高めるための事項がいくつか紹介されています。<br>併せてお読みください。</p>
+
+    
+	</div>
+	<footer class="entry-footer">
+		<div class="entry-meta-footer">
+			<span class="category">
+				
+			</span>
+			<span class="tags">
+				
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux%E3%82%AA%E3%83%9A%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3/" rel="tag">Linuxオペレーション</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/VPN/" rel="tag">VPN</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E3%82%BB%E3%82%AD%E3%83%A5%E3%83%AA%E3%83%86%E3%82%A3/" rel="tag">セキュリティ</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E3%83%86%E3%82%AF%E3%83%8E%E3%83%AD%E3%82%B8%E3%83%BC/" rel="tag">テクノロジー</a></li></ul>
+
+			</span>
+		</div>
+	</footer>
+    
+    <footer class="author-info clearfix">
+      <img class="author-picture circle" src="https://www.gravatar.com/avatar/cb02a2b3f429b7c938d1fe2665e8e342">
+      <div class="author-content right">
+        <div class="author-caption">
+          <span class="label">author</span>
+          Sho Nakatani a.k.a. laysakura
+        </div>
+        <p class="author-description">
+          東京大学大学院 情報理工学系研究科 電子情報学専攻 修士課程で並列分散処理・ストリーム処理・データベースを研究。<br>
+          2014年4月に株式会社ディー・エヌ・エーにエンジニアスペシャリストとして入社し、ソーシャルゲームのサーバサイド共通基盤の開発に従事。<br>
+          2016年8月より、オンライン証券会社<a href="https://folio-sec.com" target="_blank" rel="noopener">株式会社FOLIO</a>に入社。バックエンドシステム開発・プロジェクトマネージメント・Engineering Managementに従事。<br>
+          2020年3月より<a href="https://idein.jp" target="_blank" rel="noopener">Idein株式会社</a>所属。<br>
+          随時副業募集中です: <a href="https://github.com/laysakura/resume-jp-for-side-job" target="_blank" rel="noopener">職務経歴書や募集職種</a>
+        </p>
+        <ul class="author-social-buttons">
+          <li class="author-social-button"><a class="fa fa-lg fa-twitter-square" href="https://twitter.com/laysakura" target="_blank" rel="noopener"></a></li>
+          <li class="author-social-button"><a class="fa fa-lg fa-github-square" href="https://github.com/laysakura" target="_blank" rel="noopener"></a></li>
+          <li class="author-social-button"><a class="fa fa-lg fa-facebook-square" href="https://www.facebook.com/lay.sakura" target="_blank" rel="noopener"></a></li>
+        </ul>
+      </div>
+    </footer>
+    
+	
+    
+<nav id="article-nav">
+  
+    <a href="/2018/02/18/backlog-world-2018/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Backlog Worldにブログレポーター枠で参加しました
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/07/02/1cir6fvic10000wjiuq19loade/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          はてなブログからgithub.ioに移転しました
+        
+      </div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+
+
+<section id="comments">
+  <div id="disqus_thread">
+
+  <!-- comment service provided by disqus -->
+  <script>
+    /**
+     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+     */
+    var disqus_config = function () {
+        this.page.url = https://laysakura.github.io/2016/07/24/cir0gtu71000kibiu1skemk6c/;  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = https://laysakura.github.io/2016/07/24/cir0gtu71000kibiu1skemk6c/; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    (function() {  // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        
+        s.src = '//laysakura.disqus.com/embed.js';
+        
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript" target="_blank" rel="noopener">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+    </div>
+    <div class="mb-search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:laysakura.github.io">
+  </form>
+</div>
+<footer id="footer">
+	<h1 class="footer-blog-title">
+		<a href="/">俺とお前とlaysakura</a>
+	</h1>
+	<span class="copyright">
+		&copy; 2020 Sho Nakatani a.k.a. laysakura<br>
+		Modify from <a href="https://sanographix.github.io/tumblr/apollo/" target="_blank">Apollo</a> theme, designed by <a href="https://www.sanographix.net/" target="_blank">SANOGRAPHIX.NET</a><br>
+		Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+	</span>
+</footer>
+
+    
+<script>
+  var disqus_shortname = 'laysakura';
+  
+  var disqus_url = 'https://laysakura.github.io/2016/07/24/cir0gtu71000kibiu1skemk6c/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+
+  <!-- https://github.com/vfeskov/vanilla-back-to-top -->
+  <script src="https://unpkg.com/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js"></script>
+  <script>addBackToTop({
+    diameter: 50,
+    backgroundColor: '#33a6b880',
+    textColor: '#fff'
+  })</script>
+
+</body>
+</html>

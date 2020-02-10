@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>タグ: Linux Kernel | 俺とお前とlaysakura</title>
+  
+  <link rel="canonical" href="https://laysakura.github.io/tags/Linux-Kernel/"/>
+  <meta name="viewport" content="width=device-width">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="俺とお前とlaysakura">
+<meta property="og:url" content="https://laysakura.github.io/tags/Linux-Kernel/index.html">
+<meta property="og:site_name" content="俺とお前とlaysakura">
+<meta property="og:locale" content="ja_JP">
+<meta property="article:author" content="Sho Nakatani a.k.a. laysakura">
+<meta name="twitter:card" content="summary">
+
+  <!-- favicon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+  <link rel="icon" href="/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+  <link rel="manifest" href="/favicon/site.webmanifest">
+  <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#5bbad5">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="theme-color" content="#ffffff">
+
+  
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-22289437-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+  <!-- MathJax -->
+  <script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+  <div id="container">
+    <div class="mobile-nav-panel">
+	<i class="icon-reorder icon-large"></i>
+</div>
+<header id="header">
+	<h1 class="blog-title">
+		<a href="/">俺とお前とlaysakura</a>
+	</h1>
+	<nav class="nav">
+		<ul>
+			<li><a href="/archives">過去の投稿</a></li>
+			<li><a id="nav-search-btn" class="nav-icon" title="Search"></a></li>
+			<li><a href="http://cloud.feedly.com/#subscription%2Ffeed%2Fhttps%3A%2F%2Flaysakura.github.io%2Fatom.xml" target="_blank" rel="noopener" id="nav-rss-link" class="nav-icon" title="RSS Feed"></a></li>
+		</ul>
+	</nav>
+	<div id="search-form-wrap">
+		<form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://laysakura.github.io"></form>
+	</div>
+</header>
+    <div id="main">
+      
+  
+    <article id="post-perf-statでL1-L2-L3-キャッシュミス測定" class="post">
+	<footer class="entry-meta-header">
+		<span class="meta-elements date">
+			<a href="/2011/10/15/perf-stat-L1-L2-L3-cache-miss/" class="article-date">
+  <time datetime="2011-10-15T04:12:42.000Z" itemprop="datePublished">2011-10-15</time>
+</a>
+		</span>
+	</footer>
+	
+	<header class="entry-header">
+		
+  
+    <h1 itemprop="name" class="entry-title">
+      <a class="article-title" href="/2011/10/15/perf-stat-L1-L2-L3-cache-miss/">perf statでL1,L2(,L3)キャッシュミス測定</a>
+    </h1>
+  
+
+	</header>
+	<div class="entry-content">
+		
+			<h2 id="はじめに"><a href="#はじめに" class="headerlink" title="はじめに"></a>はじめに</h2><p>この記事は，<a href="/2011/10/11/perf-stat-performance-counters">前回のエントリ</a>の続きものです．<br>まだご覧になっていない方は，前回分をお読みになってからこちらの記事を見てください．</p>
+			
+				<p class="article-more-link">
+					<a href="/2011/10/15/perf-stat-L1-L2-L3-cache-miss/#more">続きを読む</a>
+				</p>
+      
+    
+	</div>
+	<footer class="entry-footer">
+		<div class="entry-meta-footer">
+			<span class="category">
+				
+			</span>
+			<span class="tags">
+				
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/High-Performance-Computing/" rel="tag">High Performance Computing</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux-Kernel/" rel="tag">Linux Kernel</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux%E3%82%AA%E3%83%9A%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3/" rel="tag">Linuxオペレーション</a></li></ul>
+
+			</span>
+		</div>
+	</footer>
+    
+	
+</article>
+
+
+	<hr class="article-devider">
+
+
+
+
+  
+    <article id="post-perf-stat-でパフォーマンスカウンタの値を直接指定し表示" class="post">
+	<footer class="entry-meta-header">
+		<span class="meta-elements date">
+			<a href="/2011/10/11/perf-stat-performance-counters/" class="article-date">
+  <time datetime="2011-10-11T04:13:30.000Z" itemprop="datePublished">2011-10-11</time>
+</a>
+		</span>
+	</footer>
+	
+	<header class="entry-header">
+		
+  
+    <h1 itemprop="name" class="entry-title">
+      <a class="article-title" href="/2011/10/11/perf-stat-performance-counters/">perf stat でパフォーマンスカウンタの値を直接指定し表示</a>
+    </h1>
+  
+
+	</header>
+	<div class="entry-content">
+		
+			<h2 id="perfについて少し"><a href="#perfについて少し" class="headerlink" title="perfについて少し"></a>perfについて少し</h2><p>最近のLinuxでは，perfという便利なパフォーマンス解析ツールが使えます．<br>aptやyumなどのパッケージ管理ツールで入れられると思いますが(Debian系だとlinux-tools*って名前のパッケージのはず)，詳しい使い方はここでは解説しません．</p>
+<p>さて，このperfには色々な使い方がありますが，中でもperf statはプログラム実行中に起こるハードウェア的なイベントを取得できるものです．<br>使用例はこんな感じ．</p>
+			
+				<p class="article-more-link">
+					<a href="/2011/10/11/perf-stat-performance-counters/#more">続きを読む</a>
+				</p>
+      
+    
+	</div>
+	<footer class="entry-footer">
+		<div class="entry-meta-footer">
+			<span class="category">
+				
+			</span>
+			<span class="tags">
+				
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/High-Performance-Computing/" rel="tag">High Performance Computing</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux-Kernel/" rel="tag">Linux Kernel</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux%E3%82%AA%E3%83%9A%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3/" rel="tag">Linuxオペレーション</a></li></ul>
+
+			</span>
+		</div>
+	</footer>
+    
+	
+</article>
+
+
+	<hr class="article-devider">
+
+
+
+
+  
+    <article id="post-Linux-のスケジューリング調査と超低優先度プロセスの実装" class="post">
+	<footer class="entry-meta-header">
+		<span class="meta-elements date">
+			<a href="/2011/01/25/linux-scheduling-low-prio-process/" class="article-date">
+  <time datetime="2011-01-25T06:30:00.000Z" itemprop="datePublished">2011-01-25</time>
+</a>
+		</span>
+	</footer>
+	
+	<header class="entry-header">
+		
+  
+    <h1 itemprop="name" class="entry-title">
+      <a class="article-title" href="/2011/01/25/linux-scheduling-low-prio-process/">Linux のスケジューリング調査と超低優先度プロセスの実装</a>
+    </h1>
+  
+
+	</header>
+	<div class="entry-content">
+		
+    	<p>恩師<a href="https://www.eidos.ic.i.u-tokyo.ac.jp/~tau/" target="_blank" rel="noopener">田浦健次朗</a>先生の講義、「<a href="https://www.eidos.ic.i.u-tokyo.ac.jp/~tau/lecture/operating_systems/" target="_blank" rel="noopener">オペレーティングシステム</a>」で試験を受ける代わりにカーネルハックする課題をやりました。</p>
+<p>目覚ましい成果とは言えない結果でしたが、調査や実装の記録を書いた発表スライドを残しておきます。</p>
+<p><a href="https://www.eidos.ic.i.u-tokyo.ac.jp/~tau/lecture/operating_systems/2010/nakatani.pdf" target="_blank" rel="noopener">講義資料として上がってるPDF</a> （なぜかはてブがいっぱいついてる）</p>
+<p>上記のはいつ研究室のサーバから消されてもおかしくないので、ここでも配信しておきます。</p>
+<p><a href="/pdf/2011/01-25-linux-scheduling-low-prio-process.pdf">元PDF</a></p>
+
+    
+	</div>
+	<footer class="entry-footer">
+		<div class="entry-meta-footer">
+			<span class="category">
+				
+			</span>
+			<span class="tags">
+				
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux-Kernel/" rel="tag">Linux Kernel</a></li></ul>
+
+			</span>
+		</div>
+	</footer>
+    
+	
+</article>
+
+
+	<hr class="article-devider">
+
+
+
+
+  
+  
+
+
+    </div>
+    <div class="mb-search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:laysakura.github.io">
+  </form>
+</div>
+<footer id="footer">
+	<h1 class="footer-blog-title">
+		<a href="/">俺とお前とlaysakura</a>
+	</h1>
+	<span class="copyright">
+		&copy; 2020 Sho Nakatani a.k.a. laysakura<br>
+		Modify from <a href="https://sanographix.github.io/tumblr/apollo/" target="_blank">Apollo</a> theme, designed by <a href="https://www.sanographix.net/" target="_blank">SANOGRAPHIX.NET</a><br>
+		Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+	</span>
+</footer>
+
+    
+<script>
+  var disqus_shortname = 'laysakura';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/count.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+
+  <!-- https://github.com/vfeskov/vanilla-back-to-top -->
+  <script src="https://unpkg.com/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js"></script>
+  <script>addBackToTop({
+    diameter: 50,
+    backgroundColor: '#33a6b880',
+    textColor: '#fff'
+  })</script>
+
+</body>
+</html>

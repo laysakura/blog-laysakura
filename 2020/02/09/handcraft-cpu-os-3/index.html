@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>自作CPU &amp; 自作OSをやっていく (3) - riscv/riscv-tests の挙動を追う | 俺とお前とlaysakura</title>
+  
+  <link rel="canonical" href="https://laysakura.github.io/2020/02/09/handcraft-cpu-os-3/"/>
+  <meta name="viewport" content="width=device-width">
+  <meta name="description" content="2020年1月から、趣味エンジニアリング活動として自作CPUと自作OSをやっていく。 今回は、自作CPUのパフォーマンスベンチマークとして利用するつもりの riscv-tests の挙動を追ってみる。関心があるのは、命令セットやOSの機能をどこまで用意してあげればベンチマークが実行できるのかという点。とりわけ、以下の観点をチェックしていく。  ISA (命令セット) RV64F (単精度浮動小数点">
+<meta property="og:type" content="article">
+<meta property="og:title" content="自作CPU &amp; 自作OSをやっていく (3) - riscv&#x2F;riscv-tests の挙動を追う">
+<meta property="og:url" content="https://laysakura.github.io/2020/02/09/handcraft-cpu-os-3/index.html">
+<meta property="og:site_name" content="俺とお前とlaysakura">
+<meta property="og:description" content="2020年1月から、趣味エンジニアリング活動として自作CPUと自作OSをやっていく。 今回は、自作CPUのパフォーマンスベンチマークとして利用するつもりの riscv-tests の挙動を追ってみる。関心があるのは、命令セットやOSの機能をどこまで用意してあげればベンチマークが実行できるのかという点。とりわけ、以下の観点をチェックしていく。  ISA (命令セット) RV64F (単精度浮動小数点">
+<meta property="og:locale" content="ja_JP">
+<meta property="article:published_time" content="2020-02-09T06:00:00.000Z">
+<meta property="article:modified_time" content="2020-02-10T05:06:21.000Z">
+<meta property="article:author" content="Sho Nakatani a.k.a. laysakura">
+<meta property="article:tag" content="自作CPU &amp; 自作OS">
+<meta name="twitter:card" content="summary">
+
+  <!-- favicon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+  <link rel="icon" href="/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+  <link rel="manifest" href="/favicon/site.webmanifest">
+  <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#5bbad5">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="theme-color" content="#ffffff">
+
+  
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-22289437-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+  <!-- MathJax -->
+  <script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+  <div id="container">
+    <div class="mobile-nav-panel">
+	<i class="icon-reorder icon-large"></i>
+</div>
+<header id="header">
+	<h1 class="blog-title">
+		<a href="/">俺とお前とlaysakura</a>
+	</h1>
+	<nav class="nav">
+		<ul>
+			<li><a href="/archives">過去の投稿</a></li>
+			<li><a id="nav-search-btn" class="nav-icon" title="Search"></a></li>
+			<li><a href="http://cloud.feedly.com/#subscription%2Ffeed%2Fhttps%3A%2F%2Flaysakura.github.io%2Fatom.xml" target="_blank" rel="noopener" id="nav-rss-link" class="nav-icon" title="RSS Feed"></a></li>
+		</ul>
+	</nav>
+	<div id="search-form-wrap">
+		<form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://laysakura.github.io"></form>
+	</div>
+</header>
+    <div id="main">
+      <article id="post-自作CPU-自作OSをやっていく3-riscv-tests" class="post">
+	<footer class="entry-meta-header">
+		<span class="meta-elements date">
+			<a href="/2020/02/09/handcraft-cpu-os-3/" class="article-date">
+  <time datetime="2020-02-09T06:00:00.000Z" itemprop="datePublished">2020-02-09</time>
+</a>
+		</span>
+	</footer>
+	
+	<header class="entry-header">
+		
+  
+    <h1 class="article-title entry-title" itemprop="name">
+      自作CPU &amp; 自作OSをやっていく (3) - riscv/riscv-tests の挙動を追う
+    </h1>
+  
+
+	</header>
+	<div class="entry-content">
+		
+    	<p>2020年1月から、趣味エンジニアリング活動として自作CPUと自作OSをやっていく。</p>
+<p>今回は、自作CPUのパフォーマンスベンチマークとして利用するつもりの <a href="https://github.com/riscv/riscv-tests" target="_blank" rel="noopener">riscv-tests</a> の挙動を追ってみる。<br>関心があるのは、命令セットやOSの機能をどこまで用意してあげればベンチマークが実行できるのかという点。とりわけ、以下の観点をチェックしていく。</p>
+<ul>
+<li>ISA (命令セット)<ul>
+<li>RV64F (単精度浮動小数点演算), RV64D (倍精度浮動小数点演算) を利用しているベンチマークはあるか。あるとしたらどれか。</li>
+<li>RV64V (ベクトル演算) を利用しているベンチマークはあるか。あるとしたらどれか。</li>
+<li>RV64A (アトミック命令) を利用しているベンチマークはあるか。あるとしたらどれか。</li>
+</ul>
+</li>
+<li>OS機能<ul>
+<li>ヒープ領域は必要か（スタック領域のみで十分か）。</li>
+<li>スレッドをCPUコアに割り当てるスケジューラは必要か。</li>
+</ul>
+</li>
+</ul>
+<p><a href="/tags/自作CPU-自作OS/">自作CPU &amp; 自作OS</a> タグで、この前後の進捗とか目指しているもの（初回記事）とかを追えるようにしている。</p>
+<a id="more"></a>
+
+<h2><span id="目次">目次</span></h2><!-- toc -->
+
+<ul>
+<li><a href="#riscv-tests-とは">riscv-tests とは</a><ul>
+<li><a href="#ディレクトリ構造概説-riscv-testsisa">ディレクトリ構造概説: <code>riscv-tests/isa</code></a></li>
+<li><a href="#ディレクトリ構造概説-riscv-testsbenchmarks">ディレクトリ構造概説: <code>riscv-tests/benchmarks</code></a></li>
+<li><a href="#ディレクトリ構造概説-riscv-testsenv">ディレクトリ構造概説: <code>riscv-tests/env</code></a></li>
+<li><a href="#ディレクトリ構造概説-riscv-testsmt">ディレクトリ構造概説: <code>riscv-tests/mt</code></a></li>
+<li><a href="#ディレクトリ構造概説-riscv-testsdebug">ディレクトリ構造概説: <code>riscv-tests/debug</code></a></li>
+</ul>
+</li>
+<li><a href="#riscv-tests-を-spike-シミュレータで実行する">riscv-tests を Spike シミュレータで実行する</a><ul>
+<li><a href="#spike-とrisc-v用のコンパイラツールチェインをdockerで用意する">Spike とRISC-V用のコンパイラツールチェインをDockerで用意する</a></li>
+<li><a href="#riscv-tests-のビルド">riscv-tests のビルド</a></li>
+<li><a href="#benchmarks-ベンチマークの実行"><code>benchmarks</code> （ベンチマーク）の実行</a></li>
+<li><a href="#isa-命令セットが正しく実装されているかの単体テストの実行"><code>isa</code> （命令セットが正しく実装されているかの単体テスト）の実行</a></li>
+</ul>
+</li>
+<li><a href="#benchmarksvvadd-ベクトルの加算-シングルスレッドの挙動を追う"><code>benchmarks/vvadd</code> （ベクトルの加算; シングルスレッド）の挙動を追う</a></li>
+<li><a href="#benchmarksmt-vvadd-ベクトルの加算-マルチスレッドの挙動を追う"><code>benchmarks/mt-vvadd</code> （ベクトルの加算; マルチスレッド）の挙動を追う</a></li>
+<li><a href="#機能調査">機能調査</a><ul>
+<li><a href="#rv64f-単精度浮動小数点演算-rv64d-倍精度浮動小数点演算-を利用しているベンチマークはあるか-あるとしたらどれか">RV64F (単精度浮動小数点演算), RV64D (倍精度浮動小数点演算) を利用しているベンチマークはあるか。あるとしたらどれか。</a></li>
+<li><a href="#rv64v-ベクトル演算-を利用しているベンチマークはあるか-あるとしたらどれか">RV64V (ベクトル演算) を利用しているベンチマークはあるか。あるとしたらどれか。</a></li>
+<li><a href="#rv64a-アトミック命令-を利用しているベンチマークはあるか-あるとしたらどれか">RV64A (アトミック命令) を利用しているベンチマークはあるか。あるとしたらどれか。</a></li>
+<li><a href="#ヒープ領域は必要かスタック領域のみで十分か">ヒープ領域は必要か（スタック領域のみで十分か）。</a></li>
+<li><a href="#スレッドをcpuコアに割り当てるスケジューラは必要か">スレッドをCPUコアに割り当てるスケジューラは必要か。</a></li>
+<li><a href="#まとめ表">まとめ表</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="riscv-tests-とは">riscv-tests とは</span></h2><p><a href="https://github.com/riscv/riscv-tests" target="_blank" rel="noopener">https://github.com/riscv/riscv-tests</a> に公開されている、RISC-Vのテスト・ベンチマーク群です。<br>RISC-Vプロジェクトの本拠地UC Berkleyグループが作成しているもので、コミット履歴を見る限りは、「開発自体は落ち着いたが継続的にメンテナンスはされている」というステータスであるように見えます。<br>RISC-Vなプロセッサやシミュレータを作る人とっては重宝するのではないでしょうか。</p>
+<h3><span id="ディレクトリ構造概説-riscv-testsisa">ディレクトリ構造概説: <code>riscv-tests/isa</code></span></h3><p><strong>重要</strong></p>
+<p>RISC-Vの各命令の単体テスト。アセンブリと便利なプリプロセッサマクロで書かれている。<br>サブディレクトリは <code>rv64ui</code> (RV64I, 動作モードはUser) のように区切られており、所望の命令のテストファイルが探しやすくなっている。</p>
+<h3><span id="ディレクトリ構造概説-riscv-testsbenchmarks">ディレクトリ構造概説: <code>riscv-tests/benchmarks</code></span></h3><p><strong>重要</strong></p>
+<p>ベンチマークプログラム。比較的シンプルなアプリケーションの集合。以下のものが含まれる:</p>
+<ul>
+<li><strong>dhrystone</strong>: Dhrystone。整数演算を中心とした合成ベンチマーク。</li>
+<li><strong>median</strong>: 1次元配列に対するメディアンフィルタ。画像のノイズ除去などに使われるアルゴリズムで、「ある要素とその両隣の3要素の中央値を、ある要素に上書きする」という挙動をするもの。</li>
+<li><strong>mm</strong>: シングルスレッドの行列積。<ul>
+<li><a href="https://github.com/riscv/riscv-tests/blob/3a98ec2e306938cce07ab15e3678d670611aa66d/benchmarks/mm/mm_main.c#L45-L50" target="_blank" rel="noopener">結果出力は物理スレッドのIDを伴う</a>が、<a href="https://github.com/riscv/riscv-tests/blob/3a98ec2e306938cce07ab15e3678d670611aa66d/benchmarks/mm/mm_main.c#L38" target="_blank" rel="noopener">データ同じ行列積を各物理スレッドで行っている</a>だけなので注意。</li>
+<li>カーネル部分は性能が出るようにチューニングされている。</li>
+</ul>
+</li>
+<li><strong>mt-matmul</strong>: マルチスレッドの行列積。<ul>
+<li>並列計算をしている。上流で \(A \times B = C\) の \(A\) を物理スレッドの数だけ分割している。<ul>
+<li>ただし、 <strong>各ベンチマークは <code>benchmarks/common/crt.S</code> をいじってビルドしないとシングルスレッド動作してしまうので要注意。</strong> ベンチマークが標準でマルチスレッド予定があるかは <a href="https://github.com/riscv/riscv-tests/issues/240" target="_blank" rel="noopener">“Benchmark runs in single-thread” のIssue</a> で確認中。</li>
+</ul>
+</li>
+<li>シングルスレッドのカーネル部分は単純な3重ループで性能は出なさそう。<ul>
+<li>行列積、シングルスレッド版とマルチスレッド版があるのは良いのだが、カーネル部分があまりにも異なるのはちょっと…</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>mt-vvadd</strong>: ベクトルの加算。 <code>コアID mod コア数</code> 番目の要素の足し算を各コアが担当する、単純な並列化が成されている。</li>
+<li><strong>multiply</strong>: ハードウェアの32ビット乗算器をエミュレートしたようなプログラム。</li>
+<li><strong>pmp</strong>: PMP (Physical Memory Protection; 物理メモリ保護) のテスト。<a href="https://github.com/riscv/riscv-tests/issues/232" target="_blank" rel="noopener">ベンチマークではなくテスト</a>。</li>
+<li><strong>qsort</strong>: クイックソート。</li>
+<li><strong>rsort</strong>: 基数ソート。<ul>
+<li><a href="https://github.com/riscv/riscv-tests/blob/3a98ec2e306938cce07ab15e3678d670611aa66d/benchmarks/rsort/rsort.c#L7" target="_blank" rel="noopener">コメントにはクイックソートと書かれている</a>が.際のコードはどう見ても基数ソート。<a href="https://github.com/riscv/riscv-tests/issues/45" target="_blank" rel="noopener">Issueでも指摘されている。</a></li>
+</ul>
+</li>
+<li><strong>spmv</strong>: 倍精度浮動小数の疎行列・ベクトル積。</li>
+<li><strong>towers</strong>: ハノイの塔。</li>
+<li><strong>vvadd</strong>: ベクトルの加算。シングルスレッド。</li>
+</ul>
+<h3><span id="ディレクトリ構造概説-riscv-testsenv">ディレクトリ構造概説: <code>riscv-tests/env</code></span></h3><p><strong>重要</strong></p>
+<p>サブモジュール。<br><code>riscv-tests/isa</code> が実行可能ファイルを作るためのリンカスクリプトとエントリポイント用のアセンブリや、 <code>memcpy</code> などのユーティリティ関数が含まれている。</p>
+<h3><span id="ディレクトリ構造概説-riscv-testsmt">ディレクトリ構造概説: <code>riscv-tests/mt</code></span></h3><p><strong>（たぶん）重要じゃない</strong></p>
+<p>マルチスレッドの行列積やベクトル和のプログラムがたくさんあるが、 <a href="https://github.com/riscv/riscv-tests/commits/master/mt" target="_blank" rel="noopener">コミット履歴</a> を見る感じ、ガッとどこか別のプロジェクトから引っ張ってきて2016年にメンテが途絶えている。</p>
+<h3><span id="ディレクトリ構造概説-riscv-testsdebug">ディレクトリ構造概説: <code>riscv-tests/debug</code></span></h3><p><strong>（たぶん）重要じゃない</strong></p>
+<p>あんまりしっかり見ていないが、 <code>riscv-tests/isa</code> や <code>riscv-tests/benchmarks</code> のプログラム自体をデバッグするための諸々に見える。</p>
+<h2><span id="riscv-tests-を-spike-シミュレータで実行する">riscv-tests を Spike シミュレータで実行する</span></h2><p>ISAやOSで特定機能のサポートをする必要があるかを調査するのが目的なので、いきなりコードの静的解析に入っても良いのですが、せっかくなら動かしてみましょう。<br>といってもRISC-Vなプロセッサの実機もまだ持ってない（これから作る）し、普段遣いのPCは x86_64 なので、<a href="https://github.com/riscv/riscv-isa-sim" target="_blank" rel="noopener">RISC-Vのシミュレータの Spike</a> を使います。</p>
+<p>※QEMUでもRISC-Vのシミュレーションはできるはずですが、自分はQEMUでriscv-testsを動作させることはできませんでした…</p>
+<h3><span id="spike-とrisc-v用のコンパイラツールチェインをdockerで用意する">Spike とRISC-V用のコンパイラツールチェインをDockerで用意する</span></h3><p>ホストマシンの環境差異に悩まされたくないのでDockerを使います。Dockerfileは</p>
+<div style="text-align: center">
+  <div class="github-card" data-user="laysakura" data-repo="docker-riscv-spike-toolchain" data-height="200" data-width="400" data-theme="default" data-target data-client-id data-client-secret></div>
+</div>
+<script src="/github-card-lib/githubcard.js"></script>
+
+
+<p>に置いてあるものを使います。</p>
+<p>riscv-tests リポジトリはコンテナの中でcloneしても良いですが、実行結果をファイルにまとめてホストと共有したりすると便利なので、ホストでcloneします。</p>
+<figure class="highlight bash"><figcaption><span>ホスト上</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># riscv-tests のclone</span></span><br><span class="line">git <span class="built_in">clone</span> https://github.com/riscv/riscv-tests</span><br><span class="line"><span class="built_in">cd</span> riscv-tests</span><br><span class="line">git submodule update --init --recursive</span><br><span class="line"></span><br><span class="line"><span class="comment"># riscv-tests をボリュームマウントして docker run</span></span><br><span class="line">docker build -t laysakura/docker-riscv-spike-toolchain:latest https://raw.githubusercontent.com/laysakura/docker-riscv-spike-toolchain/master/Dockerfile</span><br><span class="line">docker run -it -v <span class="variable">$PWD</span>:/riscv-tests laysakura/docker-riscv-spike-toolchain:latest bash</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><figcaption><span>コンテナ内</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># spike コマンドの確認</span></span><br><span class="line">spike --<span class="built_in">help</span></span><br><span class="line">-&gt; Spike RISC-V ISA Simulator 1.0.1-dev</span><br><span class="line">-&gt; ...</span><br><span class="line"></span><br><span class="line"><span class="comment"># riscv64-unknown-elf-gcc コマンドの確認</span></span><br><span class="line">riscv64-unknown-elf-gcc --version</span><br><span class="line">-&gt; riscv64-unknown-elf-gcc (SiFive GCC 8.3.0-2019.08.0) 8.3.0</span><br><span class="line">-&gt; ...</span><br></pre></td></tr></table></figure>
+
+<h3><span id="riscv-tests-のビルド">riscv-tests のビルド</span></h3><figure class="highlight bash"><figcaption><span>コンテナ内</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /riscv-tests</span><br><span class="line">apt -y install autoconf</span><br><span class="line">./configure --prefix=<span class="variable">$PWD</span>/target</span><br><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+
+<h3><span id="benchmarks-ベンチマークの実行"><code>benchmarks</code> （ベンチマーク）の実行</span></h3><p><code>/riscv-tests/target/share/riscv-tests/benchmarks/*.riscv</code> が、RV64アーキテクチャの実行可能なELFファイルです。</p>
+<figure class="highlight bash"><figcaption><span>コンテナ内</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /riscv-tests/target/share/riscv-tests/</span><br><span class="line"></span><br><span class="line">spike benchmarks/vvadd.riscv</span><br><span class="line">-&gt; mcycle = 2414</span><br><span class="line">-&gt; minstret = 2420</span><br></pre></td></tr></table></figure>
+
+<p>パフォーマンスカウンタの値（<code>mcycle</code>: サイクル数, <code>minstret</code>: 実行された命令数）がコンソール出力されています。</p>
+<h3><span id="isa-命令セットが正しく実装されているかの単体テストの実行"><code>isa</code> （命令セットが正しく実装されているかの単体テスト）の実行</span></h3><figure class="highlight bash"><figcaption><span>コンテナ内</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /riscv-tests/target/share/riscv-tests/</span><br><span class="line"></span><br><span class="line">spike isa/rv64ui-p-add</span><br></pre></td></tr></table></figure>
+
+<p>成功実行のときは何もコンソール出力されません。</p>
+<p>テストコードを改変すると失敗時の出力が見られます（試す必要は特にないです）。</p>
+<figure class="highlight bash"><figcaption><span>ホスト上</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">vim riscv-tests/isa/rv64ui/add.S</span><br><span class="line"></span><br><span class="line">git diff</span><br><span class="line">-&gt; diff --git a/isa/rv64ui/add.S b/isa/rv64ui/add.S</span><br><span class="line">-&gt; index 0696428..d61ae35 100644</span><br><span class="line">-&gt; --- a/isa/rv64ui/add.S</span><br><span class="line">-&gt; +++ b/isa/rv64ui/add.S</span><br><span class="line">-&gt; @@ -17,7 +17,7 @@ RVTEST_CODE_BEGIN</span><br><span class="line">-&gt;    <span class="comment"># Arithmetic tests</span></span><br><span class="line">-&gt;    <span class="comment">#-------------------------------------------------------------</span></span><br><span class="line">-&gt; </span><br><span class="line">-&gt; -  TEST_RR_OP( 2,  add, 0x00000000, 0x00000000, 0x00000000 );</span><br><span class="line">-&gt; +  TEST_RR_OP( 2,  add, 0x00000001, 0x00000000, 0x00000000 );</span><br><span class="line">-&gt;    TEST_RR_OP( 3,  add, 0x00000002, 0x00000001, 0x00000001 );</span><br><span class="line">-&gt;    TEST_RR_OP( 4,  add, 0x0000000a, 0x00000003, 0x00000007 );</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><figcaption><span>コンテナ内</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /riscv-tests</span><br><span class="line">make &amp;&amp; make install</span><br><span class="line">spike target/share/riscv-tests/isa/rv64ui-p-add</span><br><span class="line">-&gt; *** FAILED *** (tohost = 2)</span><br></pre></td></tr></table></figure>
+
+<h2><span id="benchmarksvvadd-ベクトルの加算-シングルスレッドの挙動を追う"><code>benchmarks/vvadd</code> （ベクトルの加算; シングルスレッド）の挙動を追う</span></h2><p>各ベンチマークの挙動を性格に把握できるようにするために、動作の最初から最後まで愚直にコードを読んでみます。<br><code>vvadd</code> と <code>mt-vvadd</code> はそれぞれシングルスレッドとマルチスレッドで、行っている計算もシンプルなので、ちょうどよい題材として本記事で取り上げます。まずは <code>vvadd</code> を読みます。</p>
+<p>Spikeにより、 <code>0x80000000</code> 番地に配置された <code>.text.init</code> セクションのコードが実行されます。そのコードは <a href="https://github.com/riscv/riscv-tests/blob/3a98ec2e306938cce07ab15e3678d670611aa66d/benchmarks/common/crt.S#L15-L136" target="_blank" rel="noopener">https://github.com/riscv/riscv-tests/blob/3a98ec2e306938cce07ab15e3678d670611aa66d/benchmarks/common/crt.S#L15-L136</a> のもの。以下、インラインコメントの形で挙動を解説します。</p>
+<figure class="highlight c"><figcaption><span>benchmarks/common/crt.S</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br></pre></td><td class="code"><pre><span class="line">  # .<span class="built_in">text</span>.init セクションは、</span><br><span class="line">  <span class="meta"># https:<span class="comment">//github.com/riscv/riscv-tests/blob/3a98ec2e306938cce07ab15e3678d670611aa66d/benchmarks/common/test.ld#L25-L26</span></span></span><br><span class="line">  # にて <span class="number">0x80000000</span> 番地に置かれている。</span><br><span class="line">  .section <span class="string">".text.init"</span></span><br><span class="line">  .globl _start</span><br><span class="line">_start:</span><br><span class="line">  # 各種レジスタをゼロクリア</span><br><span class="line">  li  x1, <span class="number">0</span></span><br><span class="line">  li  x2, <span class="number">0</span></span><br><span class="line">  li  x3, <span class="number">0</span></span><br><span class="line">  li  x4, <span class="number">0</span></span><br><span class="line">  li  x5, <span class="number">0</span></span><br><span class="line">  li  x6, <span class="number">0</span></span><br><span class="line">  li  x7, <span class="number">0</span></span><br><span class="line">  li  x8, <span class="number">0</span></span><br><span class="line">  li  x9, <span class="number">0</span></span><br><span class="line">  li  x10,<span class="number">0</span></span><br><span class="line">  li  x11,<span class="number">0</span></span><br><span class="line">  li  x12,<span class="number">0</span></span><br><span class="line">  li  x13,<span class="number">0</span></span><br><span class="line">  li  x14,<span class="number">0</span></span><br><span class="line">  li  x15,<span class="number">0</span></span><br><span class="line">  li  x16,<span class="number">0</span></span><br><span class="line">  li  x17,<span class="number">0</span></span><br><span class="line">  li  x18,<span class="number">0</span></span><br><span class="line">  li  x19,<span class="number">0</span></span><br><span class="line">  li  x20,<span class="number">0</span></span><br><span class="line">  li  x21,<span class="number">0</span></span><br><span class="line">  li  x22,<span class="number">0</span></span><br><span class="line">  li  x23,<span class="number">0</span></span><br><span class="line">  li  x24,<span class="number">0</span></span><br><span class="line">  li  x25,<span class="number">0</span></span><br><span class="line">  li  x26,<span class="number">0</span></span><br><span class="line">  li  x27,<span class="number">0</span></span><br><span class="line">  li  x28,<span class="number">0</span></span><br><span class="line">  li  x29,<span class="number">0</span></span><br><span class="line">  li  x30,<span class="number">0</span></span><br><span class="line">  li  x31,<span class="number">0</span></span><br><span class="line"></span><br><span class="line">  <span class="meta"># enable FPU and accelerator <span class="meta-keyword">if</span> present</span></span><br><span class="line">  li t0, MSTATUS_FS | MSTATUS_XS</span><br><span class="line">  csrs mstatus, t0</span><br><span class="line"></span><br><span class="line">  <span class="meta"># make sure XLEN agrees with compilation choice</span></span><br><span class="line">  li t0, <span class="number">1</span></span><br><span class="line">  slli t0, t0, <span class="number">31</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> __riscv_xlen == 64</span></span><br><span class="line">  # RV64ターゲットでコンパイルした場合はこちらに入る。</span><br><span class="line">  # もしも t0 が<span class="number">32</span>ビットレジスタ（つまりプロセッサはRV32）なのに、現在実行しているコンパイル済みの実行可能ファイルが</span><br><span class="line">  # __riscv_xlen == <span class="number">64</span> としてコンパイルされており、このコードパスに入っているとする。</span><br><span class="line">  # その場合は、 t0 = <span class="number">1</span> &lt;&lt; <span class="number">31</span> == <span class="number">10000000</span> <span class="number">00000000</span> <span class="number">00000000</span> <span class="number">00000000</span> であり、これは符号付き<span class="number">32</span>ビット整数と解釈すると <span class="number">-2147483648</span> である。</span><br><span class="line">  # したがって t0 &lt; <span class="number">0</span> なので、直下の bgez は不成立となり、 <span class="number">2</span>: が実行される。</span><br><span class="line">  bgez t0, <span class="number">1f</span>  # <span class="number">1f</span> は <span class="string">"forward方向の 1: ラベル"</span> を指す。</span><br><span class="line">#<span class="keyword">else</span></span><br><span class="line">  bltz t0, <span class="number">1f</span></span><br><span class="line">#endif</span><br><span class="line"><span class="number">2</span>:</span><br><span class="line">  # ここに入ると無限ループ。</span><br><span class="line">  # sw で何をしているのかは理解できていない...</span><br><span class="line">  li a0, <span class="number">1</span></span><br><span class="line">  sw a0, tohost, t0</span><br><span class="line">  j <span class="number">2b</span>  # <span class="number">2b</span> は <span class="string">"backward方向の 2: ラベル"</span> を指す。</span><br><span class="line"><span class="number">1</span>:</span><br><span class="line"></span><br><span class="line">#ifdef __riscv_flen</span><br><span class="line">  # initialize FPU <span class="keyword">if</span> we have one</span><br><span class="line">  # 例外が発生した場合のジャンプ先を、この数行後の <span class="number">1</span>: ラベルの番地とする。</span><br><span class="line">  # <span class="number">1</span>: ラベル直後においても再び例外発生の際のジャンプ先を設定しているが、これは、プロセッサが実際には浮動小数点演算をサポートしていない場合には、</span><br><span class="line">  # <span class="number">1</span>: ラベルに至る前の fssr や fmv.s.x 命令が例外を発生させてしまう可能性があるからだと思われる。</span><br><span class="line">  #</span><br><span class="line">  # mtvec の値の仕様は https:<span class="comment">//content.riscv.org/wp-content/uploads/2017/05/riscv-privileged-v1.10.pdf を参照。</span></span><br><span class="line">  la t0, <span class="number">1f</span></span><br><span class="line">  csrw mtvec, t0 </span><br><span class="line"></span><br><span class="line">  # 浮動小数点のコントロールレジスタ fcsr を<span class="number">0</span>にセット。</span><br><span class="line">  # fssr 命令は古く、 fscsr 命令に成り代わった模様: https:<span class="comment">//github.com/riscv/riscv-isa-manual/issues/419#issuecomment-516338426</span></span><br><span class="line">  fssr    x0</span><br><span class="line">  # 浮動小数点数演算のための汎用レジスタをゼロクリア。</span><br><span class="line">  fmv.s.x f0, x0</span><br><span class="line">  fmv.s.x f1, x0</span><br><span class="line">  fmv.s.x f2, x0</span><br><span class="line">  fmv.s.x f3, x0</span><br><span class="line">  fmv.s.x f4, x0</span><br><span class="line">  fmv.s.x f5, x0</span><br><span class="line">  fmv.s.x f6, x0</span><br><span class="line">  fmv.s.x f7, x0</span><br><span class="line">  fmv.s.x f8, x0</span><br><span class="line">  fmv.s.x f9, x0</span><br><span class="line">  fmv.s.x f10,x0</span><br><span class="line">  fmv.s.x f11,x0</span><br><span class="line">  fmv.s.x f12,x0</span><br><span class="line">  fmv.s.x f13,x0</span><br><span class="line">  fmv.s.x f14,x0</span><br><span class="line">  fmv.s.x f15,x0</span><br><span class="line">  fmv.s.x f16,x0</span><br><span class="line">  fmv.s.x f17,x0</span><br><span class="line">  fmv.s.x f18,x0</span><br><span class="line">  fmv.s.x f19,x0</span><br><span class="line">  fmv.s.x f20,x0</span><br><span class="line">  fmv.s.x f21,x0</span><br><span class="line">  fmv.s.x f22,x0</span><br><span class="line">  fmv.s.x f23,x0</span><br><span class="line">  fmv.s.x f24,x0</span><br><span class="line">  fmv.s.x f25,x0</span><br><span class="line">  fmv.s.x f26,x0</span><br><span class="line">  fmv.s.x f27,x0</span><br><span class="line">  fmv.s.x f28,x0</span><br><span class="line">  fmv.s.x f29,x0</span><br><span class="line">  fmv.s.x f30,x0</span><br><span class="line">  fmv.s.x f31,x0</span><br><span class="line"><span class="number">1</span>:</span><br><span class="line">#endif</span><br><span class="line"></span><br><span class="line">  # initialize trap <span class="built_in">vector</span></span><br><span class="line">  la t0, trap_entry</span><br><span class="line">  csrw mtvec, t0</span><br><span class="line"></span><br><span class="line">  # initialize global pointer</span><br><span class="line">  # グローバル変数のアドレスは gp をベースにして計算する。</span><br><span class="line">  # .option push / .option pop は、それらに挟まれたオプション設定を一時的に有効にするためのGNU Assemblerのオプション。</span><br><span class="line">  # .option norelax はリンカによるrelaxを明示的に拒否するためのオプション。</span><br><span class="line">  # https:<span class="comment">//www.st.com/content/ccc/resource/technical/document/user_manual/group1/fb/cb/d6/71/03/25/42/a1/UserManual_GNU_Assembler/files/UserManual_GNU_Assembler.pdf/jcr:content/translations/en.UserManual_GNU_Assembler.pdf</span></span><br><span class="line">  # の p<span class="number">.257</span><span class="number">-258</span> に詳しい。</span><br><span class="line">.option push</span><br><span class="line">.option norelax</span><br><span class="line">  la gp, __global_pointer$</span><br><span class="line">.option pop</span><br><span class="line"></span><br><span class="line">  # tp: thread pointer</span><br><span class="line">  # スレッドローカル変数のアドレスは tp をベースにして計算する。</span><br><span class="line">  # _end は https:<span class="comment">//github.com/riscv/riscv-tests/blob/3a98ec2e306938cce07ab15e3678d670611aa66d/benchmarks/common/test.ld#L63 の番地。</span></span><br><span class="line">  # ただし、 riscv-tests/benchmarks においては、</span><br><span class="line">  # https:<span class="comment">//github.com/riscv/riscv-tests/blob/3a98ec2e306938cce07ab15e3678d670611aa66d/benchmarks/common/test.ld#L53</span></span><br><span class="line">  # で引っ張ってきている .tdata セクションは指定されていない。つまりスレッドローカル変数は使われていない。</span><br><span class="line">  la  tp, _end + <span class="number">63</span></span><br><span class="line">  <span class="keyword">and</span> tp, tp, <span class="number">-64</span></span><br><span class="line"></span><br><span class="line">  # <span class="built_in">get</span> core id</span><br><span class="line">  csrr a0, mhartid</span><br><span class="line">  # <span class="keyword">for</span> now, assume only <span class="number">1</span> core</span><br><span class="line">  li a1, <span class="number">1</span></span><br><span class="line"># mhartid (物理スレッドID, CPUコアID) が<span class="number">1</span>以上ならば、この bgeu を無限ループ（スピンウェイト）する。</span><br><span class="line"># つまりコア番号<span class="number">0</span>のCPUコアでしか以降の命令（ベンチマーク）は実行されないようになっている。</span><br><span class="line"># ベンチマークプログラムとしてはマルチスレッド対応がほしいところなので、これが緩和されるようIssueが立っている（立てた）。</span><br><span class="line"># https:<span class="comment">//github.com/riscv/riscv-tests/issues/240</span></span><br><span class="line"><span class="number">1</span>:bgeu a0, a1, <span class="number">1b</span></span><br><span class="line"></span><br><span class="line">  # give each core <span class="number">128</span>KB of <span class="built_in">stack</span> + TLS</span><br><span class="line">  #</span><br><span class="line">  # ここでは、 mhartid が <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span> な<span class="number">4</span>コアの環境で、スタック領域とスレッドローカル変数の割当を図示する。</span><br><span class="line">  # （上述の通り mhartid == <span class="number">0</span> しかこのコードは通らないが、もしその制約が撤廃されたらの話）</span><br><span class="line">  #</span><br><span class="line">  # ----------- sp (core#<span class="number">3</span>)</span><br><span class="line">  #  ^</span><br><span class="line">  #  | <span class="number">2</span>^<span class="number">17</span></span><br><span class="line">  #  |</span><br><span class="line">  #  v</span><br><span class="line">  # ----------- sp (core#<span class="number">2</span>) = tp (core#<span class="number">3</span>)</span><br><span class="line">  #  ^</span><br><span class="line">  #  | <span class="number">2</span>^<span class="number">17</span></span><br><span class="line">  #  |</span><br><span class="line">  #  v</span><br><span class="line">  # ----------- sp (core#<span class="number">1</span>) = tp (core#<span class="number">2</span>)</span><br><span class="line">  #  ^</span><br><span class="line">  #  | <span class="number">2</span>^<span class="number">17</span></span><br><span class="line">  #  |</span><br><span class="line">  #  v</span><br><span class="line">  # ----------- sp (core#<span class="number">0</span>) = tp (core#<span class="number">1</span>)</span><br><span class="line">  #  ^</span><br><span class="line">  #  | <span class="number">2</span>^<span class="number">17</span></span><br><span class="line">  #  |</span><br><span class="line">  #  v</span><br><span class="line">  # ----------- tp (core#<span class="number">0</span>) = (_end + <span class="number">63</span>) &amp; <span class="number">-64</span></span><br><span class="line">  #</span><br><span class="line">  # 各コア、スタックポインタは下方向に（低位に向かって）伸ばし、スレッドポインタは上方向に（高位に向かって）伸ばす。</span><br><span class="line">  #</span><br><span class="line">#define STKSHIFT <span class="number">17</span></span><br><span class="line">  add sp, a0, <span class="number">1</span></span><br><span class="line">  sll sp, sp, STKSHIFT</span><br><span class="line">  add sp, sp, tp</span><br><span class="line">  sll a2, a0, STKSHIFT</span><br><span class="line">  add tp, tp, a2</span><br><span class="line"></span><br><span class="line">  # _init 関数へジャンプ。</span><br><span class="line">  #   a0 = mhartid (CPUコアのID) ; ただし mhartid != <span class="number">0</span> はこのコードパスに到達しない。</span><br><span class="line">  #   a1 = <span class="number">1</span> (コア数)</span><br><span class="line">  # の<span class="number">2</span>引数を _init に渡す。</span><br><span class="line">  j _init</span><br><span class="line"></span><br><span class="line"># この後は、例外発生時のジャンプ先の例外ハンドラが続く（省略）</span><br><span class="line">  .align <span class="number">2</span></span><br><span class="line">trap_entry:</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>マルチコアにおけるスタック領域が、コア番号が大きいほど大きくなるバグがありましたが、<a href="https://github.com/riscv/riscv-tests/pull/242" target="_blank" rel="noopener">PR</a>をマージしてもらって直りました😉</p>
+<p><code>crt.S</code> では最後に <code>_init</code> にジャンプしました。この <code>_init</code> は <a href="https://github.com/riscv/riscv-tests/blob/3a98ec2e306938cce07ab15e3678d670611aa66d/benchmarks/common/syscalls.c#L106-L123" target="_blank" rel="noopener">https://github.com/riscv/riscv-tests/blob/3a98ec2e306938cce07ab15e3678d670611aa66d/benchmarks/common/syscalls.c#L106-L123</a> で定義されています。</p>
+<figure class="highlight c"><figcaption><span>benchmarks/common/syscalls.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> _init(<span class="keyword">int</span> cid, <span class="keyword">int</span> nc)  <span class="comment">// cid = CPUコアID, nc = 1</span></span><br><span class="line">&#123;</span><br><span class="line">  init_tls();</span><br><span class="line">  thread_entry(cid, nc);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// only single-threaded programs should ever get here.</span></span><br><span class="line">  <span class="keyword">int</span> ret = main(<span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">char</span> buf[NUM_COUNTERS * <span class="number">32</span>] __attribute__((aligned(<span class="number">64</span>)));</span><br><span class="line">  <span class="keyword">char</span>* pbuf = buf;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; NUM_COUNTERS; i++)</span><br><span class="line">    <span class="keyword">if</span> (counters[i])</span><br><span class="line">      pbuf += <span class="built_in">sprintf</span>(pbuf, <span class="string">"%s = %d\n"</span>, counter_names[i], counters[i]);</span><br><span class="line">  <span class="keyword">if</span> (pbuf != buf)</span><br><span class="line">    printstr(buf);</span><br><span class="line"></span><br><span class="line">  <span class="built_in">exit</span>(ret);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>まずは <code>init_tls()</code> の定義を見てみます。名前からしてTLS (スレッドローカル変数) を初期化していそうですね。<a href="https://github.com/riscv/riscv-tests/blob/3a98ec2e306938cce07ab15e3678d670611aa66d/benchmarks/common/syscalls.c#L96-L104" target="_blank" rel="noopener">https://github.com/riscv/riscv-tests/blob/3a98ec2e306938cce07ab15e3678d670611aa66d/benchmarks/common/syscalls.c#L96-L104</a> に定義があります。</p>
+<figure class="highlight c"><figcaption><span>benchmarks/common/syscalls.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">init_tls</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="comment">// 各CPUコアの tp (thread pointer) の値を thread_pointer 変数に格納。</span></span><br><span class="line">  <span class="function"><span class="keyword">register</span> <span class="keyword">void</span>* thread_pointer <span class="title">asm</span><span class="params">(<span class="string">"tp"</span>)</span></span>;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// リンカスクリプトの</span></span><br><span class="line">  <span class="comment">// https://github.com/riscv/riscv-tests/blob/3a98ec2e306938cce07ab15e3678d670611aa66d/benchmarks/common/test.ld#L49-L60</span></span><br><span class="line">  <span class="comment">// で確保しているTLSの境界値をここで使えるように宣言。</span></span><br><span class="line">  <span class="keyword">extern</span> <span class="keyword">char</span> _tdata_begin, _tdata_end, _tbss_end;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// _tdata_begin から始まる tdata_size 分の領域を、自分のCPUコアの tp の箇所にコピーする（TLSは上（高位）に向かって伸びる）。</span></span><br><span class="line">  <span class="comment">// つまり、各CPUコアは予め同じ _tdata_begin のデータをTLSに持った状態でプログラムが開始する。</span></span><br><span class="line">  <span class="keyword">size_t</span> tdata_size = &amp;_tdata_end - &amp;_tdata_begin;</span><br><span class="line">  <span class="comment">// memcpy の実装は、シンプルにポインタを1バイトずつ操作するものが定義されている。</span></span><br><span class="line">  <span class="comment">// https://github.com/riscv/riscv-tests/blob/3a98ec2e306938cce07ab15e3678d670611aa66d/benchmarks/common/syscalls.c#L379-L393</span></span><br><span class="line">  <span class="built_in">memcpy</span>(thread_pointer, &amp;_tdata_begin, tdata_size);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// BSSセクションはゼロ初期化するものなので、 _tdata を配置したその上に、 tbss_size 分だけゼロクリアする。</span></span><br><span class="line">  <span class="keyword">size_t</span> tbss_size = &amp;_tbss_end - &amp;_tdata_end;</span><br><span class="line">  <span class="comment">// memset はこちら https://github.com/riscv/riscv-tests/blob/3a98ec2e306938cce07ab15e3678d670611aa66d/benchmarks/common/syscalls.c#L395-L412</span></span><br><span class="line">  <span class="built_in">memset</span>(thread_pointer + tdata_size, <span class="number">0</span>, tbss_size);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>各コアのTLSに、 <code>.tdata</code> (初期値を持つ読み書き可能なデータ) と <code>.tbss</code> (ゼロ初期化された読み書き可能なデータ) を配置しているのがわかりました。</p>
+<p><code>_init()</code> の処理は次に <code>thread_entry()</code> を呼び出します。シングルスレッド動作する <code>vvadd</code> においては、 <a href="https://github.com/riscv/riscv-tests/blob/3a98ec2e306938cce07ab15e3678d670611aa66d/benchmarks/common/syscalls.c#L82-L87" target="_blank" rel="noopener">https://github.com/riscv/riscv-tests/blob/3a98ec2e306938cce07ab15e3678d670611aa66d/benchmarks/common/syscalls.c#L82-L87</a> のデフォルト定義が使われます。</p>
+<figure class="highlight c"><figcaption><span>benchmarks/common/syscalls.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// GNU拡張を使って weak シンボルとして thread_entry のデフォルト定義が与えられている。</span></span><br><span class="line"><span class="comment">// 静的・動的リンク時に別の thread_entry シンボルが見つかったらそちらが優先的に使われる。</span></span><br><span class="line"><span class="keyword">void</span> __attribute__((weak)) thread_entry(<span class="keyword">int</span> cid, <span class="keyword">int</span> nc)</span><br><span class="line">&#123;</span><br><span class="line">  <span class="comment">// multi-threaded programs override this function.</span></span><br><span class="line">  <span class="comment">// for the case of single-threaded programs, only let core 0 proceed.</span></span><br><span class="line">  <span class="comment">// コアID0 以外はここでずっと足止めを食らう。</span></span><br><span class="line">  / crt.S でもコアID0 以外が無限ループを食らう箇所があったが、あの制約が撤廃されても、</span><br><span class="line">  <span class="comment">// thread_entry 関数を自前で書かないベンチマークアプリケーションはシングルスレッド処理になる。</span></span><br><span class="line">  <span class="keyword">while</span> (cid != <span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>シングルスレッドな <code>vvadd</code> においては、コア0だけが <code>_init</code> の処理を進め、 <code>int ret = main(0, 0);</code> を呼び出します。 <code>main()</code> の中身は後で見ましょう。 <code>_init()</code> の残りをインラインコメントで解説します。</p>
+<figure class="highlight c"><figcaption><span>benchmarks/common/syscalls.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> _init(<span class="keyword">int</span> cid, <span class="keyword">int</span> nc)  <span class="comment">// cid = CPUコアID, nc = 1</span></span><br><span class="line">&#123;</span><br><span class="line">  init_tls();</span><br><span class="line">  thread_entry(cid, nc);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// only single-threaded programs should ever get here.</span></span><br><span class="line">  <span class="keyword">int</span> ret = main(<span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// パフォーマンスカウンタの内容をコンソール出力する、シングルスレッドベンチマークの共通後処理。</span></span><br><span class="line">  <span class="comment">// buf はコンソール出力する文字列を格納する領域。サイズはパフォーマンスカウンタの個数 * 32。</span></span><br><span class="line">  <span class="comment">// 1個のカウンタあたり最長32バイトの文字出力ができるようにしている。</span></span><br><span class="line">  <span class="comment">// NUM_COUNTERS は</span></span><br><span class="line">  <span class="comment">// https://github.com/riscv/riscv-tests/blob/3a98ec2e306938cce07ab15e3678d670611aa66d/benchmarks/common/syscalls.c#L36-L38</span></span><br><span class="line">  <span class="comment">// で2個に固定されている。Spikeでの実行例で見たように、 mcycle, minstret の2つに設定されている。</span></span><br><span class="line">  <span class="comment">// 設定箇所をするための関数は</span></span><br><span class="line">  <span class="comment">// https://github.com/riscv/riscv-tests/blob/3a98ec2e306938cce07ab15e3678d670611aa66d/benchmarks/common/syscalls.c#L39-L54</span></span><br><span class="line">  <span class="comment">// であり、各アプリケーションから計測対象コードの前後で setStats(1); setStats(0) されている。</span></span><br><span class="line">  <span class="keyword">char</span> buf[NUM_COUNTERS * <span class="number">32</span>] __attribute__((aligned(<span class="number">64</span>)));</span><br><span class="line">  <span class="keyword">char</span>* pbuf = buf;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; NUM_COUNTERS; i++)</span><br><span class="line">    <span class="keyword">if</span> (counters[i])</span><br><span class="line">      pbuf += <span class="built_in">sprintf</span>(pbuf, <span class="string">"%s = %d\n"</span>, counter_names[i], counters[i]);</span><br><span class="line">  <span class="keyword">if</span> (pbuf != buf)</span><br><span class="line">    printstr(buf);</span><br><span class="line">  <span class="comment">// sprintf や printstr はSpikeの用意しているシステムコール呼び出しを使って実現している。</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// exit() の処理は、コードを追っていくと最終的に</span></span><br><span class="line">  <span class="comment">// https://github.com/riscv/riscv-tests/blob/3a98ec2e306938cce07ab15e3678d670611aa66d/benchmarks/common/syscalls.c#L56-L60</span></span><br><span class="line">  <span class="comment">// の tohost_exit() に行き着く。</span></span><br><span class="line">  <span class="built_in">exit</span>(ret);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>パフォーマンスカウンタ <code>mcycle</code>, <code>minstret</code> の値をコンソールに文字出力して、 <code>exit(main関数の返り値)</code> を呼び出して終了しています。<br><code>exit()</code> が最終的に行き着く <code>tohost_exit()</code> は興味深いので実装を見てみます。</p>
+<figure class="highlight c"><figcaption><span>benchmarks/common/syscalls.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> __attribute__((noreturn)) tohost_exit(<span class="keyword">uintptr_t</span> code)</span><br><span class="line">&#123;</span><br><span class="line">  tohost = (code &lt;&lt; <span class="number">1</span>) | <span class="number">1</span>;  <span class="comment">// tohost という変数に main 関数の返り値を左シフトして最下位ビットを1にした値を書き込み</span></span><br><span class="line">  <span class="keyword">while</span> (<span class="number">1</span>);                 <span class="comment">// 無限ループ</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>これでどうしてベンチマークプログラムの実行が終わるのでしょうか？<br>これはSpikeの定めている <strong>HTIF (Host-Target Interface</strong> によるものです。特定の番地の64ビット符号なし整数に0以外の値が書き込まれていたら、Host側のSpikeはTarget側のベンチマークプログラムに何らかの介入をします。ターゲット側からみたら、 <code>tohost</code> がSpikeに対する連絡手段となるのです。<br>Target側が無限ループしているのにHost側に制御が移る理由があまりわかっていないのですが、おそらくSpikeはタイマ割り込みはいつでも発生するように作っているのだと思います。タイ回り込みの処理において <code>tohost</code> 領域の値をチェックして、非ゼロの場合にTargetプログラムを終了させる挙動かと推察します。<br>このあたりは確信できるドキュメントなど見つからなかったので、詳しい方は教えていただけると嬉しいです。</p>
+<p><code>tohost</code> の番地は <code>.tohost</code> セクションの番地から取得できるように <a href="https://github.com/riscv/riscv-tests/blob/3a98ec2e306938cce07ab15e3678d670611aa66d/benchmarks/common/test.ld#L29" target="_blank" rel="noopener">https://github.com/riscv/riscv-tests/blob/3a98ec2e306938cce07ab15e3678d670611aa66d/benchmarks/common/test.ld#L29</a> において設定されています。</p>
+<p>ここまでで <code>main()</code> 周辺の仕組みが完全にわかったので、 <code>main()</code> を読んでみます。</p>
+<figure class="highlight c"><figcaption><span>benchmarks/vvadd/vvadd_main.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">vvadd</span><span class="params">( <span class="keyword">int</span> n, <span class="keyword">int</span> a[], <span class="keyword">int</span> b[], <span class="keyword">int</span> c[] )</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">int</span> i;</span><br><span class="line">  <span class="keyword">for</span> ( i = <span class="number">0</span>; i &lt; n; i++ )</span><br><span class="line">    c[i] = a[i] + b[i];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">( <span class="keyword">int</span> argc, <span class="keyword">char</span>* argv[] )</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">int</span> results_data[DATA_SIZE];</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> PREALLOCATE</span></span><br><span class="line">  <span class="comment">// If needed we preallocate everything in the caches</span></span><br><span class="line">  vvadd( DATA_SIZE, input1_data, input2_data, results_data );</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// Do the vvadd</span></span><br><span class="line">  setStats(<span class="number">1</span>);  <span class="comment">// パフォーマンスカウンタ mcycle, minstret の値を記録</span></span><br><span class="line">  vvadd( DATA_SIZE, input1_data, input2_data, results_data );</span><br><span class="line">  setStats(<span class="number">0</span>);  <span class="comment">// パフォーマンスカウンタ mcycle, minstret の増分を記録。main() 終了後に増分がコンソール出力される。</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// Check the results</span></span><br><span class="line">  <span class="keyword">return</span> verify( DATA_SIZE, results_data, verify_data );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>特筆すべきことはないですね。 <code>PREALLOCATE</code> をコンパイル時にセットしておくと、パフォーマンスカウンタ計測の前に予め入力ベクトルを舐めてキャッシュに乗せるようです。</p>
+<h2><span id="benchmarksmt-vvadd-ベクトルの加算-マルチスレッドの挙動を追う"><code>benchmarks/mt-vvadd</code> （ベクトルの加算; マルチスレッド）の挙動を追う</span></h2><p>シングルスレッド版 <code>vvadd</code> との違いはわずかです。 <code>mt-vvadd</code> は <code>thread_entry</code> 関数を自前で定義しているので、すべてのコアがこの関数をエントリポイントとして実行することができます（実際には <code>crt.S</code> でコア0以外は無限ループに嵌められていますが…）。</p>
+<p><code>mt-vvadd</code> の <code>thread_entry</code> は <a href="https://github.com/riscv/riscv-tests/blob/3a98ec2e306938cce07ab15e3678d670611aa66d/benchmarks/mt-vvadd/mt-vvadd.c#L47-L78" target="_blank" rel="noopener">https://github.com/riscv/riscv-tests/blob/3a98ec2e306938cce07ab15e3678d670611aa66d/benchmarks/mt-vvadd/mt-vvadd.c#L47-L78</a> に定義があります。息切れしてきたので解説は省略します🙄<br>計算のコアの <code>vvadd()</code> は <a href="https://github.com/riscv/riscv-tests/blob/3a98ec2e306938cce07ab15e3678d670611aa66d/benchmarks/mt-vvadd/vvadd.c#L9-L18" target="_blank" rel="noopener">https://github.com/riscv/riscv-tests/blob/3a98ec2e306938cce07ab15e3678d670611aa66d/benchmarks/mt-vvadd/vvadd.c#L9-L18</a> に定義があります。<code>コアID mod コア数</code> 番目の要素の足し算を各コアが担当していることがわかります。</p>
+<h2><span id="機能調査">機能調査</span></h2><p>ベンチマークプログラムのコードがカーネル部分も周辺部分も読めるようになったので、自作CPU, OSで備えるべき機能を検討するために以下の観点を調べます。</p>
+<h3><span id="rv64f-単精度浮動小数点演算-rv64d-倍精度浮動小数点演算-を利用しているベンチマークはあるか-あるとしたらどれか">RV64F (単精度浮動小数点演算), RV64D (倍精度浮動小数点演算) を利用しているベンチマークはあるか。あるとしたらどれか。</span></h3><p><code>float</code> 型または <code>double</code> 型を使っているかが肝になります。たとえ使っていたとしても、RV64Iの範囲で整数レジスタを使ってソフトウェア的に浮動小数点演算をするコードをコンパイラに吐いてもらうこともできますが、やはりハードウェア側でRV64F, RV64DのISAに対応しておいてFPUをハードウェアで作っておいたほうが圧倒的に速度が出るので、 <code>float</code> や <code>double</code> 型を使っているベンチマークがあれば自作CPUはRV64F, RV64D対応したくなります。</p>
+<p><strong>mm</strong>, <strong>spmv</strong> は <code>double</code> 型を使っていて、それ以外はなさそうです。</p>
+<h3><span id="rv64v-ベクトル演算-を利用しているベンチマークはあるか-あるとしたらどれか">RV64V (ベクトル演算) を利用しているベンチマークはあるか。あるとしたらどれか。</span></h3><p>RV64Vはまだドラフト段階であり、調べている限り、RISC-Vでのベクトル演算アセンブリを吐くためのコンパイライントリンシックは今の所なさそうです。<br>となると直接アセンブリでベクトル命令を書いているベンチマークがあるかどうかが調査ポイントですが、 riscv-tests/benchmarks の中ではアセンブリを書いてなさそうです。<br>ただし、 <a href="https://github.com/riscv/riscv-tests/blob/3a98ec2e306938cce07ab15e3678d670611aa66d/benchmarks/mm/common.h#L12" target="_blank" rel="noopener"><strong>mm</strong> は標準ライブラリの <code>fmaf</code> を読んでいる形跡</a>があります。</p>
+<p>標準ライブラリが絡んでくるとコンパイル済みのアセンブリを見たほうが調査精度が高そうです。幸い riscv-tests/benchmarks は <code>mm.riscv</code> などの実行可能ファイルだけではなく <code>mm.riscv.dump</code> のようなアセンブリファイルも出力してくれるので、 <code>*.dump</code>ファイルを対象にベクトル命令をgrepしてみます。</p>
+<figure class="highlight bash"><figcaption><span>コンテナ内</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /riscv-tests/target/share/riscv-tests/benchmarks</span><br><span class="line">grep vl *.dump</span><br><span class="line">grep vs *.dump</span><br></pre></td></tr></table></figure>
+
+<p>どうやらどれもベクトル命令は吐いてなさそうです。</p>
+<h3><span id="rv64a-アトミック命令-を利用しているベンチマークはあるか-あるとしたらどれか">RV64A (アトミック命令) を利用しているベンチマークはあるか。あるとしたらどれか。</span></h3><figure class="highlight bash"><figcaption><span>コンテナ内</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">% grep <span class="string">'\slr\s'</span> *.dump</span><br><span class="line">% grep <span class="string">'\ssc\s'</span> *.dump</span><br><span class="line">% grep <span class="string">'\samo'</span> *.dump</span><br><span class="line">-&gt; mm.riscv.dump:    800035c6:     04c6a72f                amoadd.w.aq     a4,a2,(a3)</span><br><span class="line">-&gt; mt-matmul.riscv.dump:    8000121c:      04c6a72f                amoadd.w.aq     a4,a2,(a3)</span><br><span class="line">-&gt; mt-vvadd.riscv.dump:    80001066:       04c6a72f                amoadd.w.aq     a4,a2,(a3)</span><br><span class="line">-&gt; qsort.riscv.dump:    800022f2:  03af21af                amoadd.w.rl     gp,s10,(t5)</span><br><span class="line">-&gt; rsort.riscv.dump:    8000242a:  03af21af                amoadd.w.rl     gp,s10,(t5)</span><br></pre></td></tr></table></figure>
+
+<p>アトミック命令が <strong>mm</strong>, <strong>mt-matmul</strong>, <strong>mt-vvadd</strong>, <strong>qsort</strong>, <strong>rsort</strong> で使われていますね。</p>
+<h3><span id="ヒープ領域は必要かスタック領域のみで十分か">ヒープ領域は必要か（スタック領域のみで十分か）。</span></h3><p>ヒープの有無はリンカスクリプトからはわかりません。<br>ヒープがあるとしたら、 <code>.data</code> や <code>.bss</code> セクションの直後（高位）の領域をベースアドレス配置されるのが通常です。<br>（スタックはヒープから思い切り離れたところにそのトップアドレスを配置し、ヒープは高位へ、スタックは低位へ伸びていくのが慣例ですね）</p>
+<p>ヒープはOSがシステムコールの形で動的な確保と開放をサポートします。Linuxにおけるヒープ操作のためのシステムコールは <code>brk(2)</code> ですね。<br>riscv-tests は動作に特定のOSを必要としていない組み込みプログラムなので、ヒープ操作のシステムコール必要としておらず、呼び出していません。<br>したがってヒープ領域は不要です。</p>
+<p>（一部のベンチマークプログラムは <code>alloca</code> を呼び出していますが、これはスタック領域を動的に伸ばすための関数です）`</p>
+<h3><span id="スレッドをcpuコアに割り当てるスケジューラは必要か">スレッドをCPUコアに割り当てるスケジューラは必要か。</span></h3><p>コードを追いながら見たように、</p>
+<ul>
+<li><code>crt.S</code> においてコアID0 以外は無限ループでストップするようになっている。</li>
+<li>仮に <code>crt.S</code> の上記制約がなくなったとしても、マルチスレッドのベンチマークの <strong>mt-matmul</strong> と <strong>mt-vvadd</strong> は、どのコアも同じ命令の実行を行っている（各コアが扱う入力データが分割されている、いわゆるデータ並列）。<ul>
+<li>自分のコアの計算が早く終わった場合にも <code>barrier()</code> するだけで、ロードバランシングのためにスケジューラに制御を移したりはしない。</li>
+</ul>
+</li>
+</ul>
+<p>という状況なので、スケジューラは不要です。</p>
+<h3><span id="まとめ表">まとめ表</span></h3><table>
+<thead>
+<tr>
+<th></th>
+<th>dhrystone</th>
+<th>median</th>
+<th>mm</th>
+<th>mt-matmul</th>
+<th>mt-vvadd</th>
+<th>multiply</th>
+<th>pmp</th>
+<th>qsort</th>
+<th>rsort</th>
+<th>spmv</th>
+<th>towers</th>
+<th>vvadd</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>RV64F要否</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+</tr>
+<tr>
+<td>RV64D要否</td>
+<td>x</td>
+<td>x</td>
+<td>o</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>o</td>
+<td>x</td>
+<td>x</td>
+</tr>
+<tr>
+<td>RV64A要否</td>
+<td>x</td>
+<td>x</td>
+<td>o</td>
+<td>o</td>
+<td>o</td>
+<td>x</td>
+<td>x</td>
+<td>o</td>
+<td>o</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+</tr>
+<tr>
+<td>RV64V要否</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+</tr>
+<tr>
+<td>ヒープ要否</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+</tr>
+<tr>
+<td>スケジューラ要否</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+</tr>
+</tbody></table>
+
+    
+	</div>
+	<footer class="entry-footer">
+		<div class="entry-meta-footer">
+			<span class="category">
+				
+			</span>
+			<span class="tags">
+				
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%87%AA%E4%BD%9CCPU-%E8%87%AA%E4%BD%9COS/" rel="tag">自作CPU & 自作OS</a></li></ul>
+
+			</span>
+		</div>
+	</footer>
+    
+    <footer class="author-info clearfix">
+      <img class="author-picture circle" src="https://www.gravatar.com/avatar/cb02a2b3f429b7c938d1fe2665e8e342">
+      <div class="author-content right">
+        <div class="author-caption">
+          <span class="label">author</span>
+          Sho Nakatani a.k.a. laysakura
+        </div>
+        <p class="author-description">
+          東京大学大学院 情報理工学系研究科 電子情報学専攻 修士課程で並列分散処理・ストリーム処理・データベースを研究。<br>
+          2014年4月に株式会社ディー・エヌ・エーにエンジニアスペシャリストとして入社し、ソーシャルゲームのサーバサイド共通基盤の開発に従事。<br>
+          2016年8月より、オンライン証券会社<a href="https://folio-sec.com" target="_blank" rel="noopener">株式会社FOLIO</a>に入社。バックエンドシステム開発・プロジェクトマネージメント・Engineering Managementに従事。<br>
+          2020年3月より<a href="https://idein.jp" target="_blank" rel="noopener">Idein株式会社</a>所属。<br>
+          随時副業募集中です: <a href="https://github.com/laysakura/resume-jp-for-side-job" target="_blank" rel="noopener">職務経歴書や募集職種</a>
+        </p>
+        <ul class="author-social-buttons">
+          <li class="author-social-button"><a class="fa fa-lg fa-twitter-square" href="https://twitter.com/laysakura" target="_blank" rel="noopener"></a></li>
+          <li class="author-social-button"><a class="fa fa-lg fa-github-square" href="https://github.com/laysakura" target="_blank" rel="noopener"></a></li>
+          <li class="author-social-button"><a class="fa fa-lg fa-facebook-square" href="https://www.facebook.com/lay.sakura" target="_blank" rel="noopener"></a></li>
+        </ul>
+      </div>
+    </footer>
+    
+	
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2020/02/03/handcraft-cpu-os-2/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          自作CPU &amp; 自作OSをやっていく (2) - 64ビットRISC-Vの &#34;Hello World&#34; をRustで作った
+        
+      </div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+
+
+<section id="comments">
+  <div id="disqus_thread">
+
+  <!-- comment service provided by disqus -->
+  <script>
+    /**
+     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+     */
+    var disqus_config = function () {
+        this.page.url = https://laysakura.github.io/2020/02/09/handcraft-cpu-os-3/;  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = https://laysakura.github.io/2020/02/09/handcraft-cpu-os-3/; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    (function() {  // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        
+        s.src = '//laysakura.disqus.com/embed.js';
+        
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript" target="_blank" rel="noopener">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+    </div>
+    <div class="mb-search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:laysakura.github.io">
+  </form>
+</div>
+<footer id="footer">
+	<h1 class="footer-blog-title">
+		<a href="/">俺とお前とlaysakura</a>
+	</h1>
+	<span class="copyright">
+		&copy; 2020 Sho Nakatani a.k.a. laysakura<br>
+		Modify from <a href="https://sanographix.github.io/tumblr/apollo/" target="_blank">Apollo</a> theme, designed by <a href="https://www.sanographix.net/" target="_blank">SANOGRAPHIX.NET</a><br>
+		Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+	</span>
+</footer>
+
+    
+<script>
+  var disqus_shortname = 'laysakura';
+  
+  var disqus_url = 'https://laysakura.github.io/2020/02/09/handcraft-cpu-os-3/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+
+  <!-- https://github.com/vfeskov/vanilla-back-to-top -->
+  <script src="https://unpkg.com/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js"></script>
+  <script>addBackToTop({
+    diameter: 50,
+    backgroundColor: '#33a6b880',
+    textColor: '#fff'
+  })</script>
+
+</body>
+</html>

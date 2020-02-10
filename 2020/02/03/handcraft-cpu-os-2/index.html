@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>自作CPU &amp; 自作OSをやっていく (2) - 64ビットRISC-Vの &#34;Hello World&#34; をRustで作った | 俺とお前とlaysakura</title>
+  
+  <link rel="canonical" href="https://laysakura.github.io/2020/02/03/handcraft-cpu-os-2/"/>
+  <meta name="viewport" content="width=device-width">
+  <meta name="description" content="2020年1月から、趣味エンジニアリング活動として自作CPUと自作OSをやっていく。 今回は、64ビットRISC-V (RV64I) の “Hello World” をRustで作ったので、そのリポジトリの紹介。 自作CPU &amp; 自作OS タグで、この前後の進捗とか目指しているもの（初回記事）とかを追えるようにしている。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="自作CPU &amp; 自作OSをやっていく (2) - 64ビットRISC-Vの &quot;Hello World&quot; をRustで作った">
+<meta property="og:url" content="https://laysakura.github.io/2020/02/03/handcraft-cpu-os-2/index.html">
+<meta property="og:site_name" content="俺とお前とlaysakura">
+<meta property="og:description" content="2020年1月から、趣味エンジニアリング活動として自作CPUと自作OSをやっていく。 今回は、64ビットRISC-V (RV64I) の “Hello World” をRustで作ったので、そのリポジトリの紹介。 自作CPU &amp; 自作OS タグで、この前後の進捗とか目指しているもの（初回記事）とかを追えるようにしている。">
+<meta property="og:locale" content="ja_JP">
+<meta property="article:published_time" content="2020-02-03T05:45:00.000Z">
+<meta property="article:modified_time" content="2020-02-10T05:06:21.000Z">
+<meta property="article:author" content="Sho Nakatani a.k.a. laysakura">
+<meta property="article:tag" content="自作CPU &amp; 自作OS">
+<meta name="twitter:card" content="summary">
+
+  <!-- favicon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+  <link rel="icon" href="/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+  <link rel="manifest" href="/favicon/site.webmanifest">
+  <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#5bbad5">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="theme-color" content="#ffffff">
+
+  
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-22289437-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+  <!-- MathJax -->
+  <script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+  <div id="container">
+    <div class="mobile-nav-panel">
+	<i class="icon-reorder icon-large"></i>
+</div>
+<header id="header">
+	<h1 class="blog-title">
+		<a href="/">俺とお前とlaysakura</a>
+	</h1>
+	<nav class="nav">
+		<ul>
+			<li><a href="/archives">過去の投稿</a></li>
+			<li><a id="nav-search-btn" class="nav-icon" title="Search"></a></li>
+			<li><a href="http://cloud.feedly.com/#subscription%2Ffeed%2Fhttps%3A%2F%2Flaysakura.github.io%2Fatom.xml" target="_blank" rel="noopener" id="nav-rss-link" class="nav-icon" title="RSS Feed"></a></li>
+		</ul>
+	</nav>
+	<div id="search-form-wrap">
+		<form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://laysakura.github.io"></form>
+	</div>
+</header>
+    <div id="main">
+      <article id="post-自作CPU-自作OSをやっていく2-riscv64imac-hello-rs" class="post">
+	<footer class="entry-meta-header">
+		<span class="meta-elements date">
+			<a href="/2020/02/03/handcraft-cpu-os-2/" class="article-date">
+  <time datetime="2020-02-03T05:45:00.000Z" itemprop="datePublished">2020-02-03</time>
+</a>
+		</span>
+	</footer>
+	
+	<header class="entry-header">
+		
+  
+    <h1 class="article-title entry-title" itemprop="name">
+      自作CPU &amp; 自作OSをやっていく (2) - 64ビットRISC-Vの &#34;Hello World&#34; をRustで作った
+    </h1>
+  
+
+	</header>
+	<div class="entry-content">
+		
+    	<div style="text-align: center">
+  <div class="github-card" data-user="laysakura" data-repo="riscv64imac-hello-rs" data-height="200" data-width="400" data-theme="default" data-target data-client-id data-client-secret></div>
+</div>
+<script src="/github-card-lib/githubcard.js"></script>
+
+
+<p>2020年1月から、趣味エンジニアリング活動として自作CPUと自作OSをやっていく。</p>
+<p>今回は、64ビットRISC-V (RV64I) の “Hello World” をRustで作ったので、そのリポジトリの紹介。</p>
+<p><a href="/tags/自作CPU-自作OS/">自作CPU &amp; 自作OS</a> タグで、この前後の進捗とか目指しているもの（初回記事）とかを追えるようにしている。</p>
+<a id="more"></a>
+
+<p>冒頭にも貼ったが、</p>
+<div style="text-align: center">
+  <div class="github-card" data-user="laysakura" data-repo="riscv64imac-hello-rs" data-height="200" data-width="400" data-theme="default" data-target data-client-id data-client-secret></div>
+</div>
+<script src="/github-card-lib/githubcard.js"></script>
+
+
+<p>のリポジトリに公開している。READMEに全部書いてあるが、特徴を抜粋すると</p>
+<ul>
+<li><code>Dockerfile</code> を書いているので、面倒なコンパイラツールチェインなどのインストールを自前でしないで良い。</li>
+<li>64ビットなRISC-Vターゲットへコンパイルされる（世のサンプルは32ビット版が多いのでちょっと参考になるかも）。</li>
+<li>RustのStableビルドを使う。Nightlyビルドは使わない。</li>
+<li><a href="https://github.com/japaric/xargo" target="_blank" rel="noopener">xargo</a> を使わず <code>cargo</code> を使う。</li>
+<li>Visual Studio Codeを使う人なら、Remote Development Containerで走るように設定ファイルを同梱している。</li>
+</ul>
+<p>あたり。</p>
+<p>参考にさせていただいた <a href="https://qiita.com/tomoyuki-nakabayashi/items/76f912adb6b7da6030c7" target="_blank" rel="noopener">RustでRISC-V OS自作！はじめの一歩</a> とファイル構成は同じなので、比較しながら読めば十分に挙動は追えるはず（解説をサボった）。こちらの記事との差分は、</p>
+<ul>
+<li>64ビット版であること。</li>
+<li>QEMUで <code>-machine sifive_u</code> ではなく <code>-machine virt</code> を使った。それに伴いUARTのアドレスが <code>0x10013000</code> から <code>0x10000000</code> に変わった。</li>
+<li>リンカスクリプトで無駄を省いたりコメント追加したりした。あと <code>MEMORY</code> コマンドを使った（と言っても定義して実際に使ったのはRAMだけだが…）。</li>
+<li><code>boot.s</code> で、スタック領域を確保するときに <code>la</code> アセンブリ疑似命令を使うようにした。</li>
+</ul>
+<p>あたり。</p>
+<h2><span id="苦労したこと学んだこと">苦労したこと・学んだこと</span></h2><ul>
+<li>RustのStableビルドで勝負するなら、インラインアセンブリが使えないので、生アセンブリファイルを書く必要がある。</li>
+<li>生アセンブリファイルを書いた瞬間に、<a href="https://github.com/riscv/riscv-gnu-toolchain" target="_blank" rel="noopener">RISC-V用のコンパイラツールチェイン</a> が必要になる。アセンブリファイルのアセンブルのため、その結果のオブジェクトファイルを <code>rustc</code> でコンパイルした別のオブジェクトファイルとリンクするため。<ul>
+<li><code>rustc</code> がバックエンドに使ってるLLVMでRISC-V用のオブジェクトファイル生成もリンクもできているわけなので、本来的には不要なはず。 <code>build.rs</code> をもっと上手に書けば不要にできるのか…？🤷</li>
+</ul>
+</li>
+<li>QEMUのバージョンの違いで “Hello World” が出力されたりされなかったり…<ul>
+<li>UARTのアドレスを規定するのがQEMUだと理解するまでは「謎挙動」に見えて苦しんでいた。 <a href="https://gitlab.freedesktop.org/spice/qemu/blob/e24f44dbeab8e54c72bdaedbd35453fb2a6c38da/hw/riscv/virt.c#L51-63" target="_blank" rel="noopener">https://gitlab.freedesktop.org/spice/qemu/blob/e24f44dbeab8e54c72bdaedbd35453fb2a6c38da/hw/riscv/virt.c#L51-63</a> を見つけてようやく意味がわかった。</li>
+</ul>
+</li>
+<li>スタック領域確保、64ビットにした途端に動かなくなった…<ul>
+<li>最終的に <code>la</code> を使って回避したが、 <a href="https://qiita.com/tomoyuki-nakabayashi/items/76f912adb6b7da6030c7" target="_blank" rel="noopener">RustでRISC-V OS自作！はじめの一歩</a> のまま <code>lui</code> と <code>ori</code> 使う形式でも動きそうなもんだけどな…🤔</li>
+</ul>
+</li>
+<li>リンカスクリプト何もわからん状態だったが、 <a href="http://blueeyes.sakura.ne.jp/2018/10/31/1676/" target="_blank" rel="noopener">リンカスクリプトの書き方</a> 読んでだいぶ分かるようになった気がするありがたい。</li>
+<li>SiFiveはRISC-Vクロスコンパイル用のビルド済みgccもqemuを提供してくれていてとてもありがたいけど、Ubuntu 14.04前提なのが厳しかった。特に <code>riscv64-unknown-elf-gdb</code> と <code>qemu-system-riscv64</code> 起動に必要な動的ライブラリの適切なバージョンを引っ張ってくるので地獄を見た（最初は <code>rust</code> dockerイメージで頑張ってたけど匙投げて <code>ubuntu:14.04</code> 使うようにしてから苦行程度に落ち着いた）。</li>
+</ul>
+
+    
+	</div>
+	<footer class="entry-footer">
+		<div class="entry-meta-footer">
+			<span class="category">
+				
+			</span>
+			<span class="tags">
+				
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%87%AA%E4%BD%9CCPU-%E8%87%AA%E4%BD%9COS/" rel="tag">自作CPU & 自作OS</a></li></ul>
+
+			</span>
+		</div>
+	</footer>
+    
+    <footer class="author-info clearfix">
+      <img class="author-picture circle" src="https://www.gravatar.com/avatar/cb02a2b3f429b7c938d1fe2665e8e342">
+      <div class="author-content right">
+        <div class="author-caption">
+          <span class="label">author</span>
+          Sho Nakatani a.k.a. laysakura
+        </div>
+        <p class="author-description">
+          東京大学大学院 情報理工学系研究科 電子情報学専攻 修士課程で並列分散処理・ストリーム処理・データベースを研究。<br>
+          2014年4月に株式会社ディー・エヌ・エーにエンジニアスペシャリストとして入社し、ソーシャルゲームのサーバサイド共通基盤の開発に従事。<br>
+          2016年8月より、オンライン証券会社<a href="https://folio-sec.com" target="_blank" rel="noopener">株式会社FOLIO</a>に入社。バックエンドシステム開発・プロジェクトマネージメント・Engineering Managementに従事。<br>
+          2020年3月より<a href="https://idein.jp" target="_blank" rel="noopener">Idein株式会社</a>所属。<br>
+          随時副業募集中です: <a href="https://github.com/laysakura/resume-jp-for-side-job" target="_blank" rel="noopener">職務経歴書や募集職種</a>
+        </p>
+        <ul class="author-social-buttons">
+          <li class="author-social-button"><a class="fa fa-lg fa-twitter-square" href="https://twitter.com/laysakura" target="_blank" rel="noopener"></a></li>
+          <li class="author-social-button"><a class="fa fa-lg fa-github-square" href="https://github.com/laysakura" target="_blank" rel="noopener"></a></li>
+          <li class="author-social-button"><a class="fa fa-lg fa-facebook-square" href="https://www.facebook.com/lay.sakura" target="_blank" rel="noopener"></a></li>
+        </ul>
+      </div>
+    </footer>
+    
+	
+    
+<nav id="article-nav">
+  
+    <a href="/2020/02/09/handcraft-cpu-os-3/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          自作CPU &amp; 自作OSをやっていく (3) - riscv/riscv-tests の挙動を追う
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/01/31/handcraft-cpu-os-1/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          自作CPU &amp; 自作OSをやっていく (1) - 全体像（随時更新）
+        
+      </div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+
+
+<section id="comments">
+  <div id="disqus_thread">
+
+  <!-- comment service provided by disqus -->
+  <script>
+    /**
+     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+     */
+    var disqus_config = function () {
+        this.page.url = https://laysakura.github.io/2020/02/03/handcraft-cpu-os-2/;  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = https://laysakura.github.io/2020/02/03/handcraft-cpu-os-2/; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    (function() {  // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        
+        s.src = '//laysakura.disqus.com/embed.js';
+        
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript" target="_blank" rel="noopener">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+    </div>
+    <div class="mb-search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:laysakura.github.io">
+  </form>
+</div>
+<footer id="footer">
+	<h1 class="footer-blog-title">
+		<a href="/">俺とお前とlaysakura</a>
+	</h1>
+	<span class="copyright">
+		&copy; 2020 Sho Nakatani a.k.a. laysakura<br>
+		Modify from <a href="https://sanographix.github.io/tumblr/apollo/" target="_blank">Apollo</a> theme, designed by <a href="https://www.sanographix.net/" target="_blank">SANOGRAPHIX.NET</a><br>
+		Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+	</span>
+</footer>
+
+    
+<script>
+  var disqus_shortname = 'laysakura';
+  
+  var disqus_url = 'https://laysakura.github.io/2020/02/03/handcraft-cpu-os-2/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+
+  <!-- https://github.com/vfeskov/vanilla-back-to-top -->
+  <script src="https://unpkg.com/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js"></script>
+  <script>addBackToTop({
+    diameter: 50,
+    backgroundColor: '#33a6b880',
+    textColor: '#fff'
+  })</script>
+
+</body>
+</html>

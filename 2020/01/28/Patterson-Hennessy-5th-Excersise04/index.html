@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>『コンピュータの構成と設計 第5版』演習問題解答集 第4章 | 俺とお前とlaysakura</title>
+  
+  <link rel="canonical" href="https://laysakura.github.io/2020/01/28/Patterson-Hennessy-5th-Excersise04/"/>
+  <meta name="viewport" content="width=device-width">
+  <meta name="description" content="“パタヘネ本” でおなじみの『コンピュータの構成と設計 第5版』の解答集です。読者は書籍を保有していることを前提として解答・解説を記載します。訂正案などありましたら本ブログ記事のリポジトリ へPull-Requestくだされば幸いです😊 この記事4章の内容は、プロセッサを実現するハードウェアユニット・パイプライン処理・命令レベル並列化など、CPUに関する中核です。 各章の解答集 『">
+<meta property="og:type" content="article">
+<meta property="og:title" content="『コンピュータの構成と設計 第5版』演習問題解答集 第4章">
+<meta property="og:url" content="https://laysakura.github.io/2020/01/28/Patterson-Hennessy-5th-Excersise04/index.html">
+<meta property="og:site_name" content="俺とお前とlaysakura">
+<meta property="og:description" content="“パタヘネ本” でおなじみの『コンピュータの構成と設計 第5版』の解答集です。読者は書籍を保有していることを前提として解答・解説を記載します。訂正案などありましたら本ブログ記事のリポジトリ へPull-Requestくだされば幸いです😊 この記事4章の内容は、プロセッサを実現するハードウェアユニット・パイプライン処理・命令レベル並列化など、CPUに関する中核です。 各章の解答集 『">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:image" content="https://laysakura.github.io/img/2020/01-19-4.3.1.svg">
+<meta property="og:image" content="https://laysakura.github.io/img/2020/01-19-4.7.3.png">
+<meta property="og:image" content="https://laysakura.github.io/img/2020/01-23-4.9.2-data-hazard.svg">
+<meta property="og:image" content="https://laysakura.github.io/img/2020/01-23-4.9.2-wo-data-hazard.svg">
+<meta property="og:image" content="https://laysakura.github.io/img/2020/01-23-4.9.3.svg">
+<meta property="og:image" content="https://laysakura.github.io/img/2020/01-23-4.9.5-data-hazard.svg">
+<meta property="og:image" content="https://laysakura.github.io/img/2020/01-23-4.9.5-data-hazard2.svg">
+<meta property="og:image" content="https://laysakura.github.io/img/2020/01-23-4.9.5-wo-data-hazard.svg">
+<meta property="og:image" content="https://laysakura.github.io/img/2020/01-23-4.10.1-structual-hazard.svg">
+<meta property="og:image" content="https://laysakura.github.io/img/2020/01-23-4.10.1-wo-structual-hazard.svg">
+<meta property="og:image" content="https://laysakura.github.io/img/2020/01-23-4.10.2.svg">
+<meta property="og:image" content="https://laysakura.github.io/img/2020/01-23-4.10.3-branch-on-ex.svg">
+<meta property="og:image" content="https://laysakura.github.io/img/2020/01-23-4.10.3-branch-on-id.svg">
+<meta property="og:image" content="https://laysakura.github.io/img/2020/01-23-4.10.6-addr-on-ex.svg">
+<meta property="og:image" content="https://laysakura.github.io/img/2020/01-23-4.10.6-addr-on-mem.svg">
+<meta property="og:image" content="https://laysakura.github.io/img/2020/01-23-4.11.1-full.svg">
+<meta property="og:image" content="https://laysakura.github.io/img/2020/01-23-4.11.1-loop3.svg">
+<meta property="og:image" content="https://laysakura.github.io/img/2020/01-23-4.12.1-no_fw-data-hazard.svg">
+<meta property="og:image" content="https://laysakura.github.io/img/2020/01-23-4.12.2-ex_mem_fw-mem_wb_fw-data-hazard.svg">
+<meta property="og:image" content="https://laysakura.github.io/img/2020/01-23-4.12.3-ex_mem_fw-data-hazard.svg">
+<meta property="og:image" content="https://laysakura.github.io/img/2020/01-23-4.12.3-mem_wb_fw-data-hazard.svg">
+<meta property="og:image" content="https://laysakura.github.io/img/2020/01-23-4.13.1-data-hazard.svg">
+<meta property="og:image" content="https://laysakura.github.io/img/2020/01-23-4.13.1-wo-data-hazard.svg">
+<meta property="og:image" content="https://laysakura.github.io/img/2020/01-23-4.13.2-1.svg">
+<meta property="og:image" content="https://laysakura.github.io/img/2020/01-23-4.13.2-2.svg">
+<meta property="og:image" content="https://laysakura.github.io/img/2020/01-23-4.13.3.svg">
+<meta property="og:image" content="https://laysakura.github.io/img/2020/01-23-4.13.6.svg">
+<meta property="og:image" content="https://laysakura.github.io/img/2020/01-23-4.14.1.svg">
+<meta property="og:image" content="https://laysakura.github.io/img/2020/01-23-4.14.2.svg">
+<meta property="og:image" content="https://laysakura.github.io/img/2020/01-23-4.14.3.svg">
+<meta property="article:published_time" content="2020-01-28T00:40:00.000Z">
+<meta property="article:modified_time" content="2020-02-10T05:06:21.000Z">
+<meta property="article:author" content="Sho Nakatani a.k.a. laysakura">
+<meta property="article:tag" content="『コンピュータの構成と設計』">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://laysakura.github.io/img/2020/01-19-4.3.1.svg">
+
+  <!-- favicon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+  <link rel="icon" href="/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+  <link rel="manifest" href="/favicon/site.webmanifest">
+  <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#5bbad5">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="theme-color" content="#ffffff">
+
+  
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-22289437-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+  <!-- MathJax -->
+  <script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+  <div id="container">
+    <div class="mobile-nav-panel">
+	<i class="icon-reorder icon-large"></i>
+</div>
+<header id="header">
+	<h1 class="blog-title">
+		<a href="/">俺とお前とlaysakura</a>
+	</h1>
+	<nav class="nav">
+		<ul>
+			<li><a href="/archives">過去の投稿</a></li>
+			<li><a id="nav-search-btn" class="nav-icon" title="Search"></a></li>
+			<li><a href="http://cloud.feedly.com/#subscription%2Ffeed%2Fhttps%3A%2F%2Flaysakura.github.io%2Fatom.xml" target="_blank" rel="noopener" id="nav-rss-link" class="nav-icon" title="RSS Feed"></a></li>
+		</ul>
+	</nav>
+	<div id="search-form-wrap">
+		<form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://laysakura.github.io"></form>
+	</div>
+</header>
+    <div id="main">
+      <article id="post-『コンピュータの構成と設計-第5版』演習問題回答集-第4章" class="post">
+	<footer class="entry-meta-header">
+		<span class="meta-elements date">
+			<a href="/2020/01/28/Patterson-Hennessy-5th-Excersise04/" class="article-date">
+  <time datetime="2020-01-28T00:40:00.000Z" itemprop="datePublished">2020-01-28</time>
+</a>
+		</span>
+	</footer>
+	
+	<header class="entry-header">
+		
+  
+    <h1 class="article-title entry-title" itemprop="name">
+      『コンピュータの構成と設計 第5版』演習問題解答集 第4章
+    </h1>
+  
+
+	</header>
+	<div class="entry-content">
+		
+    	<iframe style="width:120px;height:240px;display:block;margin:0px auto;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="https://rcm-fe.amazon-adsystem.com/e/cm?ref=qf_sp_asin_til&t=laysakura-22&m=amazon&o=9&p=8&l=as1&IS2=1&detail=1&asins=B01M5FMGDL&linkId=93bb4e3be4ca3abe7e74716873f1aec2&bc1=000000&lt1=_top&fc1=333333&lc1=0066c0&bg1=ffffff&f=ifr">
+    </iframe>
+
+<p>“パタヘネ本” でおなじみの『コンピュータの構成と設計 第5版』の解答集です。読者は書籍を保有していることを前提として解答・解説を記載します。<br>訂正案などありましたら<a href="https://github.com/laysakura/laysakura.github.io/tree/ready/source/_posts" target="_blank" rel="noopener">本ブログ記事のリポジトリ</a> へPull-Requestくだされば幸いです😊</p>
+<p>この記事4章の内容は、プロセッサを実現するハードウェアユニット・パイプライン処理・命令レベル並列化など、CPUに関する中核です。</p>
+<h2><span id="各章の解答集">各章の解答集</span></h2><ol>
+<li>『コンピュータの構成と設計 第5版』演習問題解答集 第1章 （執筆中）</li>
+<li><a href="/2020/01/10/Patterson-Hennessy-5th-Excersise02">『コンピュータの構成と設計 第5版』演習問題解答集 第2章</a></li>
+<li><a href="/2020/01/19/Patterson-Hennessy-5th-Excersise03">『コンピュータの構成と設計 第5版』演習問題解答集 第3章</a></li>
+<li><a href="/2020/01/28/Patterson-Hennessy-5th-Excersise04">『コンピュータの構成と設計 第5版』演習問題解答集 第4章</a> （この記事）</li>
+<li>『コンピュータの構成と設計 第5版』演習問題解答集 第5章 （執筆中）</li>
+<li>『コンピュータの構成と設計 第5版』演習問題解答集 第6章 （執筆中）</li>
+</ol>
+<a id="more"></a>
+
+<h2><span id="問題解答解説へジャンプ">問題・解答・解説へジャンプ</span></h2><!-- toc -->
+
+<ul>
+<li><a href="#41">4.1</a><ul>
+<li><a href="#411">4.1.1</a></li>
+<li><a href="#412">4.1.2</a></li>
+<li><a href="#413">4.1.3</a></li>
+</ul>
+</li>
+<li><a href="#42">4.2</a><ul>
+<li><a href="#421">4.2.1</a></li>
+<li><a href="#422">4.2.2</a></li>
+<li><a href="#423">4.2.3</a></li>
+</ul>
+</li>
+<li><a href="#43">4.3</a><ul>
+<li><a href="#431">4.3.1</a></li>
+<li><a href="#432">4.3.2</a></li>
+<li><a href="#433">4.3.3</a></li>
+</ul>
+</li>
+<li><a href="#44">4.4</a><ul>
+<li><a href="#441">4.4.1</a></li>
+<li><a href="#442">4.4.2</a></li>
+<li><a href="#443">4.4.3</a></li>
+<li><a href="#444">4.4.4</a></li>
+<li><a href="#445">4.4.5</a></li>
+<li><a href="#446">4.4.6</a></li>
+</ul>
+</li>
+<li><a href="#45">4.5</a><ul>
+<li><a href="#451">4.5.1</a></li>
+<li><a href="#452">4.5.2</a></li>
+</ul>
+</li>
+<li><a href="#46">4.6</a><ul>
+<li><a href="#461">4.6.1</a></li>
+<li><a href="#462">4.6.2</a></li>
+<li><a href="#463">4.6.3</a></li>
+<li><a href="#464">4.6.4</a></li>
+<li><a href="#465">4.6.5</a></li>
+</ul>
+</li>
+<li><a href="#47">4.7</a><ul>
+<li><a href="#471">4.7.1</a></li>
+<li><a href="#472">4.7.2</a></li>
+<li><a href="#473">4.7.3</a></li>
+<li><a href="#474">4.7.4</a></li>
+<li><a href="#475">4.7.5</a></li>
+<li><a href="#476">4.7.6</a></li>
+</ul>
+</li>
+<li><a href="#48">4.8</a><ul>
+<li><a href="#481">4.8.1</a></li>
+<li><a href="#482">4.8.2</a></li>
+<li><a href="#483">4.8.3</a></li>
+<li><a href="#484">4.8.4</a></li>
+<li><a href="#485">4.8.5</a></li>
+<li><a href="#486">4.8.6</a></li>
+</ul>
+</li>
+<li><a href="#49">4.9</a><ul>
+<li><a href="#491">4.9.1</a></li>
+<li><a href="#492">4.9.2</a></li>
+<li><a href="#493">4.9.3</a></li>
+<li><a href="#494">4.9.4</a></li>
+<li><a href="#495">4.9.5</a></li>
+<li><a href="#496">4.9.6</a></li>
+</ul>
+</li>
+<li><a href="#410">4.10</a><ul>
+<li><a href="#4101">4.10.1</a></li>
+<li><a href="#4102">4.10.2</a></li>
+<li><a href="#4103">4.10.3</a></li>
+<li><a href="#4104">4.10.4</a></li>
+<li><a href="#4105">4.10.5</a></li>
+<li><a href="#4106">4.10.6</a></li>
+</ul>
+</li>
+<li><a href="#411">4.11</a><ul>
+<li><a href="#4111">4.11.1</a></li>
+<li><a href="#4112">4.11.2</a></li>
+</ul>
+</li>
+<li><a href="#412">4.12</a><ul>
+<li><a href="#4121">4.12.1</a></li>
+<li><a href="#4122">4.12.2</a></li>
+<li><a href="#4123">4.12.3</a></li>
+<li><a href="#4124">4.12.4</a></li>
+<li><a href="#4125">4.12.5</a></li>
+<li><a href="#4126">4.12.6</a></li>
+</ul>
+</li>
+<li><a href="#413">4.13</a><ul>
+<li><a href="#4131">4.13.1</a></li>
+<li><a href="#4132">4.13.2</a></li>
+<li><a href="#4133">4.13.3</a><ul>
+<li><a href="#問題-56">問題</a></li>
+</ul>
+</li>
+<li><a href="#4134">4.13.4</a></li>
+<li><a href="#4135">4.13.5</a></li>
+<li><a href="#4136">4.13.6</a></li>
+</ul>
+</li>
+<li><a href="#414">4.14</a><ul>
+<li><a href="#4141">4.14.1</a></li>
+<li><a href="#4142">4.14.2</a></li>
+<li><a href="#4143">4.14.3</a></li>
+<li><a href="#4144-未回答">4.14.4 (未回答)</a></li>
+<li><a href="#4145-未回答">4.14.5 (未回答)</a></li>
+<li><a href="#4146-未回答">4.14.6 (未回答)</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="41">4.1</span></h2><p>次の命令を考える．</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">命令: AND Rd,Rs,Rt</span><br><span class="line">解釈: Reg[Rd] &#x3D; Reg[Rs] AND Reg[Rt]</span><br></pre></td></tr></table></figure>
+
+<h3><span id="411">4.1.1</span></h3><h5><span id="問題">問題</span></h5><p>図4.2において，上の命令に関して生成される制御信号の値を示せ．</p>
+<h5><span id="解答">解答</span></h5><ul>
+<li>RegWrite = 1</li>
+<li>ALU操作 = 0000</li>
+<li>ゼロ判定 = 0</li>
+<li>MemWrite = 0</li>
+<li>MemRead = 0</li>
+<li>分岐 = 0</li>
+</ul>
+<h5><span id="解説">解説</span></h5><ul>
+<li>デスティネーションレジスタへの下記戻しがあるので、RegWriteは1。</li>
+<li>ALU操作の4ビット信号は、4.4節の表参照。ANDは <code>0000</code> 。</li>
+</ul>
+<h3><span id="412">4.1.2</span></h3><h5><span id="問題">問題</span></h5><p>この命令に関して，どのリソース（ブロック）が有用な機能を果たすか．</p>
+<h5><span id="解答">解答</span></h5><ul>
+<li>PC</li>
+<li>命令メモリ</li>
+<li>左の加算ユニット</li>
+<li>レジスタ</li>
+<li>ALU</li>
+</ul>
+<h5><span id="解説">解説</span></h5><p>それぞれ以下の役割。</p>
+<ul>
+<li>PC<ul>
+<li>AND命令が格納されている命令メモリ上のアドレスを指す。</li>
+</ul>
+</li>
+<li>命令メモリ<ul>
+<li>AND命令を格納している。</li>
+</ul>
+</li>
+<li>左の加算ユニット<ul>
+<li>AND命令の次の命令のアドレスを計算。</li>
+</ul>
+</li>
+<li>レジスタ<ul>
+<li>ソースレジスタ, ターゲットレジスタから値を読み出し、デスティネーションレジスタに値を書き戻す。</li>
+</ul>
+</li>
+<li>ALU<ul>
+<li>AND演算を実行。</li>
+</ul>
+</li>
+</ul>
+<h3><span id="413">4.1.3</span></h3><h5><span id="問題">問題</span></h5><p>結果を出力するが，その出力がこの命令に使用されないのはどのリソース（ブロック）か．この命令に関しては結果を出力しないリソースはどれか．</p>
+<h5><span id="解答">解答</span></h5><ul>
+<li>結果を出力するが，その出力がこの命令に使用されない:<ul>
+<li>右の加算ユニット</li>
+<li>データメモリ</li>
+</ul>
+</li>
+<li>結果を出力しない:<ul>
+<li>なし</li>
+</ul>
+</li>
+</ul>
+<h5><span id="解説">解説</span></h5><p>「出力がない」ユニットはない。通常のデジタル回路において、各ユニットの出力は、出力端子の電圧の高低を2値で区別したものの集合であるので、出力端子の電圧が0であっても、それは「出力がない」のではなく「低電圧側の出力（通常は0）」と見なされる。<br>「出力を使わない」ユニットはある。使わないためには、マルチプレクサと制御信号を使う。</p>
+<ul>
+<li>分岐の制御信号もゼロ判定の制御信号も0になるので、マルチプレクサによって右の加算ユニットの出力は選ばれない。</li>
+<li>データメモリは、MemRead制御信号が0であれば、マルチプレクサによって出力が無視される。</li>
+</ul>
+<h2><span id="42">4.2</span></h2><p>図4.2のMIPSの基本的な単一クロック・サイクル方式のプロセッサでは，一部の命令しか実装されていていない．既存の命令セット・アーキテクチャ（ISA）に新しい命令を追加したい．しかし，そうするかどうかは，必要コストと，それによって生じるプロセッサのデータパスと制御の複雑性によって決まる．次の3問では，次の命令を取り上げる．</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">命令: LWI Rt,Rd(Rs)</span><br><span class="line">解釈: Reg[Rt] &#x3D; Mem[Reg[Rd]+Reg[Rs]]</span><br></pre></td></tr></table></figure>
+
+<p><strong>図4.2に基づいて解答する。</strong></p>
+<h3><span id="421">4.2.1</span></h3><h5><span id="問題">問題</span></h5><p>この命令のために使用できる既存のブロックがあるならば，どれか．</p>
+<h5><span id="解答">解答</span></h5><ul>
+<li>PC</li>
+<li>命令メモリ</li>
+<li>左の加算器</li>
+<li>レジスタ</li>
+<li>ALU</li>
+<li>データメモリ</li>
+</ul>
+<h5><span id="解説">解説</span></h5><p>それぞれ以下の用途。</p>
+<ul>
+<li>PC<ul>
+<li>LWI命令が格納されている命令メモリ上のアドレスを指す。</li>
+</ul>
+</li>
+<li>命令メモリ<ul>
+<li>LWI命令を格納している。</li>
+</ul>
+</li>
+<li>左の加算ユニット<ul>
+<li>LWI命令の次の命令のアドレスを計算。</li>
+</ul>
+</li>
+<li>レジスタ<ul>
+<li>ソースレジスタ, ターゲットレジスタから値を読み出し、デスティネーションレジスタに値を書き戻す。</li>
+</ul>
+</li>
+<li>ALU<ul>
+<li>ソースレジスタとデスティネーションレジスタの値の和を取り、それをデータメモリのアドレス値として入力。</li>
+</ul>
+</li>
+<li>データメモリ<ul>
+<li>ALUからアドレス値を入力され、そのアドレスの指す語を出力。</li>
+</ul>
+</li>
+</ul>
+<h3><span id="422">4.2.2</span></h3><h5><span id="問題">問題</span></h5><p>この命令のために必要となる新しいブロックがあるならば，どれか．</p>
+<h5><span id="解答">解答</span></h5><p>なし。</p>
+<h5><span id="解説">解説</span></h5><p>4.2.3で見るように、既存のブロックを制御すれば十分。</p>
+<h3><span id="423">4.2.3</span></h3><h5><span id="問題">問題</span></h5><p>この命令を実装するために，制御ユニットから必要となる新しい信号があるならば，どのようなものか．</p>
+<h5><span id="解答">解答</span></h5><p>なし。</p>
+<h5><span id="解説">解説</span></h5><p>以下のような制御で実装可能。</p>
+<ul>
+<li>LWI命令に対応する信号を、命令メモリから制御に入力。</li>
+<li>制御は、以下のように制御信号を出力。<ul>
+<li>RegWrite = 1</li>
+<li>ALU操作 = 0010 (加算機能)</li>
+<li>ゼロ判定 = 0</li>
+<li>MemWrite = 0</li>
+<li>MemRead = 1</li>
+<li>分岐 = 0</li>
+</ul>
+</li>
+<li>命令のオペランドがレジスタユニットに入力され、ソースレジスタ・デスティネーションレジスタ・ターゲットレジスタの3つが選択される。</li>
+<li>レジスタユニットから、ソースレジスタとデスティネーションレジスタの値が出力される。制御信号とマルチプレクサにより、ALUへの入力として、（命令の即値オペランドではなく）レジスタの値が選ばれる。</li>
+<li>ALUでソースレジスタとデスティネーションレジスタの値の和が計算され、出力される。</li>
+<li>データメモリにALUの計算結果がアドレスとして入力される。制御信号MemReadが立っているので、そのメモリの値が読まれ、デーメモリから出力される。</li>
+<li>レジスタユニットへのデータ入力は、制御信号とマルチプレクサにより、（ALUからの出力ではなく）データメモリからの出力が選ばれる。結果としてターゲットレジスタにデータメモリの出力が書き戻される。</li>
+</ul>
+<h2><span id="43">4.3</span></h2><p>プロセッサのデータパスの改善を設計者が検討するとき，意思決定の鍵となるのは通常，コストと性能のトレードオフである．次の3問では，図4.2のデータパスの改善を検討する．このデータパスの命令メモリ，加算，マルチプレクサ，ALU，レジスタ，データ・メモリ，制御ブロックのレイテンシはそれぞれ，400ps，100ps，30ps，120ps，200ps，350ps，100psとする．また，コストはそれぞれ，1000，30，10，100，200，2000，500とする．<br>ALUに乗算器を追加することを検討する．乗算器を追加すると，ALUのレイテンシが300ps長くなり，コストが600高くなる．結果として，実行される命令数が5%減る．MUL命令をエミュレートする必要がなくなるからである．</p>
+<h3><span id="431">4.3.1</span></h3><h5><span id="問題">問題</span></h5><p>この改善を行った場合と行わなかった場合の，クロック・サイクル時間はそれぞれいくつか．</p>
+<h5><span id="解答">解答</span></h5><p>乗算器なし: 1430 ps<br>乗算器追加: 1730 ps</p>
+<h5><span id="解説">解説</span></h5><ul>
+<li><p>クロックサイクル時間は、1クロックで生じるデータフローのうち、所要時間が最も大きいクリティカルパスに要する時間である。</p>
+</li>
+<li><p>図4.2をより抽象化しデータフローグラフにしたのが下図（配線が下手すぎる😡）</p>
+  <img src="/img/2020/01-19-4.3.1.svg" alt="図4.2データフロー分析" width="auto" height="auto">
+</li>
+<li><p>赤色のエッジがクリティカルパスである。レイテンシの総和は（最後のレジスタ書き戻しにも200psかかると考えて）、</p>
+<ul>
+<li>乗算器なし: \(400 + 100 + 200 + 30 + \textcolor{red}{120} + 350 + 30 + 200 = 1430 \rm{[ps]}\)</li>
+<li>乗算器追加: \(400 + 100 + 200 + 30 + \textcolor{red}{420} + 350 + 30 + 200 = 1730 \rm{[ps]}\)</li>
+</ul>
+</li>
+</ul>
+<h3><span id="432">4.3.2</span></h3><h5><span id="問題">問題</span></h5><p>この改善を行うと，どれだけの速度向上が達成されるか．</p>
+<h5><span id="解答">解答</span></h5><p>\(\frac{1430}{0.95 \times 1730} = 0.87 倍\)</p>
+<h5><span id="解説">解説</span></h5><p>速度は低下している。</p>
+<h3><span id="433">4.3.3</span></h3><h5><span id="問題">問題</span></h5><p>この改善を行った場合と行わなかった場合の，コスト性能比を比較せよ．</p>
+<h5><span id="解答">解答</span></h5><p>0.75</p>
+<h5><span id="解説">解説</span></h5><ul>
+<li>改善前後の性能比:<ul>
+<li>4.3.2 の通り、0.87倍</li>
+</ul>
+</li>
+<li>改善前後のコスト比:<ul>
+<li>コストは、4.3.1で示した図の各ノードのコストの総和（クリティカルパスは無関係）である。</li>
+<li>改善前: \(30 + 30 + 10 + 1000 + 200 + 10 + \textcolor{red}{100} + 500 + 10 + 2000 = 3890\)</li>
+<li>改善後: \(30 + 30 + 10 + 1000 + 200 + 10 + \textcolor{red}{700} + 500 + 10 + 2000 = 4490\)</li>
+<li>よってコスト比は \(\frac{4490}{3890} = 1.15\)</li>
+</ul>
+</li>
+<li>以上より、コスト性能比は \(\frac{0.87}{1.15} = 0.75\) 。悪化している。</li>
+</ul>
+<h2><span id="44">4.4</span></h2><p>次の3問では，プロセッサのデータパスを実装するために必要な論理ブロックが，下の表に示すとおりであるとする．</p>
+<table>
+<thead>
+<tr>
+<th>命令メモリ</th>
+<th>加算</th>
+<th>マルチプレクサ</th>
+<th>ALU</th>
+<th>レジスタ</th>
+<th>データメモリ</th>
+<th>符号拡張</th>
+<th>2ビット左にシフト</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>200ps</td>
+<td>70ps</td>
+<td>20ps</td>
+<td>90ps</td>
+<td>90ps</td>
+<td>250ps</td>
+<td>15ps</td>
+<td>10ps</td>
+</tr>
+</tbody></table>
+<h3><span id="441">4.4.1</span></h3><h5><span id="問題">問題</span></h5><p>プロセッサに求められていることが命令を連続的にフェッチすることだけであるとしたら（図4.6），サイクル時間はどうなるか．</p>
+<h5><span id="解答">解答</span></h5><p>200ps</p>
+<h5><span id="解説">解説</span></h5><p>問題4.4は、図4.11を念頭に答えていく。</p>
+<p>命令フェッチのみをしていくなら、1サイクルの動きは以下の通り。</p>
+<ol>
+<li>PCの値を読み出して、その値（アドレス）が指す命令語を命令メモリから読み取る。</li>
+<li>PCの値を読み出して、その値（アドレス）に4を加算し、結果をPCに書き戻す。</li>
+</ol>
+<p>これらは、1クロックの中で同時並行で行える。したがってサイクル時間は長い方に律速され、前者の 200ps となる。</p>
+<h3><span id="442">4.4.2</span></h3><h5><span id="問題">問題</span></h5><p>図4.11と似ているが，無条件PC相対分岐だけを実行するプロセッサについて考える．このデータパスのサイクル時間はどうなるか．</p>
+<h5><span id="解答">解答</span></h5><p>315ps</p>
+<h5><span id="解説">解説</span></h5><p>1サイクルの動きは以下の通り。</p>
+<ol>
+<li>PCの値を読み出して、その値（アドレス）が指す命令語を命令メモリから読み取る。</li>
+<li>命令語の下位16ビットを取り、符号拡張する。</li>
+<li>符号拡張した結果を、2ビット左シフトする（命令アドレスは必ず下位2ビットが0になるようにアラインされているので）。</li>
+<li>PCの値を読み出して、その値（アドレス）に4を加算する。</li>
+<li><ol start="4">
+<li>の出力と 3. の出力を加算する。</li>
+</ol>
+</li>
+<li>マルチプレクサを通して、（4. の出力ではなく）5. の出力を採択し、PCに書き戻す。</li>
+</ol>
+<p>データフローとして、 1 -&gt; 2 -&gt; 3 -&gt; 5 -&gt; 6 という依存がある（5は4にも依存する。4は1と同時に計算でき、1~3よりはずっと速い）。<br>これらが1サイクルになるので、サイクル時間は \(200 + 15 + 10 + 70 + 20 = 315 \rm{ps}\)</p>
+<h3><span id="443">4.4.3</span></h3><h5><span id="問題">問題</span></h5><p>問題4.4.2と同じ問いに答えよ．ただし，今度は，条件付きPC相対分岐だけをサポートするものとする．</p>
+<h5><span id="解答">解答</span></h5><p>420ps</p>
+<h5><span id="解説">解説</span></h5><p>1サイクルの動きは以下の通り。</p>
+<ul>
+<li><p>命令フェッチ</p>
+<ol>
+<li>PCの値を読み出して、その値（アドレス）が指す命令語を命令メモリから読み取る。</li>
+</ol>
+</li>
+<li><p>条件判定</p>
+<ol start="2">
+<li>命令語の上位25~16ビットから、読み出しレジスタ1, 2を特定し、値を読み出す。</li>
+<li>ALUへの入力値として、マルチプレクサを通して、（符号拡張した命令後の下位16ビットではなく）読み出しレジスタ2の値を採択する。</li>
+<li>ALUで読み出しレジスタ1, 2の値の一致または不一致判定。判定結果は、右の加算器の先のマルチプレクサの制御に使われる。</li>
+</ol>
+</li>
+<li><p>条件成立時の分岐先アドレス計算</p>
+<ol start="5">
+<li>命令語の下位16ビットを取り、符号拡張する。</li>
+<li>符号拡張した結果を、2ビット左シフトする（命令アドレスは必ず下位2ビットが0になるようにアラインされているので）。</li>
+<li>PCの値を読み出して、その値（アドレス）に4を加算する。</li>
+<li><ol start="7">
+<li>の出力と 6. の出力を加算する。</li>
+</ol>
+</li>
+<li>マルチプレクサを通して、条件判定結果に応じ、8. の出力または 7. の出力を採択し、PCに書き戻す。</li>
+</ol>
+</li>
+</ul>
+<p>クリティカルパスのサイクル時間は、 1 -&gt; 2 -&gt; 3 -&gt; 4 -&gt; 9 で、サイクル時間は \(200 + 90 + 20 + 90 + 20 = 420 \rm{ps}\)。<br>（1 -&gt; 5 -&gt; 6 -&gt; 8 -&gt; 9 も比較的長いが、これは 4.4.2 で求めたとおり、315ps なのでクリティカルパスではない。）</p>
+<h3><span id="444">4.4.4</span></h3><h5><span id="問題">問題</span></h5><p>次の3問では，データパス中の要素である「2ビット左にシフト」を取り上げる．</p>
+<p>このリソースを必要とする命令は何か．</p>
+<h5><span id="解答">解答</span></h5><ul>
+<li>無条件PC相対分岐</li>
+<li>条件付きPC相対分岐</li>
+</ul>
+<h5><span id="解説">解説</span></h5><p>これらの命令においては、命令アドレス（バイトアドレシング）を直接命令語に含む、それを2ビット右シフトした値を命令語に含む。命令長は32ビットしかないので2ビット節約するため。命令アドレスは必ず4の倍数のバイトに配置されるためこれが可能。</p>
+<h3><span id="445">4.4.5</span></h3><h5><span id="問題">問題</span></h5><p>クリティカル・パス上にこのリソースがある命令があるとすれば，どのような種類のものか．</p>
+<h5><span id="解答">解答</span></h5><p>無条件PC相対分岐命令</p>
+<h5><span id="解説">解説</span></h5><p>4.4.3で見たように、条件付きPC相対分岐においては、条件判断のほうがレイテンシが長くなる。<br>これはひろく一般に言えることで、条件判断にはレジスタファイルとALUが介在するが、相対アドレスを絶対アドレスにする計算には、符号拡張と左シフトしか介在せず、前者のほうがその複雑さからレイテンシが大きい場合が大半である。</p>
+<h3><span id="446">4.4.6</span></h3><h5><span id="問題">問題</span></h5><p>beq命令とadd命令だけをサポートしているとした場合，このリソースのレイテンシを変更すると，プロセッサのサイクル時間にどのような影響が出るかを論ぜよ．他のリソースのレイテンシは変わらないものとする．</p>
+<h5><span id="解答">解答</span></h5><p>基本的にはサイクル時間は変わらない。ただし、「2ビット左にシフト」のレイテンシを極端に大きくし、beq命令において条件判断よりも、相対アドレスを絶対アドレスにする計算のほうが時間がかかるようになった場合に限り、プロセッサのサイクル時間は伸びる。</p>
+<h5><span id="解説">解説</span></h5><p>特になし。</p>
+<h2><span id="45">4.5</span></h2><p>この演習問題では，パイプライン・ストールが発生せず，実行される命令の内訳は下の表に示すとおりであるとする．</p>
+<table>
+<thead>
+<tr>
+<th>add</th>
+<th>addi</th>
+<th>not</th>
+<th>beq</th>
+<th>lw</th>
+<th>sw</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>20%</td>
+<td>20%</td>
+<td>0%</td>
+<td>25%</td>
+<td>25%</td>
+<td>10%</td>
+</tr>
+</tbody></table>
+<h3><span id="451">4.5.1</span></h3><h5><span id="問題">問題</span></h5><p>全サイクルのうち，データ・メモリが使用されるのはどれくらいの割合か．</p>
+<h5><span id="解答">解答</span></h5><p>35%</p>
+<h5><span id="解説">解説</span></h5><ul>
+<li>データメモリが使用される命令は、lw, sw。割合は \(25 + 10 = 35%\)</li>
+</ul>
+<h3><span id="452">4.5.2</span></h3><h5><span id="問題">問題</span></h5><p>全サイクルのうち，符号拡張回路への入力が必要なのはどれくらいの割合か．入力が必要ないサイクルにおいて，その回路は何を行っているか．</p>
+<h5><span id="解答">解答</span></h5><p>80%</p>
+<p>入力が必要なくとも、自動的に命令語の下位16ビットが入力され、符号拡張した32ビットを出力している。<br>ただし、その出力はマルチプレクサで落とされる。</p>
+<h5><span id="解説">解説</span></h5><ul>
+<li>符号拡張回路が使用される命令は下記:<ul>
+<li>addi: 加算の2項目の即値16ビットを32ビットに符号拡張</li>
+<li>beq: 条件成立時の分岐先相対アドレス16ビットを32ビットに符号拡張</li>
+<li>lw: データメモリのオフセットの16ビットを32ビットに符号拡張</li>
+<li>sw: データメモリのオフセットの16ビットを32ビットに符号拡張</li>
+</ul>
+</li>
+<li>割合は \(20 + 25 + 25 + 10 = 80%\)</li>
+</ul>
+<h2><span id="46">4.6</span></h2><p>シリコン・チップを製造する際，材料（たとえば，シリコン）に欠陥があったり製造上のエラーがあったりすると，欠陥のある回路ができてしまう．非常に一般的なものは，ある配線が別の配線の信号に影響を及ぼす欠陥である．これをクロストーク欠陥と呼ぶ．クロストーク欠陥の特殊な例として，一定の論理値を有する配線（たとえば，電力供給線）に信号が接続されてしまうものがある．この場合，0謬着エラーまたは1謬着エラーが発生し，影響を受けた信号の論理値はそれぞれつねに0または1となる．以下の問題では，図4.24中のレジスタ・ファイル上のレジスタ書き込み入力のビット0を取り上げる．</p>
+<p><strong>膠着エラーが起き得るのが、レジスタファイルへ書き戻しされる値なのか、書き込みを受けるレジスタ（R命令ならrd, I命令ならrt）の指定子なのか問題文から判然としないが、後者であると仮定して問題を解く。</strong></p>
+<h3><span id="461">4.6.1</span></h3><h5><span id="問題">問題</span></h5><p>プロセッサをテストしているとする．PC，レジスタ，データ・メモリ，命令メモリに何らかの値を設定し（値は自分で選択可能），単一の命令を実行し，その後でPC，メモリ，レジスタを読む．読んだ値をチェックして，何らかのエラーがあるかどうかを判定する．信号に0謬着エラーまたは1謬着エラーが発生しているかどうかを判定できるような，テスト（PC，メモリ，レジスタの値）を設計できるか．</p>
+<h5><span id="解答">解答</span></h5><p>設計できる。</p>
+<p>まず、レジスタファイルの各レジスタの値を0クリアする。PCを適当なアドレス値に設定し、そのアドレスの命令メモリに <code>addi $t0, $zero, 1</code> の命令を格納。この命令を実行した後、 $t0 ではなく $t1 の値が1になっていれば、1膠着エラーが起きている。<br>同様にして、 <code>addi $t1, $zero, 1</code> 命令実行後に、$t0 の値が1になっていれば、0膠着エラーが起きている。</p>
+<h5><span id="解説">解説</span></h5><p>特になし</p>
+<h3><span id="462">4.6.2</span></h3><h5><span id="問題">問題</span></h5><p>問題4.6.1と同じ問いに答えよ．ただし今度は，1謬着エラーをチェックするものとする．0謬着エラーと1謬着エラーの両方に単一のテストを適用できるか．できる場合は，その方法を説明せよ．できない場合は，その理由を説明せよ．</p>
+<p><strong>4.6.1で既に1膠着エラーについても問われていて、その実現方法も解答したので、前半は無視する。</strong></p>
+<h5><span id="解答">解答</span></h5><p>0謬着エラーと1謬着エラーの両方に単一のテストを適用することはできない。<br>0膠着エラーを見分けるには「1をセットしたのに0になった」ことを確かめる必要があり、1膠着エラーを見分けるには「0をセットしたのに0になった」ことを確かめる必要がある。単一のテストで（同一ビットに）「1をセットしたし、0をセットした」という前提を両方満たすようなことは不可能であるため。</p>
+<h5><span id="解説">解説</span></h5><p>特になし。</p>
+<h3><span id="463">4.6.3</span></h3><h5><span id="問題">問題</span></h5><p>この信号に関してプロセッサに1謬着エラーがあるとわかっている場合でも，そのプロセッサを使用することは可能か．使用可能にするためには，通常のMIPSプロセッサ上で実行されるあらゆるプログラムを，このプロセッサで動作するように変換できなければならない．プログラムを長くしたり追加のデータを格納しても問題ないように，命令メモリにもデータ・メモリにも十分な空きスペースがあると想定してよい．ヒント：このエラーによって「妨げられる」すべての命令を，同じ機能を果たす一連の「正常に実行される」命令で置き換えられるならば，プロセッサは使用可能である．</p>
+<h5><span id="解答">解答</span></h5><p>使用可能。</p>
+<p>1膠着エラーがあった場合、R命令のrdとI命令のrtに、偶数のレジスタ指定子が使えなくなるが、それでも任意のプログラムが実現可能な（偶数レジスタ指定子の代替ができる）ことを示す。</p>
+<p>偶数のレジスタ指定子で指定されるレジスタと、その代替方法を下記に示す。</p>
+<table>
+<thead>
+<tr>
+<th>レジスタ</th>
+<th>代替方法</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>$zero</td>
+<td>必要なタイミングで <code>sub $t1, $t1, $t1</code> など実行し、値が0のレジスタを得れば良い。</td>
+</tr>
+<tr>
+<td>$v0</td>
+<td>$v1 を代わりに使えば良い。</td>
+</tr>
+<tr>
+<td>$a0, $a2</td>
+<td>関数の引数が3個以上になるときは、関数コールの直前にcallerのスタックに引数をpushし、関数のcalleeでスタックから引数をpopすれば良い。</td>
+</tr>
+<tr>
+<td>$t0, $t2, …</td>
+<td>$t1, $t3, … のみ使えば良い。</td>
+</tr>
+<tr>
+<td>$s0, $s2, …</td>
+<td>$s1, $s3, … のみ使えば良い。</td>
+</tr>
+<tr>
+<td>$k0</td>
+<td>$k1 を代わりに使えば良い。</td>
+</tr>
+<tr>
+<td>$gp</td>
+<td><code>0x10008000</code> の固定値を $t9 など決まったレジスタに格納しておき、 $gp の代わりに使えば良い。</td>
+</tr>
+<tr>
+<td>$fp</td>
+<td>“$sp + 関数フレームで伸ばしたスタックサイズ” の計算値を代わりに使えば良い。</td>
+</tr>
+</tbody></table>
+<h5><span id="解説">解説</span></h5><p>特になし。</p>
+<h3><span id="464">4.6.4</span></h3><h5><span id="問題">問題</span></h5><p>問題4.6.1と同じ問いに答えよ．ただし今度は，制御信号RegDstが0である場合には制御信号MemReadが0になるエラーが発生し，それ以外の場合にはエラーが発生しないかどうかをテストする．</p>
+<p><strong>「それ以外の場合」を広く捉えるとプロセッサ全体の膨大なテストが必要になるので、正常系テストは「RegDstが1である場合はMemReadの膠着エラーが発生しないこと」のみを解答すれば良いものとみなす。</strong></p>
+<h5><span id="解答">解答</span></h5><ul>
+<li><p>制御信号RegDstが0である場合には制御信号MemReadが0になるエラーが発生することのテスト:</p>
+<ul>
+<li><p>RegDstが0なことが保証される（Don’t care ではない）のは、 <code>lw</code> 命令の場合。 <code>lw</code> 命令ではMemReadが1になる。したがって、 <code>lw</code> を使った以下のテストが設計できる。</p>
+<ol>
+<li><p>各種のレジスタを0クリアしておく。</p>
+</li>
+<li><p>命令メモリとPCを操作して、以下の命令列を実行する。</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">addi $t0, $zero, 42</span><br><span class="line">sw $t0, 0($gp)</span><br><span class="line">lw $t1, 0($gp)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>$t1 の値が42ではなく0であれば、MemReadが0膠着していることが確かめられる。</p>
+</li>
+</ol>
+</li>
+</ul>
+</li>
+<li><p>RegDstが1である場合はMemReadの膠着エラーが発生しないことのテスト:</p>
+<ul>
+<li><p>RegDstが1なことが保証されるのは、R命令の場合。R命令ではRegReadは0である。したがって、エラーの種類は「RegDstが1なのにMemReadが1に膠着」のみ。</p>
+</li>
+<li><p>しかしR命令では、MemtoRegが0にセットされて、メモリから読み取った値はマルチプレクサで捨てられる。</p>
+</li>
+<li><p>テストのために、R命令であってもわざとMemtoRegを1に膠着させ、R命令のデスティネーションレジスタに常にデータメモリからの出力値が下記戻される状況を作った上で、以下のテストを設計できる。</p>
+<ol>
+<li><p>各種のレジスタを0クリアしておく。</p>
+</li>
+<li><p>データメモリの0番地を <code>0x1</code> に値セットしておく。</p>
+</li>
+<li><p>命令メモリとPCを操作して、以下の命令列を実行する。</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">add $t0, $zero, $zero</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>$t0 の値が1ではなく0であれば、MemReadが1膠着していないことが確かめられる。</p>
+</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+<h5><span id="解説">解説</span></h5><p>特になし。</p>
+<h3><span id="465">4.6.5</span></h3><h5><span id="問題">問題</span></h5><p>問題4.6.4と同じ問いに答えよ．ただし今度は，制御信号RegDstが0である場合には制御信号Jumpが0になるエラーが発生し，それ以外の場合にはエラーが発生しないかどうかをテストする．</p>
+<p><strong>「それ以外の場合」を広く捉えるとプロセッサ全体の膨大なテストが必要になるので、正常系テストは「RegDstが1である場合はJumpの膠着エラーが発生しないこと」のみを解答すれば良いものとみなす。</strong></p>
+<h5><span id="解答">解答</span></h5><ul>
+<li><p>制御信号RegDstが0である場合には制御信号Jumpが0になるエラーが発生することのテスト:</p>
+<ul>
+<li><p>Jump信号の硬直エラー有無を確かめたいので、I形式の条件付き分岐命令またはJ形式の無条件分岐命令を使う必要がある。しかし、そのいずれもRegDstはDon’t careなので、テストのためにわざとRegDstを0に膠着させる必要がある。</p>
+</li>
+<li><p>その上で、下記のテストが設計できる。</p>
+<ol>
+<li><p>各種のレジスタを0クリアしておく。</p>
+</li>
+<li><p>命令メモリとPCを操作して、以下の命令列を実行する。</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">j 0x00400000</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>PCの値が <code>0x00400000</code> 以外であれば、Jumpが0膠着していることが確かめられる。</p>
+</li>
+</ol>
+</li>
+</ul>
+</li>
+<li><p>RegDstが1である場合はJumpの膠着エラーが発生しないことのテスト:</p>
+<ul>
+<li><p>同様に、テストのためにわざとRegDstを1に膠着させる必要がある。</p>
+</li>
+<li><p>その上で、下記のテストが設計できる。</p>
+<ol>
+<li><p>各種のレジスタを0クリアしておく。</p>
+</li>
+<li><p>命令メモリとPCを操作して、以下の命令列を実行する。</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">j 0x00400000</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>PCの値が <code>0x00400000</code> であれば、Jumpが1膠着していないことが確かめられる。</p>
+</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+<h5><span id="解説">解説</span></h5><p>特になし</p>
+<h2><span id="47">4.7</span></h2><p>この演習問題では，単一クロック・サイクル方式のデータパスにおいて，命令がどのように実行されるかを検討する．この問題において，あるクロック・サイクルにプロセッサがフェッチする命令を下に示す．</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">10101100011000100000000000010100</span><br></pre></td></tr></table></figure>
+
+<p>上記の命令語がフェッチされたサイクルの開始時に，データ・メモリはすべてゼロであり，プロセッサのレジスタの値は下の表に示すとおりになっているものとする．</p>
+<table>
+<thead>
+<tr>
+<th>r0</th>
+<th>r1</th>
+<th>r2</th>
+<th>r3</th>
+<th>r4</th>
+<th>r5</th>
+<th>r6</th>
+<th>r8</th>
+<th>r12</th>
+<th>r31</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>-1</td>
+<td>2</td>
+<td>-3</td>
+<td>-4</td>
+<td>10</td>
+<td>6</td>
+<td>8</td>
+<td>2</td>
+<td>-16</td>
+</tr>
+</tbody></table>
+<h3><span id="471">4.7.1</span></h3><h5><span id="問題">問題</span></h5><p>この命令語に関して，符号拡張してジャンプするための「2ビット左シフト」ユニット（図4.24の左上）の出力を示せ．</p>
+<h5><span id="解答">解答</span></h5><p><code>00000000 00000000 00000000 01010000</code></p>
+<h5><span id="解説">解説</span></h5><p>図4.24 をもとに説明をする。</p>
+<ul>
+<li>命令フェッチをしてから「2ビット左シフト」に至るまでのデータフローで、制御は発生しない。</li>
+<li>命令後の15-0ビット <code>00000000 00010100</code> が取り出され、符号拡張ユニットに入力される。</li>
+<li>符号拡張の結果は <code>00000000 00000000 00000000 00010100</code> 。</li>
+<li>これを2ビット左シフトして、 <code>00000000 00000000 00000000 01010000</code> 。</li>
+</ul>
+<h3><span id="472">4.7.2</span></h3><h5><span id="問題">問題</span></h5><p>この命令語に関して，ALU制御ユニットへの入力の値を示せ．</p>
+<h5><span id="解答">解答</span></h5><p><code>101011</code></p>
+<h5><span id="解説">解説</span></h5><ul>
+<li>ALU制御ユニットには、31-26ビット目の <code>101011</code> が入力される。</li>
+</ul>
+<h3><span id="473">4.7.3</span></h3><h5><span id="問題">問題</span></h5><p>この命令を実行した後の，新しいPCアドレスを示せ．その値を決定する経路を強調して示せ．</p>
+<h5><span id="解答">解答</span></h5><p>PC + 4</p>
+<p>値を決定する経路は、数の緑色の線で強調した。PCアドレス以外にも、主要なデータフローを図中に示している。</p>
+<img src="/img/2020/01-19-4.7.3.png" alt="図4.24からの引用に、問題4.7.3における主要なデータフローの情報を加えた図" width="auto" height="auto">
+
+<h5><span id="解説">解説</span></h5><p>opcodeを見て <code>sw</code> と “解釈” しないでも、機械的に <code>sw</code> の満たすべきデータフローになっていることに注目。<br>緑色になっていない配線は、将来的にどこかのマルチプレクサ、またはRegWrite=0によって落とされるデータフローである。</p>
+<h3><span id="474">4.7.4</span></h3><h5><span id="問題">問題</span></h5><p>上記の命令を実行したときの，各マルチプレクサの出力データと，レジスタの値をそれぞれ示せ．</p>
+<h5><span id="解答">解答</span></h5><ul>
+<li>上部左のマルチプレクサ出力: PC + 4</li>
+<li>上部右のマルチプレクサ出力: PC + 4</li>
+<li>下部左のマルチプレクサ出力: 不明（RegDstがDon’t careであるため）</li>
+<li>下部中央のマルチプレクサ出力: <code>00000000 00000000 00000000 00010100</code></li>
+<li>下部右のマルチプレクサ出力: 不明（RegDstがDon’t careであるため） (MemtoRegがDon’t careであるため)</li>
+</ul>
+<p>レジスタの値の書き換えは発生しないので、元のまま。</p>
+<h5><span id="解説">解説</span></h5><p>4.7.3の図解通り。</p>
+<h3><span id="475">4.7.5</span></h3><h5><span id="問題">問題</span></h5><p>ALUおよび2つの加算ユニットの入力データ値を示せ．</p>
+<h5><span id="解答">解答</span></h5><ul>
+<li>ALU: レジスタ <code>$3</code> の値 <code>-3</code> と、即値 <code>00000000 00000000 00000000 00010100</code></li>
+<li>上部左の加算ユニット: PCの値と、即値4</li>
+<li>上部右の加算ユニット: PC+4と、 <code>00000000 00000000 00000000 01010000</code></li>
+</ul>
+<h5><span id="解説">解説</span></h5><p>4.7.3の図解通り。</p>
+<h3><span id="476">4.7.6</span></h3><h5><span id="問題">問題</span></h5><p>「レジスタ」ユニットのすべての入力値を示せ．</p>
+<h5><span id="解答">解答</span></h5><ul>
+<li>読み出しレジスタ1: <code>00011</code></li>
+<li>読み出しレジスタ2: <code>00010</code></li>
+<li>書き込みレジスタ: 不明 (RegDstがDon’t careであるため)</li>
+<li>書き込みデータ: 不明 (MemtoRegがDon’t careであるため)</li>
+</ul>
+<h5><span id="解説">解説</span></h5><p>4.7.3の図解通り。</p>
+<h2><span id="48">4.8</span></h2><p>この演習問題では，パイプラインがプロセッサのクロック・サイクル時間にどのように影響するかを検討する．次の3問では，データパスの各ステージのレイテンシは，下の表に示すとおりであると想定する．</p>
+<table>
+<thead>
+<tr>
+<th>IF</th>
+<th>ID</th>
+<th>EX</th>
+<th>MEM</th>
+<th>WB</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>250ps</td>
+<td>350ps</td>
+<td>150ps</td>
+<td>300ps</td>
+<td>200ps</td>
+</tr>
+</tbody></table>
+<p>また，プロセッサによって実行される命令の内訳が，下の表に示すとおりであると想定する．</p>
+<table>
+<thead>
+<tr>
+<th>ALU</th>
+<th>beq</th>
+<th>lw</th>
+<th>sw</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>45%</td>
+<td>20%</td>
+<td>20%</td>
+<td>15%</td>
+</tr>
+</tbody></table>
+<h3><span id="481">4.8.1</span></h3><h5><span id="問題">問題</span></h5><p>パイプライン方式のプロセッサとパイプライン方式でないプロセッサの，クロック・サイクル時間をそれぞれ示せ．</p>
+<h5><span id="解答">解答</span></h5><ul>
+<li>パイプライン方式: 350ps</li>
+<li>パイプライン方式でない: 1250ps</li>
+</ul>
+<h5><span id="解説">解説</span></h5><p>パイプライン方式でなければ、IF~WBの全ステージを1クロックで処理するので、クロックサイクル時間は全ステージのレイテンシの総和になる。<br>パイプライン方式では、1ステージを1クロックで処理するが、同一クロックで複数種類のステージが実行される都合上、最もレイテンシの大きいステージが律速となりクロックサイクル時間が決まる。</p>
+<h3><span id="482">4.8.2</span></h3><h5><span id="問題">問題</span></h5><p>パイプライン方式のプロセッサおよびパイプライン方式でないプロセッサにおける，lw命令の合計レイテンシをそれぞれ示せ．</p>
+<h5><span id="解答">解答</span></h5><ul>
+<li>パイプライン方式: 1750ps</li>
+<li>パイプライン方式でない: 1250ps</li>
+</ul>
+<h5><span id="解説">解説</span></h5><p>パイプライン方式でなければ、4.8.1で算出したクロックサイクル時間がかかる。<br>パイプライン方式では、全5ステージがそれぞれ350psのクロックサイクル時間なので、5ステージ（5クロック）の分時間が命令のレイテンシとしてかかる。</p>
+<h3><span id="483">4.8.3</span></h3><h5><span id="問題">問題</span></h5><p>パイプライン方式のデータパスの1つのステージを2つの新しいステージに分割でき，新しいステージのレイテンシは元のステージの半分になるとする．どのステージを分割するのがよいか．また，ステージ分割後の，プロセッサの新しいクロック・サイクル時間はどうなるか．</p>
+<h5><span id="解答">解答</span></h5><p>IDステージを分割すると良い。分割後は律速のステージはMEMの300psになるので、これが新しいクロックサイクル時間になる。</p>
+<h5><span id="解説">解説</span></h5><p>ロードバランシングの観点から、ボトルネックになっているステージを分割するべき。</p>
+<h3><span id="484">4.8.4</span></h3><h5><span id="問題">問題</span></h5><p>ストールもハザードも発生しないとするならば，データ・メモリの利用率（使用されたサイクルの割合）はどれほどか．</p>
+<h5><span id="解答">解答</span></h5><p>35%</p>
+<h5><span id="解説">解説</span></h5><p>命令数が十分に多く、各クロックで5ステージ分の実行ができていると仮定すると、任意のクロックで全ステージの実行が行われる余地がある。<br>ここで “余地がある” と述べたのは、必ずしもすべての命令でMEM, WBステージを実行するとは限らないため（実行しない場合は単にそのステージで待ちが発生する）。</p>
+<p>データメモリを利用するMEMステージを利用する命令は、本問においては <code>lw</code> と <code>sw</code> 。これらの命令は全体の35%を占める。</p>
+<p>以上より、データメモリの利用率は35%。</p>
+<h3><span id="485">4.8.5</span></h3><h5><span id="問題">問題</span></h5><p>ストールもハザードも発生しないとするならば，レジスタ・ユニットの書き込みレジスタ・ポートの利用率はどれほどか．</p>
+<h5><span id="解答">解答</span></h5><p>65%</p>
+<h5><span id="解説">解説</span></h5><p>4.8.4と同様の論旨。</p>
+<p>レジスタユニットの書き込みレジスタポートを利用する命令は、本文においてはALU, <code>lw</code> であり、全体の65%を占める。</p>
+<h3><span id="486">4.8.6</span></h3><h5><span id="問題">問題</span></h5><p>単一クロック・サイクル型の構成方式の代わりに，マルチサイクル型の構成方式を採用することができる．マルチサイクル方式では，各命令は複数のサイクルをとり，ある命令が他の命令より早く終わることがある．この構成方式では，命令は実際に必要なステージだけを通過する（たとえばストア命令は，WBステージを必要としないので，4サイクルで終了する）．単一クロック・サイクル，マルチサイクル，パイプラインのそれぞれの構成方式のクロック・サイクル時間および実行時間を比較せよ．</p>
+<h5><span id="解答">解答</span></h5><p>実行時間は、与えられた命令の出現頻度のもと、100命令を実行した場合の実行時間とする。</p>
+<ul>
+<li><p>単一クロックサイクル:</p>
+<ul>
+<li>クロックサイクル時間: 1250ps</li>
+<li>実行時間: 125us</li>
+</ul>
+</li>
+<li><p>マルチサイクル:</p>
+<ul>
+<li>クロックサイクル時間: 350ps</li>
+<li>実行時間: 140us</li>
+</ul>
+</li>
+<li><p>パイプライン:</p>
+<ul>
+<li>クロックサイクル時間: 350ps</li>
+<li>実行時間: 35us</li>
+</ul>
+</li>
+</ul>
+<h5><span id="解説">解説</span></h5><p>単一クロックサイクルとパイプラインのクロックサイクル時間は、4.8.1で回答したとおり。</p>
+<p>マルチサイクル方式でのクロックサイクル時間を考える。同時に1命令中の1ステージしか実行しないため、ステージごとの「変動クロックサイクル時間」のような方式を論理的には考えられそうだが、さすがにクロックサイクル時間は一定にしないとハードウェア製造の観点で現実的ではないと考える。とすると、結局パイプライン方式と同様に、最も遅いステージに律速されるので、350psがマルチサイクル方式でのクロックサイクル時間。</p>
+<p>あとは、ALU命令が45回, <code>beq</code> が20回, <code>lw</code> が20回, <code>sw</code> が15回 実行されることから、実行時間は以下のようになる。</p>
+<p>単一クロックサイクル:</p>
+<p>\[<br>1250 \rm{[ps]} \times 100 \rm{命令} = 125,000 \rm{[ps]}<br>\]</p>
+<p>パイプライン（1<del>4個目, 97</del>100個目の命令では命令数が足りずに5並列にならないが、その影響は無視する）:</p>
+<p>\[<br>350 \rm{[ps]} \times 5 \rm{[stages]} \times 100 \rm{命令} \times \frac{1}{5 \rm{並列}}= 35,000 \rm{[ps]}<br>\]</p>
+<p>マルチサイクル:</p>
+<p>\[<br>\begin{eqnarray}<br>  &amp;&amp;  (350 \rm{[ps]} \times 4 \rm{[stages]} \times 45 \rm{命令}) \\<br>  &amp;+&amp; (350 \rm{[ps]} \times 3 \rm{[stages]} \times 20 \rm{命令}) \\<br>  &amp;+&amp; (350 \rm{[ps]} \times 5 \rm{[stages]} \times 20 \rm{命令}) \\<br>  &amp;+&amp; (350 \rm{[ps]} \times 4 \rm{[stages]} \times 15 \rm{命令}) \\<br>  &amp;=&amp; 140,000 \rm{[ps]}<br>\end{eqnarray}<br>\]</p>
+<p>マルチサイクル方式が速くなるための条件は、</p>
+<ul>
+<li>各ステージのレイテンシに差が少なく</li>
+<li>特定のステージをスキップできる命令が多い</li>
+</ul>
+<p>ことと考えられる。</p>
+<h2><span id="49">4.9</span></h2><p>この演習問題では，4.5節で説明した基本的な5ステージのパイプラインにおいて，データの依存関係が実行にどのような影響を及ぼすかを検討する．この問題では，下に示す命令列を取り上げる．</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">or r1,r2,r3</span><br><span class="line">or r2,r1,r4</span><br><span class="line">or r1,r1,r2</span><br></pre></td></tr></table></figure>
+
+<p>また，クロック・サイクル時間が下の表に示すとおりであるとする．</p>
+<table>
+<thead>
+<tr>
+<th>フォワーディングなし</th>
+<th>全面的にフォワーディングあり</th>
+<th>ALU同士の間のフォワーディングのみあり</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>250ps</td>
+<td>300ps</td>
+<td>290ps</td>
+</tr>
+</tbody></table>
+<h3><span id="491">4.9.1</span></h3><h5><span id="問題">問題</span></h5><p>依存関係とそのタイプを示せ．</p>
+<h5><span id="解答">解答</span></h5><ul>
+<li>命令1と命令2の <code>r1</code> : RAW</li>
+<li>命令2と命令1の <code>r2</code> : WAR</li>
+<li>命令1と命令3の <code>r1</code> : RAW, WAR</li>
+<li>命令2と命令3の <code>r1</code> : WAR</li>
+<li>命令2と命令3の <code>r2</code> : RAW</li>
+<li>命令3の中の <code>r1</code> : WAR</li>
+</ul>
+<h5><span id="解説">解説</span></h5><p>書籍の中で記載は見られなかったが、データ依存の種類としてRAW (Read After Write) とWAR (Write After Read) を持ち出した。</p>
+<h3><span id="492">4.9.2</span></h3><h5><span id="問題">問題</span></h5><p>このパイプライン方式のプロセッサでは，フォワーディングは行われないとする．ハザードを指摘し，それを回避するためにnop命令を追加せよ．</p>
+<h5><span id="解答">解答</span></h5><ul>
+<li>1つ目と2つ目の命令において、r1に関するデータハザードがある。</li>
+<li>2つ目と3つ目の命令において、r2に関するデータハザードがある。</li>
+</ul>
+<p>以下のようにnopを挟めば良い。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">or r1,r2,r3</span><br><span class="line">nop</span><br><span class="line">nop</span><br><span class="line">or r2,r1,r4</span><br><span class="line">nop</span><br><span class="line">nop</span><br><span class="line">or r1,r1,r2</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解説">解説</span></h5><p>まずはデータハザードを気にせずにパイプライン図を描く。</p>
+<img src="/img/2020/01-23-4.9.2-data-hazard.svg" alt="4.9.2 データハザードあり" width="auto" height="auto">
+
+
+<p>フォワーディングがない場合、以下のハザードがある。</p>
+<ul>
+<li>2つ目の命令のIDはr1を必要とするが、それが1つ目の命令からWBされるまでには、もう2クロック必要。</li>
+<li>3つ目の命令のIDはr1を必要とするが、それが2つ目の命令からWBされるまでには、もう2クロック必要。</li>
+</ul>
+<p>よって、nopは2箇所に挟む必要がある。</p>
+<img src="/img/2020/01-23-4.9.2-wo-data-hazard.svg" alt="4.9.2 nopでデータハザードを回避" width="auto" height="auto">
+
+<p>同一クロックにおいて、2つ前の命令のWB結果をID入力として使える点に注意（クロック前半で書き込みが、後半で読み出しが行われる）。</p>
+<h3><span id="493">4.9.3</span></h3><h5><span id="問題">問題</span></h5><p>このプロセッサでは，フォワーディングが全面的に行われるとする．ハザードを指摘し，それを回避するためにnop命令を追加せよ．</p>
+<h5><span id="解答">解答</span></h5><p>ハザードはなく、nopは不要。</p>
+<h5><span id="解説">解説</span></h5><p>まずはデータハザードを気にせずにパイプライン図を描く。</p>
+<img src="/img/2020/01-23-4.9.3.svg" alt="4.9.3" width="auto" height="auto">
+
+<p>前の命令のEXからのフォワーディングが次の命令のEXに間に合っているので、nopは不要。</p>
+<h3><span id="494">4.9.4</span></h3><h5><span id="問題">問題</span></h5><p>フォワーディングなしの場合と，全面的にフォワーディングありの場合の，上記の命令列の合計実行時間を示せ．フォワーディングなしのパイプラインに全面的なフォワーディングを追加した場合に，速度はどれだけ向上するか．</p>
+<h5><span id="解答">解答</span></h5><ul>
+<li>フォワーディングなし: 11クロック</li>
+<li>全面的にフォワーディングあり: 7クロック</li>
+</ul>
+<p>速度向上は \(\frac{11 \times 250 \rm{ps}}{7 \times 300 \rm{ps}} = 1.30\)</p>
+<h5><span id="解説">解説</span></h5><p>特になし。</p>
+<h3><span id="495">4.9.5</span></h3><h5><span id="問題">問題</span></h5><p>ALU同士の間のフォワーディングのみある（MEMステージからEXステージへのフォワーディングはない）場合に，ハザードを回避するためにこのコードにnop命令を追加せよ．</p>
+<h5><span id="解答">解答</span></h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">or r1,r2,r3</span><br><span class="line">or r2,r1,r4</span><br><span class="line">nop</span><br><span class="line">nop</span><br><span class="line">or r1,r1,r2</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解説">解説</span></h5><p>まずはデータハザードを気にせずにパイプライン図を描く。</p>
+<img src="/img/2020/01-23-4.9.5-data-hazard.svg" alt="4.9.5 データハザードあり" width="auto" height="auto">
+
+
+<p>「3つ目の命令は、1つ目の命令のr1をWBまで待つ必要がある」というハザードがある。これを解消するためにnopを挟む。</p>
+<img src="/img/2020/01-23-4.9.5-data-hazard2.svg" alt="4.9.5 nopを1つ挟んだがまだデータハザードあり" width="auto" height="auto">
+
+<p>1つ目の命令のWBステージで書き戻された <code>r1</code> は、同一クロックで3つ目の命令のIDステージで読み出せる点に注意（レジスタファイルは、クロック前半で書き戻しが、クロック後半で読み出しが行われる）。</p>
+<p>新たに、「3つ目のorは、2つ目のorのr2をWBまで待つ必要がある」というハザードが発生。nopをもう一つ挟んで完成。</p>
+<img src="/img/2020/01-23-4.9.5-wo-data-hazard.svg" alt="4.9.5 nopでデータハザード解消" width="auto" height="auto">
+
+<h3><span id="496">4.9.6</span></h3><h5><span id="問題">問題</span></h5><p>ALU同士の間のフォワーディングのみある場合の，上記の命令列の合計実行時間を示せ．フォワーディングなしのパイプラインに比べて，どれだけ速度が向上するか．</p>
+<h5><span id="解答">解答</span></h5><ul>
+<li>フォーワーディングなし: 11クロック</li>
+<li>ALU同士の間のフォワーディングのみあり: 9クロック</li>
+</ul>
+<p>速度向上は \(\frac{11 \times 250 \rm{ps}}{9 \times 290 \rm{ps}} = 1.05\)</p>
+<h5><span id="解説">解説</span></h5><p>特になし。</p>
+<h2><span id="410">4.10</span></h2><p>この演習問題では，リソース・ハザード，制御ハザード，命令セット・アーキテクチャ（ISA）の設計が，パイプライン方式のプロセッサの稼働にどのような影響を及ぼすかを検討する．この問題では，下に示すMIPSの命令列を取り上げる．</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sw  r16,12(r6)</span><br><span class="line">lw  r16,8(r6)</span><br><span class="line">beq r5,r4,Label  # r5!&#x3D;r4 と想定</span><br><span class="line">add r5,r1,r4</span><br><span class="line">slt r5,r15,r4</span><br></pre></td></tr></table></figure>
+
+<p>パイプラインの各ステージのレイテンシは，下に示すとおりであるとする．</p>
+<table>
+<thead>
+<tr>
+<th>IF</th>
+<th>ID</th>
+<th>EX</th>
+<th>MEM</th>
+<th>WB</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>200ps</td>
+<td>120ps</td>
+<td>150ps</td>
+<td>190ps</td>
+<td>100ps</td>
+</tr>
+</tbody></table>
+<p><strong>各小問の題意がとても曖昧なので、問題文の下部に太字で前提を追加する。</strong></p>
+<h3><span id="4101">4.10.1</span></h3><h5><span id="問題">問題</span></h5><p>この演習問題では，すべての分岐は完全に予測され（したがって，制御ハザードはいっさい発生しない），遅延スロットは使用されないとする．メモリが1つしかない（命令用とデータ用を共用）ならば，他の命令がデータにアクセスするのと同じサイクルに命令をフェッチする必要があるたびに，構造ハザードが発生する．処理が正しく進むためには，このハザードを解決する際は常に，データにアクセスする命令を優先しなければならない．メモリが1つしかない5ステージのパイプラインの場合，この命令列の合計実行時間はどれほどになるか．前に見たように，データ・ハザードはコードにnopを追加することで回避できた．構造ハザードにも同じ方法を適用できるか．その理由はなぜか．</p>
+<h5><span id="解答">解答</span></h5><p>合計実行時間: 2400ps</p>
+<p>nop追加ではメモリに関する構造ハザードは回避できない。nopを挟んだとしても、それをIFするときには前の命令のMEMステージと重なっているので、nopを読むことができないため。</p>
+<h5><span id="解説">解説</span></h5><p>まずはデータハザード・構造ハザードを気にせずにパイプライン図を描く。</p>
+<img src="/img/2020/01-23-4.10.1-structual-hazard.svg" alt="4.10.1 構造ハザードあり" width="auto" height="auto">
+
+
+<p>この図から、データハザードはないことが確認できる。</p>
+<p>命令メモリとデータメモリに同一クロックで同時アクセスできればこのパイプラインは問題なく処理できるが、本問の設定に従いデータアクセスを命令フェッチよりも優先する必要がある場合を考える。<br>このとき、 <code>sw</code> のMEMステージが <code>add</code> のIFステージと同一クロックの実行になっているので、 <code>add</code> 命令の実行開始は遅らせる必要がある。1クロック遅らせただけでは <code>lw</code> のMEMステージと同一クロックになってしまう。2クロック遅らせれば <code>beq</code> のMEMステージと同一クロックだが、 <code>beq</code> はデータメモリにアクセスしないため、これは許容される。<br>同様に <code>slt</code> のIFも他のデータメモリアクセスと重ならないようにし、下図を得る。</p>
+<img src="/img/2020/01-23-4.10.1-wo-structual-hazard.svg" alt="4.10.1 構造ハザードなし" width="auto" height="auto">
+
+<p>これより、実行に要するクロック数は11クロックである。クロックサイクル時間は最も遅いIFステージに律速され、200ps。したがって合計実行時間は \(200 \rm{ps} \times 11 \rm{clk} = 2200 \rm{ps}\) 。</p>
+<h3><span id="4102">4.10.2</span></h3><h5><span id="問題">問題</span></h5><p>この演習問題では，すべての分岐は完全に予測され（したがって，制御ハザードはいっさい発生しない），遅延スロットは使用されないとする．ロード／ストア命令において，アドレスをレジスタに直に指定する（オフセットを使用しない）ように変更できるならば，これらの命令でALUを使用する必要はなくなる．そうすれば，MEMステージとEXステージを重ねられるので，パイプラインの長さは4ステージに短縮される．このような命令セット・アーキテクチャの変更に対応するように，上の命令列を修正せよ．ただし，この変更はクロック・サイクル時間に影響しないものとする．上の命令列の実行速度はどれだけ向上するか．</p>
+<p><strong>4.10.1と異なり、同一クロックでIFステージとMEMステージが実行できるものと考える。また、4.10全体でデータハザードは考慮しないので、フォワーディングは利用できるものと考える。比較対象は、4.10.1から構造ハザードを取り除いたものとする。</strong></p>
+<h5><span id="解答">解答</span></h5><p>修正した命令列:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">addi r6,r6,12</span><br><span class="line">sw   r16,r6</span><br><span class="line">addi r6,r6,-4</span><br><span class="line">lw   r16,r6</span><br><span class="line">beq  r5,r4,Label  # r5!&#x3D;r4 と想定</span><br><span class="line">add  r5,r1,r4</span><br><span class="line">slt  r5,r15,r4</span><br></pre></td></tr></table></figure>
+
+<p>実行速度向上: 0.9</p>
+<h5><span id="解説">解説</span></h5><p><code>sw</code>, <code>lw</code> で即値オフセットが使えなくなったので、 <code>addi</code> 命令を追加する必要がある。新しい命令列は以下。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">addi r6,r6,12</span><br><span class="line">sw   r16,r6</span><br><span class="line">addi r6,r6,-4</span><br><span class="line">lw   r16,r6</span><br><span class="line">beq  r5,r4,Label  # r5!&#x3D;r4 と想定</span><br><span class="line">add  r5,r1,r4</span><br><span class="line">slt  r5,r15,r4</span><br></pre></td></tr></table></figure>
+
+<p>まずはデータハザードを気にせずにパイプライン図を描く。</p>
+<img src="/img/2020/01-23-4.10.2.svg" alt="4.10.2" width="auto" height="auto">
+
+<p><code>lw</code>, <code>sw</code> 命令ではオフセット計算がなくなったのでEXステージがなくなり、 <code>beq</code>, <code>add</code>, <code>slt</code> 命令ではデータメモリアクセスをしないのでMEMステージがなくなった。</p>
+<p>フォワーディングがあるので、データハザードは発生しないことに注意。<br>この問題においては同一クロックのIFとMEMステージでの構造ハザードも考えない。</p>
+<p>したがって図に示したパイプラインはこのまま実行することができ、要クロック数は10。</p>
+<p>比較対象は、4.10.1の解説の最初に描いた図（ただし構造ハザードは無視できる）のとおりに実行でき、要クロック数は9。</p>
+<p>以上より、速度向上は \(\frac{9}{10} = 0.9\) 。 <code>addi</code> 命令を追加した分だけ速度が落ちている。</p>
+<h3><span id="4103">4.10.3</span></h3><h5><span id="問題">問題</span></h5><p>分岐の際にはパイプラインにストールを挿入し，遅延スロットはないものとする．分岐の判定がIDステージでなされるようになったならば，分岐の判定がEXステージでなされる通常の命令と比べて，どれだけ速度が向上するか．</p>
+<p><strong>4.10.2と同様、構造ハザードはなく、フォワーディングが利用でき、MEMステージとEXステージは重ねられるものとする。</strong></p>
+<h5><span id="解答">解答</span></h5><p>1.09</p>
+<h5><span id="解説">解説</span></h5><p>4.10.2では、100%の精度の分岐予測ができると想定していた。4.10.2の解説の図を元に、 “EXステージで分岐先が次の <code>add</code> 命令になることが判明するケース” と、 “IDステージで分岐先が次の <code>add</code> 命令になることが判明するケース” の図をそれぞれ記載する。</p>
+<p>EXステージで分岐先が次の <code>add</code> 命令になることが判明するケース:</p>
+<img src="/img/2020/01-23-4.10.3-branch-on-ex.svg" alt="4.9.3 EXステージで分岐先が判明" width="auto" height="auto">
+
+<p>IDステージで分岐先が次の <code>add</code> 命令になることが判明するケース:</p>
+<img src="/img/2020/01-23-4.10.3-branch-on-id.svg" alt="4.9.3 IDステージで分岐先が判明" width="auto" height="auto">
+
+<p>所要クロック数はそれぞれ12クロック, 11クロック。速度向上は \(\frac{12}{11} = 1.09\) 。</p>
+<h3><span id="4104">4.10.4</span></h3><h5><span id="問題">問題</span></h5><p>上のパイプライン・ステージのレイテンシを用いて，問題4.10.2と同様に速度向上の度合いを計算せよ．ただし今度は，クロック・サイクル時間の変更（の可能性）を考慮に入れること．EXステージとMEMステージが単一のステージに統合されると，その処理の大部分を並列に進められる．その結果，統合されたEX/MEMステージのレイテンシは，元の2つのステージのレイテンシの大きい方と，並列には進められない処理のために必要な20psとの和になる．</p>
+<p><strong>速度向上の比較対象は、構造ハザードがなく、EX/MEMステージが統合されておらず（したがってロード・ストア命令のオフセット計算に追加の <code>addi</code> が不要な）、分岐先の確定はEXステージで行われるパイプラインとする。</strong></p>
+<h5><span id="解答">解答</span></h5><p>1.16</p>
+<h5><span id="解説">解説</span></h5><ul>
+<li>統合されたEX/MEMステージのレイテンシは、 \(\rm{max}(150\rm{ps}, 190\rm{ps}) + 20\rm{ps} = 210\rm{ps}\) 。これは他のどのステージのレイテンシよりも多きいので、クロックサイクル時間は210psになる。</li>
+<li>したがって、4.10.3の「IDステージで分岐先が次の <code>add</code> 命令になることが判明するケース」における実行時間は、 \(9\rm{clk} \times 210\rm{ps} = 1890\rm{ps}\) 。</li>
+<li>比較対象のパイプラインにおける所要クロック数は、4.10.1の最初の図に示したものと比べて <code>add</code> 命令の開始が2クロック遅れる（直前の <code>beq</code> の不成立がEXフェーズまでわからないため）ので、11クロック。クロックサイクル時間は実行時間は律速IFステージの200psになるので、 \(11\rm{clk} \times 200\rm{ps} = 2200\rm{ps}\)</li>
+<li>以上より、速度向上は \(\frac{2200\rm{ps}}{1890\rm{ps}} = 1.16\) 。</li>
+<li>速度向上へ寄与した要因:<ul>
+<li>EX/MEMステージの統合</li>
+<li>分岐の確定がEXでなくIDステージで行われる</li>
+</ul>
+</li>
+<li>速度低下へ寄与した要因:<ul>
+<li>オフセット即値の代替としての <code>addi</code> 命令の追加</li>
+<li>クロックサイクル時間の増加</li>
+</ul>
+</li>
+</ul>
+<h3><span id="4105">4.10.5</span></h3><h5><span id="問題">問題</span></h5><p>上のパイプライン・ステージのレイテンシを使用して，問題4.10.3と同様に速度向上の度合いを計算せよ．ただし今度は，クロック・サイクル時間の変更（の可能性）を考慮に入れること．分岐の判定がEXステージからIDステージに繰り上げられると，IDステージのレイテンシは50%増大し，EXステージは10ps短縮されるとする．</p>
+<p><strong>比較は、4.10.3で登場した「分岐先がEXステージで判明するパイプライン」から「分岐先がIDステージで判明するパイプライン」への変更として行う。ただし変更後はクロックサイクル時間が伸びる可能性がある。</strong></p>
+<h5><span id="解答">解答</span></h5><p>1.11</p>
+<h5><span id="解説">解説</span></h5><ul>
+<li>変更後、IDステージのレイテンシは180ps、EXステージは140psになる。律速ステージはIFであり、クロックサイクル時間は200ps。したがってクロックサイクル時間は変更前と変わらない。</li>
+<li>速度向上は4.10.3の検討と全く同様に1.11。</li>
+</ul>
+<h3><span id="4106">4.10.6</span></h3><h5><span id="問題">問題</span></h5><p>分岐の際にはパイプラインにストールを挿入し，遅延スロットはないものとする．beq命令のアドレス計算がEXステージからMEMステージに移されたならば，新しいクロック・サイクル時間および上の命令列の実行時間はどうなるか．この変更により，どれだけ速度が向上するか．ただし，EXステージのレイテンシは20ps短縮され，MEMステージのレイテンシは変わらないとする．</p>
+<p><strong>比較は、「分岐先がEXステージで判明するパイプライン」から、「分岐先がMEMステージで判明するパイプライン」への変更として行う。ただし変更後はクロックサイクル時間が短くなる可能性がある。両者ともに、EX/MEMステージの統合は行わないものとする。</strong></p>
+<h5><span id="解答">解答</span></h5><p>新しいクロックサイクル時間は不変で200ps。</p>
+<p>速度向上は0.916。</p>
+<h5><span id="解説">解説</span></h5><p>比較すべき両者のパイプライン図を描く。</p>
+<p>分岐先がEXステージで判明するパイプライン:</p>
+<img src="/img/2020/01-23-4.10.6-addr-on-ex.svg" alt="4.10.6 分岐先アドレス計算がEXステージ" width="auto" height="auto">
+
+<p>分岐先がMEMステージで判明するパイプライン:</p>
+<img src="/img/2020/01-23-4.10.6-addr-on-mem.svg" alt="4.10.6 分岐先アドレス計算がMEMステージ" width="auto" height="auto">
+
+<p>前者は11クロック、後者は12クロック。</p>
+<p>クロックサイクル時間については、どちらもIFステージが律速なので変わらない。</p>
+<p>速度向上は \(\frac{11}{12} = 0.916\) 。</p>
+<h2><span id="411">4.11</span></h2><p>下記のループを検討する．</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">loop: lw  r1,0(r1)</span><br><span class="line">      and r1,r1,r2</span><br><span class="line">      lw  r1,0(r1)</span><br><span class="line">      lw  r1,0(r1)</span><br><span class="line">      beq r1,r0,loop</span><br></pre></td></tr></table></figure>
+
+<p>分岐は完全に予測され（制御ハザードに起因するパイプライン・ストールは発生しない），遅延スロットは存在せず，フォワーディングが全面的に採用されているとする．また，何回もループを繰り返した後に，このループが終了するものとする．</p>
+<p><strong>本では <code>land</code> という命令が使われていたが、 <code>and</code> の誤植と判断した。</strong></p>
+<h3><span id="4111">4.11.1</span></h3><h5><span id="問題">問題</span></h5><p>このループの3巡目の最初の命令をフェッチするサイクルから，4巡目の最初の命令をフェッチできるようになるサイクルの直前までの実行の様子を，パイプライン図で示せ．（3巡目だけではなく）すべての過程でパイプラインに流れ込む，すべての命令を示せ．</p>
+<h5><span id="解答">解答</span></h5><img src="/img/2020/01-23-4.11.1-full.svg" alt="4.11.1 3番目のループと、その12クロックの範囲内の前後のステージ" width="auto" height="auto">
+
+<h5><span id="解説">解説</span></h5><p>まずは、3巡目の開始から4巡目の開始までのパイプライン図を描く。データハザードを考慮し、必要なストールを挟んだ図を描く。</p>
+<img src="/img/2020/01-23-4.11.1-loop3.svg" alt="4.11.1 3番目のループ" width="auto" height="auto">
+
+
+<p>4巡目先頭の <code>lw</code> を除いた12クロックに関係する前後の命令も含めて記載したのが解答の図。</p>
+<h3><span id="4112">4.11.2</span></h3><h5><span id="問題">問題</span></h5><p>5つのパイプライン・ステージで実質的な処理が行われているサイクルの数は，全サイクルのどのくらいの割合か．</p>
+<h5><span id="解答">解答</span></h5><p>86.8%</p>
+<h5><span id="解説">解説</span></h5><p>4.11.1で描いた絵について、</p>
+<ul>
+<li>全ステージ数: 38</li>
+<li>実質的な処理が行われていないステージ（塗りつぶしのないステージ）数: 5</li>
+</ul>
+<p>なので、 \(100 \times \frac{38 - 5}{38} = 86.8%\)</p>
+<h2><span id="412">4.12</span></h2><p>この問題は，パイプライン方式のプロセッサにおけるフォワーディングのコスト／複雑性／性能のトレードオフに関して，読者の理解を助けることを意図している．この演習問題では，図4.45のパイプライン方式のデータパスを取り上げる．次の問題では，プロセッサ内で実行されるすべての命令には，いずれかのタイプのRAWデータ依存関係（データ書き込み後の読み出し）がある，と想定している．タイプの内訳は下の表に示すとおりである．RAWデータ依存関係のタイプは，該当のデータを書き込むステージ（EXまたはMEM）と，それを使用する命令がいくつ後であるかによって示される．1stはデータを書き込んだ命令の1つ後の命令がそのデータを使用することを，2ndはデータを書き込んだ命令の2つ後の命令がそのデータを使用することを，それぞれ意味する．レジスタへの書き込みはクロック・サイクルの前半で行われ，レジスタからの読み出しはクロック・サイクルの後半で行われるものとする．したがって，「EXto\(3^{rd}\)」および「MEMto\(3^{rd}\)」は依存関係がない．データ・ハザードを招かないからである．また，データ・ハザードがない場合のプロセッサのCPIは1であるとする．</p>
+<table>
+<thead>
+<tr>
+<th>EX to 1st のみ</th>
+<th>MEM to 1st のみ</th>
+<th>EX to 2nd のみ</th>
+<th>MEM to 2nd のみ</th>
+<th>EX to 1st および MEM to 2nd</th>
+<th>その他のRAW依存関係</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>5%</td>
+<td>20%</td>
+<td>5%</td>
+<td>10%</td>
+<td>10%</td>
+<td>10%</td>
+</tr>
+</tbody></table>
+<p>個々のパイプライン・ステージのレイテンシを下の表に示すように想定する．EXステージに関しては，フォワーディング（FW）を行わない場合と，フォワーディングを行う場合のタイプごとに，レイテンシを別々に示してある．</p>
+<table>
+<thead>
+<tr>
+<th>IF</th>
+<th>ID</th>
+<th>EX (FWなし)</th>
+<th>EX (全面的にFW)</th>
+<th>EX (EX/MEMからのみFW)</th>
+<th>EX (MEM/WBからのみFB)</th>
+<th>MEM</th>
+<th>WB</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>150ps</td>
+<td>100ps</td>
+<td>120ps</td>
+<td>150ps</td>
+<td>140ps</td>
+<td>130ps</td>
+<td>120ps</td>
+<td>100ps</td>
+</tr>
+</tbody></table>
+<h3><span id="4121">4.12.1</span></h3><h5><span id="問題">問題</span></h5><p>フォワーディングを行わない場合，発生するデータ・ハザードに対して，どのくらいの割合でパイプライン・ストールを挿入する必要があるか．</p>
+<h5><span id="解答">解答</span></h5><p>85%</p>
+<h5><span id="解説">解説</span></h5><p>フォワーディングなしでストールを挟まなければ、下図のようなデータハザードが起こる。</p>
+<img src="/img/2020/01-23-4.12.1-no_fw-data-hazard.svg" alt="4.12.1" width="auto" height="auto">
+
+<p>必要なストール数は以下。</p>
+<ul>
+<li>EX to 1stのみ: 2</li>
+<li>EX to 2ndのみ: 1</li>
+<li>MEM to 1stのみ: 2</li>
+<li>MEM to 2ndのみ: 1</li>
+<li>EX to 1st および MEM to 2nd: 2</li>
+</ul>
+<p>各種命令の頻度と合わせ、必要なストールの割合は、</p>
+<p>\[<br>  5\% \times 2 + 5\% \times 1 + 20\% \times 2 + 10\% \times 1 + 10\% \times 2 = 85\%<br>\]</p>
+<h3><span id="4122">4.12.2</span></h3><h5><span id="問題">問題</span></h5><p>フォワーディングを行う場合（フォワーディング可能な結果をすべてフォワーディングする），発生するデータ・ハザードに対して，どのくらいの割合でパイプライン・ストールを挿入する必要があるか．</p>
+<h5><span id="解答">解答</span></h5><p>20%</p>
+<h5><span id="解説">解説</span></h5><p>フォワーディングありでストールを挟まなければ、下図のようなデータハザードが起こる。</p>
+<img src="/img/2020/01-23-4.12.2-ex_mem_fw-mem_wb_fw-data-hazard.svg" alt="4.12.2" width="auto" height="auto">
+
+<p>必要なストール数は以下。</p>
+<ul>
+<li>EX to 1stのみ: 0</li>
+<li>EX to 2ndのみ: 0</li>
+<li>MEM to 1stのみ: 1</li>
+<li>MEM to 2ndのみ: 0</li>
+<li>EX to 1st および MEM to 2nd: 0</li>
+</ul>
+<p>各種命令の頻度と合わせ、必要なストールの割合は、</p>
+<p>\[<br>  20\% \times 1 = 20\%<br>\]</p>
+<h3><span id="4123">4.12.3</span></h3><h5><span id="問題">問題</span></h5><p>全面的なフォワーディングを行うために必要な，3入力マルチプレクサのコストを負担する余裕がないものとする．EX/MEMパイプライン・レジスタからのフォワーディング（次サイクルへのフォワーディング）だけに留めるか，MEM/WBパイプライン・レジスタからのフォワーディング（2サイクルのフォワーディング）だけに留めるかを，決定しなければならない．どちらの方が，パイプラインをストールさせるサイクル数が少なくて済むか．</p>
+<h5><span id="解答">解答</span></h5><p>MEM/WBパイプラインレジスタからのフォワーディングにとどめた場合。</p>
+<h5><span id="解説">解説</span></h5><p>EX/MEMパイプラインレジスタからのフォワーディングだけある場合は、下図のようなデータハザードが起こる。</p>
+<img src="/img/2020/01-23-4.12.3-ex_mem_fw-data-hazard.svg" alt="4.12.3 EX/MEMパイプラインレジスタからのフォワーディングのみ" width="auto" height="auto">
+
+<p>必要なストール数は以下。</p>
+<ul>
+<li>EX to 1stのみ: 0</li>
+<li>EX to 2ndのみ: 1</li>
+<li>MEM to 1stのみ: 2</li>
+<li>MEM to 2ndのみ: 1</li>
+<li>EX to 1st および MEM to 2nd: 2</li>
+</ul>
+<p>“EX to 1st および MEM to 2nd” においては、1クロック分のストールだけでは足りない（EXの結果を2ステージ分先のEXの入力に渡す手段がないので）点に注意。</p>
+<p>各種命令の頻度と合わせ、必要なストールの割合は、</p>
+<p>\[<br>  5\% \times 1 + 20\% \times 2 + 10\% \times 1 + 10\% \times 2 = 75\%<br>\]</p>
+<p>MEM/WBパイプラインレジスタからのフォワーディングだけある場合は、下図のようなデータハザードが起こる。</p>
+<img src="/img/2020/01-23-4.12.3-mem_wb_fw-data-hazard.svg" alt="4.12.3 MEM/WBパイプラインレジスタからのフォワーディングのみ" width="auto" height="auto">
+
+<p>必要なストール数は以下。</p>
+<ul>
+<li>EX to 1stのみ: 2</li>
+<li>EX to 2ndのみ: 0</li>
+<li>MEM to 1stのみ: 1</li>
+<li>MEM to 2ndのみ: 0</li>
+<li>EX to 1st および MEM to 2nd: 2</li>
+</ul>
+<p>各種命令の頻度と合わせ、必要なストールの割合は、</p>
+<p>\[<br>  5\% \times 2 + 20\% \times 1 + 10\% \times 2 = 50\%<br>\]</p>
+<p>後者のほうがパイプラインをストールさせるサイクル数が少なくて済む。</p>
+<h3><span id="4124">4.12.4</span></h3><h5><span id="問題">問題</span></h5><p>与えられたハザードの確率とパイプライン・ステージのレイテンシのもとで，フォワーディング機能のないパイプラインに全面的なフォワーディング機能を付加したならば，速度はどれだけ向上するか．</p>
+<h5><span id="解答">解答</span></h5><p>1.54倍</p>
+<h5><span id="解説">解説</span></h5><p>4.12.1と4.12.2の比較になる。</p>
+<ul>
+<li>フォワーディング機能のないパイプライン:<ul>
+<li>CPI: 1.85</li>
+<li>クロックサイクル時間: 150ps (IFステージが律速)</li>
+</ul>
+</li>
+<li>全面的なフォワーディング機能があるパイプライン:<ul>
+<li>CPI: 1.20</li>
+<li>クロックサイクル時間: 150ps (IF, EXステージが律速)</li>
+</ul>
+</li>
+</ul>
+<p>速度向上は \(\frac{1.85 \times 150\rm{ps}}{1.20 \times 150 \rm{ps}} = 1.54\)</p>
+<h3><span id="4125">4.12.5</span></h3><h5><span id="問題">問題</span></h5><p>時間旅行のパラドックスめいたフォワーディングを追加してデータ・ハザードをすべて回避できるならば，さらにどれだけ速度が向上するか（通常のフォワーディング機能を備えたプロセッサと比べて）．新たに開発すべき時間旅行用の回路により，全面的なフォワーディングを行うEXステージで，レイテンシが100ps増えるものとする．</p>
+<h5><span id="解答">解答</span></h5><p>0.72倍</p>
+<h5><span id="解説">解説</span></h5><p>「時間旅行のパラドックスめいたフォワーディング」があるというのは、要するにデータハザードが全く発生しないということ。この場合のCPIは1。クロックサイクル時間は250ps (EXステージが律速)。</p>
+<p>通常のフォワーディング機構を備えたプロセッサの場合は、4.12.2のものと同じく、CPIは1.20。クロックサイクル時間は150ps (IF, EXステージが律速)。</p>
+<p>速度向上は \(\frac{1.20 \times 150\rm{ps}}{1 \times 250\rm{ps}} = 0.72\)</p>
+<p>EXステージのレイテンシの向上による速度低下が支配的になってしまった。</p>
+<h3><span id="4126">4.12.6</span></h3><h5><span id="問題">問題</span></h5><p>問題4.12.3と同じ問いに答えよ．ただし今度は，2つの選択肢のうちのどちらの方が命令当たりの時間が短くなるか判定せよ．</p>
+<h5><span id="解答">解答</span></h5><p>EX/MEMパイプラインレジスタからのフォワーディングだけある場合。</p>
+<h5><span id="解説">解説</span></h5><ul>
+<li>EX/MEMパイプラインレジスタからのフォワーディングだけある場合:<ul>
+<li>CPI: 1.75 [clock/命令]</li>
+<li>クロックサイクル時間: 150 [ps/clock] (IFステージが律速)</li>
+<li>命令当たりの時間: \(1.75 \rm{[clock/命令]} \times 150 \rm{[ps/clock]} = 262.5 \rm{[ps/命令]}\)</li>
+</ul>
+</li>
+<li>EX/MEMパイプラインレジスタからのフォワーディングだけある場合:<ul>
+<li>CPI: 1.50 [clock/命令]</li>
+<li>クロックサイクル時間: 150 [ps/clock] (IFステージが律速)</li>
+<li>命令当たりの時間: \(1.50 \rm{[clock/命令]} \times 150 \rm{[ps/clock]} = 225.0 \rm{[ps/命令]}\)</li>
+</ul>
+</li>
+</ul>
+<p>後者のほうが命令当たりの時間が短い。</p>
+<h2><span id="413">4.13</span></h2><p>この問題は，フォワーディング，ハザード検出，そして命令セット・アーキテクチャの設計の関係について，読者の理解を助けることを意図している．この演習問題では，下の表に示す命令列を取り上げる．これらは5ステージのパイプライン方式のデータパス上で実行されるものとする．</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">add r5,r2,r1</span><br><span class="line">lw  r3,4(r5)</span><br><span class="line">lw  r2,0(r2)</span><br><span class="line">or  r3,r5,r3</span><br><span class="line">sw  r3,0(r5)</span><br></pre></td></tr></table></figure>
+
+<h3><span id="4131">4.13.1</span></h3><h5><span id="問題">問題</span></h5><p>ハザード検出もフォワーディングも行われない場合に，命令が正しく実行されることを保証するために，この命令列にnopを挿入せよ．</p>
+<h5><span id="解答">解答</span></h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">add r5,r2,r1</span><br><span class="line">nop</span><br><span class="line">nop</span><br><span class="line">lw  r3,4(r5)</span><br><span class="line">lw  r2,0(r2)</span><br><span class="line">nop</span><br><span class="line">or  r3,r5,r3</span><br><span class="line">sw  r3,0(r5)</span><br></pre></td></tr></table></figure>
+
+<h5><span id="解説">解説</span></h5><p>データハザードを気にせずパイプライン図を描く。</p>
+<img src="/img/2020/01-23-4.13.1-data-hazard.svg" alt="4.13.1 データハザードあり" width="auto" height="auto">
+
+<p>データハザードを回避させるため、2番目の命令を2ステージ分ストールさせ、4晩名の命令を1ステージ分ストールさせる。</p>
+<img src="/img/2020/01-23-4.13.1-wo-data-hazard.svg" alt="4.13.1 ストールを追加してデータハザードを回避" width="auto" height="auto">
+
+<p>ストールを実現するためのnop命令を挟んだ命令列が解答のもの。</p>
+<h3><span id="4132">4.13.2</span></h3><h5><span id="問題">問題</span></h5><p>問題4.13.1と同じ問いに答えよ．ただし今度は，命令の変更や並べ替えをしても，ハザードを回避できない場合にのみ，nopを使用する．修正したコード内で一時的に値を保持するために，レジスタr7を使用してよい．</p>
+<h5><span id="解答">解答</span></h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">add r5,r2,r1</span><br><span class="line">lw  r2,0(r2)</span><br><span class="line">nop</span><br><span class="line">lw  r3,4(r5)</span><br><span class="line">sw  r3,0(r5)</span><br><span class="line">nop</span><br><span class="line">or  r3,r5,r3</span><br></pre></td></tr></table></figure>
+
+
+<h5><span id="解説">解説</span></h5><p><code>r5</code> とRAW依存を持たない命令を、 <code>r5</code> へ書き戻しを行う命令の直後に実行すると、 <code>r5</code> に関するデータハザードをなくすことができる。今回は <code>lw r2,0(r2)</code> がそれに該当する。</p>
+<img src="/img/2020/01-23-4.13.2-1.svg" alt="4.13.2 r5に依存しないlw命令を前倒し" width="auto" height="auto">
+
+<p>今度は、 <code>r3</code> のRAW依存のせいで2ステージ分のストールが必要になっている。 <code>r3</code> に依存しない <code>sw</code> を前倒す。</p>
+<img src="/img/2020/01-23-4.13.2-2.svg" alt="4.13.2 r3に依存しないor命令を前倒し" width="auto" height="auto">
+
+<p>nop 2つでデータハザードを回避できた。</p>
+<h3><span id="4133">4.13.3</span></h3><h4><span id="問題">問題</span></h4><p>プロセッサにフォワーディング機能を持たせたが，ハザード検出ユニットを実装し忘れたとする．上のコードを実行したときに，何が起こるか．</p>
+<h5><span id="解答">解答</span></h5><p>意味論通りに実行される。</p>
+<h5><span id="解説">解説</span></h5><img src="/img/2020/01-23-4.13.3.svg" alt="4.13.3 フォワーディングあり" width="auto" height="auto">
+
+<p>この命令列ではフォワーディングさえあればハザードは起こらないので、意味論通りに実行される。</p>
+<h3><span id="4134">4.13.4</span></h3><h5><span id="問題">問題</span></h5><p>フォワーディング機能がある場合，上のコードを実行した最初の5サイクルにおいて，図4.60のハザード検出ユニットおよびフォワーディング・ユニットにより，各サイクルでどの信号がアサートされるか．</p>
+<h5><span id="解答">解答</span></h5><table>
+<thead>
+<tr>
+<th>サイクル</th>
+<th>PCWrite</th>
+<th>IF/IDWrite</th>
+<th>ForwardA</th>
+<th>ForwardB</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>cc1</td>
+<td>1</td>
+<td>1</td>
+<td>00</td>
+<td>00</td>
+</tr>
+<tr>
+<td>cc2</td>
+<td>1</td>
+<td>1</td>
+<td>00</td>
+<td>00</td>
+</tr>
+<tr>
+<td>cc3</td>
+<td>1</td>
+<td>1</td>
+<td>00</td>
+<td>00</td>
+</tr>
+<tr>
+<td>cc4</td>
+<td>1</td>
+<td>1</td>
+<td>10</td>
+<td>00</td>
+</tr>
+<tr>
+<td>cc5</td>
+<td>1</td>
+<td>1</td>
+<td>00</td>
+<td>00</td>
+</tr>
+</tbody></table>
+<h5><span id="解説">解説</span></h5><p>4.13.3で見たように、ハザードは起こらないので、どのサイクルでも <code>PCWrite</code> と <code>IF/IDWrite</code> は 1 となる。</p>
+<p>フォワーディングが起こるのは、cc4における <code>ForwardA</code> のみ。サイクル4では、直前のEXステージからの出力を受け取るので、 <code>ForwardA</code> は 10 となる。</p>
+<h3><span id="4135">4.13.5</span></h3><h5><span id="問題">問題</span></h5><p>フォワーディング機能がない場合，図4.60のハザード検出ユニットに関して，新たにどんな入力信号および出力信号が必要になるか．</p>
+<h5><span id="解答">解答</span></h5><ul>
+<li>新たな入力信号:<ul>
+<li>EX/MEM.MemRead</li>
+<li>ID/EX.MemtoReg</li>
+<li>EX/MEM.RegisterRt</li>
+<li>ID/EX.RegisterRt</li>
+<li>EX/MEM.RegisterRd</li>
+</ul>
+</li>
+<li>新たな出力信号: なし</li>
+</ul>
+<h5><span id="解説">解説</span></h5><p>フォワーディング機能があれば、データハザードは「ロード命令のRtを直後の命令の入力として使う」場合だけである。データハザードの検出ロジックは、本文に記載がある通り、</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ID&#x2F;EX.MemRead and</span><br><span class="line">((ID&#x2F;EX.RegisterRt &#x3D; IF&#x2F;ID.RegisterRs) or</span><br><span class="line"> (ID&#x2F;EX.RegisterRt &#x3D; IF&#x2F;ID.RegisterRt))</span><br></pre></td></tr></table></figure>
+
+<p>と定式化できる。このロジックは、「直後の命令」のIDステージで発火する。</p>
+<p>フォワーディング機能がない場合は必ずWBまで待つ必要があるので、以下のデータハザードが発生し得る。</p>
+<ul>
+<li>ロード命令:<ol>
+<li>この命令のRtを、1つ後の命令が入力として使う</li>
+<li>この命令のRtを、2つ後の命令が入力として使う</li>
+</ol>
+</li>
+<li>ALU命令:<ol start="3">
+<li>この命令のRdを、1つ後の命令が入力として使う</li>
+<li>この命令のRdを、2つ後の命令が入力として使う</li>
+</ol>
+</li>
+</ul>
+<p>それぞれの検出ロジックは以下のように記述できる。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; データハザード1 (「1つ後の命令」のIDステージで発火)</span><br><span class="line">ID&#x2F;EX.MemRead and</span><br><span class="line">((ID&#x2F;EX.RegisterRt &#x3D; IF&#x2F;ID.RegisterRs) or</span><br><span class="line"> (ID&#x2F;EX.RegisterRt &#x3D; IF&#x2F;ID.RegisterRt))</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; データハザード2 (「2つ後の命令」のIDステージで発火)</span><br><span class="line">EX&#x2F;MEM.MemRead and</span><br><span class="line">((EX&#x2F;MEM.RegisterRt &#x3D; IF&#x2F;ID.RegisterRs) or</span><br><span class="line"> (EX&#x2F;MEM.RegisterRt &#x3D; IF&#x2F;ID.RegisterRt))</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; データハザード3 (「1つ後の命令」のIDステージで発火)</span><br><span class="line">ID&#x2F;EX.MemRead &#x3D; 0 and ID&#x2F;EX.MemtoReg  &#x2F;&#x2F; ALU命令である条件</span><br><span class="line">((ID&#x2F;EX.RegisterRd &#x3D; IF&#x2F;ID.RegisterRs) or</span><br><span class="line"> (ID&#x2F;EX.RegisterRd &#x3D; IF&#x2F;ID.RegisterRt))</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; データハザード2 (「2つ後の命令」のIDステージで発火)</span><br><span class="line">EX&#x2F;MEM.MemRead &#x3D; 0 and EX&#x2F;MEM.MemtoReg  &#x2F;&#x2F; ALU命令である条件</span><br><span class="line">((EX&#x2F;MEM.RegisterRd &#x3D; IF&#x2F;ID.RegisterRs) or</span><br><span class="line"> (EX&#x2F;MEM.RegisterRd &#x3D; IF&#x2F;ID.RegisterRt))</span><br></pre></td></tr></table></figure>
+
+<p>ここで使われている項のうち、図4.60のハザード検出ユニットの入力に足りないのは、</p>
+<ul>
+<li>EX/MEM.MemRead</li>
+<li>ID/EX.MemtoReg</li>
+<li>EX/MEM.RegisterRt</li>
+<li>ID/EX.RegisterRt</li>
+<li>EX/MEM.RegisterRd</li>
+</ul>
+<p>データハザード1~4のいずれも、IDステージでの検出時点で、その命令をnopに変更すれば良い。それは図4.59で見たように、ID/EXのパイプラインレジスタのEX, MEM, WBの各制御フィールドををすべて0にすれば良い。</p>
+<h3><span id="4136">4.13.6</span></h3><h5><span id="問題">問題</span></h5><p>問題4.13.5で変更した新しいハザード検出ユニットを使用して，上のコードを実行した場合，最初の5サイクルの各サイクルでアサートされる出力信号を示せ．</p>
+<p><strong>4.13.5と同じく、フォワーディング機構はないものとする。</strong></p>
+<h5><span id="解答">解答</span></h5><table>
+<thead>
+<tr>
+<th>サイクル</th>
+<th>PCWrite</th>
+<th>IF/IDWrite</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>cc1</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>cc2</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>cc3</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>cc4</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>cc5</td>
+<td>1</td>
+<td>1</td>
+</tr>
+</tbody></table>
+<h5><span id="解説">解説</span></h5><p>ハザード検出ユニットの働きにより、 <code>lw r3,4(r5)</code> が2度 nop に書き換わる。</p>
+<img src="/img/2020/01-23-4.13.6.svg" alt="4.13.6 ハザード検出ユニットがnopへ書き換える" width="auto" height="auto">
+
+
+<h2><span id="414">4.14</span></h2><p>この問題は，パイプライン方式のプロセッサにおける遅延スロット，制御ハザード，そして分岐の関係について，読者の理解を助けることを意図している．この演習問題では，下に示すMIPSのコードを取り上げる．5ステージのパイプライン方式をとり，全面的なフォワーディング機能および分岐成立予測機能を備えたプロセッサ上で，これらのコードが実行されるものとする．</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">        lw  r2,0(r1)</span><br><span class="line">label1: beq r2,r0,label2  # 一度不成立。次に成立</span><br><span class="line">        lw  r3,0(r2)</span><br><span class="line">        beq r3,r0,label1  # 成立</span><br><span class="line">        add r1,r3,r1</span><br><span class="line">label2: sw  r1,0(r2)</span><br></pre></td></tr></table></figure>
+
+<h3><span id="4141">4.14.1</span></h3><h5><span id="問題">問題</span></h5><p>このコードの実行の様子を示すパイプライン図を描け．ただし，遅延スロットはなく，分岐はEXステージで行われるものとする．</p>
+<h5><span id="解答">解答</span></h5><img src="/img/2020/01-23-4.14.1.svg" alt="4.14.1 常に成立と分岐予測" width="auto" height="auto">
+
+<h5><span id="解説">解説</span></h5><p>図中の命令の文字列の下部に、起こったイベントをコメント形式で記載したので、参照のこと。</p>
+<h3><span id="4142">4.14.2</span></h3><h5><span id="問題">問題</span></h5><p>問題4.14.1と同じ問いに答えよ．ただし今度は，遅延スロットを使用するものとする．上のコードにおいて，分岐命令直後の命令は，その分岐命令の遅延スロット中の命令となる．</p>
+<h5><span id="解答">解答</span></h5><img src="/img/2020/01-23-4.14.2.svg" alt="4.14.2 遅延スロットを使いたいが、分岐有無のpath間でデータ依存があるので使えない" width="auto" height="auto">
+
+<h5><span id="解説">解説</span></h5><p><code>beq</code> の先行命令は、 <code>beq</code> のオペランドのレジスタの値を出力するものなので、図4.64の(a)の形式の分岐スロットのスケジューリングはできない。</p>
+<p>したがって(b)または(c)のスケジューリングをする必要があるが、問題文での指示により、(c)の形式を採る。</p>
+<p>(c)の形式に置いて、分岐スロットに入れることのできる命令は、「分岐が成立した場合でも、分岐スロット内の命令実行がプログラムの意味論を破壊しない」命令に限る。<br>この問題で分岐スロットに入り得るのは <code>lw r3,0(r2)</code> と <code>add r1,r3,r1</code> 。いずれも、分岐が成立した場合に使用され得るレジスタ (<code>r2</code>, <code>r1</code>) を書き換える命令なので、これらは分岐スロットに入れてはならない。</p>
+<p>この前提で考えると、分岐命令EXステージが完了してから、確定した分岐先の命令のIFステージを開始できる。<br>これにより、解答のパイプライン図を得る。</p>
+<h3><span id="4143">4.14.3</span></h3><h5><span id="問題">問題</span></h5><p>分岐の確定を1ステージ早める1つの方法は，条件分岐におけるALUでの演算をなくすことである．たとえば，bez rd,Labelやbnez rd,Labelといった命令が考えられる．これらの命令はそれぞれ，レジスタの値が0のとき，または0でないときに分岐することになる．beq命令の代わりにこうした分岐命令を使用するように，上のコードを変更せよ．一時レジスタとして，レジスタr8を使用できるものとする．また，R形式命令のseq（等しい場合に設定）を使用できるものとする．</p>
+<p>4.8節で，分岐の実行をIDステージに繰り上げることにより，制御ハザードの問題を緩和できることを説明した．そうするためには，図4.62に示したように，IDステージに専用の比較器を備える必要がある．しかしこのやり方を採用すると，IDステージのレイテンシが増大する可能性が生じ，追加のフォワーディング・ロジックとハザード検出回路も必要になる．</p>
+<h5><span id="解答">解答</span></h5><img src="/img/2020/01-23-4.14.3.svg" alt="4.14.3 EXステージまで分岐先のわからないbeqの代わりに、IDステージでわかるbnezを使う" width="auto" height="auto">
+
+<h5><span id="解説">解説</span></h5><p><code>beq</code> 命令を使うとALUでの演算が発生する設定なので、 <code>beq</code> 命令を <code>bez</code>, <code>bnez</code> で置き換えることを考える。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">beq r2,r0,label2</span><br></pre></td></tr></table></figure>
+
+<p>は、</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">seq  r8,r2,r0   # r8 &lt;- r2 &#x3D;&#x3D; r0</span><br><span class="line">bnez r8,label2  # goto label2 if r8 &#x3D;&#x3D; 1</span><br></pre></td></tr></table></figure>
+
+<p>と置き換えられる。したがって、命令列全体は以下のようになる。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">        lw   r2,0(r1)</span><br><span class="line">label1: seq  r8,r2,r0  # 一度 r8 &#x3D;&#x3D; 0, 次に r8 &#x3D;&#x3D; 1</span><br><span class="line">        bnez r8,label2</span><br><span class="line">        lw   r3,0(r2)</span><br><span class="line">        seq  r8,r3,r0  # r8 &#x3D;&#x3D; 1</span><br><span class="line">        bnez r8,label1</span><br><span class="line">        add r1,r3,r1</span><br><span class="line">label2: sw  r1,0(r2)</span><br></pre></td></tr></table></figure>
+
+<p>大問の設定に従い、 <code>bnez</code> では分岐成立予測（すなわち、指定されたラベルへ常にジャンプと予測）が行われるとする。<br>この設定で、解答のパイプライン図を得る。</p>
+<h3><span id="4144-未回答">4.14.4 (未回答)</span></h3><h5><span id="問題">問題</span></h5><p>上のコード中の最初の分岐命令を例として使用し，図4.62に示したようなIDステージでの分岐の実行をサポートするのに必要となる，ハザード検出ロジックを説明せよ．その新しいロジックでは，どのタイプのハザードを検出できるか．</p>
+<h5><span id="解答">解答</span></h5><h5><span id="解説">解説</span></h5><h3><span id="4145-未回答">4.14.5 (未回答)</span></h3><h5><span id="問題">問題</span></h5><p>上のコードに関して，分岐の実行をIDステージに繰り上げることにより，速度がどれだけ向上するか．答えの根拠も説明せよ．速度向上の計算においては，IDステージにおける追加の比較はクロック・サイクル時間に影響しないものとする．</p>
+<h5><span id="解答">解答</span></h5><h5><span id="解説">解説</span></h5><h3><span id="4146-未回答">4.14.6 (未回答)</span></h3><h5><span id="問題">問題</span></h5><p>上のコード中の最初の分岐命令を例として使用し，IDステージでの分岐の実行をサポートするために追加する必要がある，フォワーディング機能を説明せよ．この新しいフォワーディング・ユニットの複雑性を，図4.62中の既存のフォワーディング・ユニットの複雑性と比較せよ．</p>
+<h5><span id="解答">解答</span></h5><h5><span id="解説">解説</span></h5>
+    
+	</div>
+	<footer class="entry-footer">
+		<div class="entry-meta-footer">
+			<span class="category">
+				
+			</span>
+			<span class="tags">
+				
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E3%80%8E%E3%82%B3%E3%83%B3%E3%83%94%E3%83%A5%E3%83%BC%E3%82%BF%E3%81%AE%E6%A7%8B%E6%88%90%E3%81%A8%E8%A8%AD%E8%A8%88%E3%80%8F/" rel="tag">『コンピュータの構成と設計』</a></li></ul>
+
+			</span>
+		</div>
+	</footer>
+    
+    <footer class="author-info clearfix">
+      <img class="author-picture circle" src="https://www.gravatar.com/avatar/cb02a2b3f429b7c938d1fe2665e8e342">
+      <div class="author-content right">
+        <div class="author-caption">
+          <span class="label">author</span>
+          Sho Nakatani a.k.a. laysakura
+        </div>
+        <p class="author-description">
+          東京大学大学院 情報理工学系研究科 電子情報学専攻 修士課程で並列分散処理・ストリーム処理・データベースを研究。<br>
+          2014年4月に株式会社ディー・エヌ・エーにエンジニアスペシャリストとして入社し、ソーシャルゲームのサーバサイド共通基盤の開発に従事。<br>
+          2016年8月より、オンライン証券会社<a href="https://folio-sec.com" target="_blank" rel="noopener">株式会社FOLIO</a>に入社。バックエンドシステム開発・プロジェクトマネージメント・Engineering Managementに従事。<br>
+          2020年3月より<a href="https://idein.jp" target="_blank" rel="noopener">Idein株式会社</a>所属。<br>
+          随時副業募集中です: <a href="https://github.com/laysakura/resume-jp-for-side-job" target="_blank" rel="noopener">職務経歴書や募集職種</a>
+        </p>
+        <ul class="author-social-buttons">
+          <li class="author-social-button"><a class="fa fa-lg fa-twitter-square" href="https://twitter.com/laysakura" target="_blank" rel="noopener"></a></li>
+          <li class="author-social-button"><a class="fa fa-lg fa-github-square" href="https://github.com/laysakura" target="_blank" rel="noopener"></a></li>
+          <li class="author-social-button"><a class="fa fa-lg fa-facebook-square" href="https://www.facebook.com/lay.sakura" target="_blank" rel="noopener"></a></li>
+        </ul>
+      </div>
+    </footer>
+    
+	
+    
+<nav id="article-nav">
+  
+    <a href="/2020/01/31/handcraft-cpu-os-1/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          自作CPU &amp; 自作OSをやっていく (1) - 全体像（随時更新）
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/01/19/Patterson-Hennessy-5th-Excersise03/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          『コンピュータの構成と設計 第5版』演習問題解答集 第3章
+        
+      </div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+
+
+<section id="comments">
+  <div id="disqus_thread">
+
+  <!-- comment service provided by disqus -->
+  <script>
+    /**
+     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+     */
+    var disqus_config = function () {
+        this.page.url = https://laysakura.github.io/2020/01/28/Patterson-Hennessy-5th-Excersise04/;  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = https://laysakura.github.io/2020/01/28/Patterson-Hennessy-5th-Excersise04/; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    (function() {  // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        
+        s.src = '//laysakura.disqus.com/embed.js';
+        
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript" target="_blank" rel="noopener">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+    </div>
+    <div class="mb-search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:laysakura.github.io">
+  </form>
+</div>
+<footer id="footer">
+	<h1 class="footer-blog-title">
+		<a href="/">俺とお前とlaysakura</a>
+	</h1>
+	<span class="copyright">
+		&copy; 2020 Sho Nakatani a.k.a. laysakura<br>
+		Modify from <a href="https://sanographix.github.io/tumblr/apollo/" target="_blank">Apollo</a> theme, designed by <a href="https://www.sanographix.net/" target="_blank">SANOGRAPHIX.NET</a><br>
+		Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+	</span>
+</footer>
+
+    
+<script>
+  var disqus_shortname = 'laysakura';
+  
+  var disqus_url = 'https://laysakura.github.io/2020/01/28/Patterson-Hennessy-5th-Excersise04/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+
+  <!-- https://github.com/vfeskov/vanilla-back-to-top -->
+  <script src="https://unpkg.com/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js"></script>
+  <script>addBackToTop({
+    diameter: 50,
+    backgroundColor: '#33a6b880',
+    textColor: '#fff'
+  })</script>
+
+</body>
+</html>
