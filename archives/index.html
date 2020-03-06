@@ -99,7 +99,7 @@
 <ul>
 <li>lint, testなどの各ジョブが並列に動く（ジョブ実行数を多くしてないとdocker containerの立ち上げ分むしろ全体時間はロスになることもあるが…）。</li>
 <li><a href="https://docs.travis-ci.com/user/build-matrix/#matrix-expansion" target="_blank" rel="noopener">Travis CI のマトリクスビルド</a> に近いことを、 <code>parameters:</code> を使ってやっている。<ul>
-<li><code>rust-toolchain</code> ファイルに書かれたバージョンと、 <code>.circleci/config.yml</code> に書かれた MSRV (Minimum Supported Rust Version) の2つでビルドしている。</li>
+<li><a href="http://www.soudegesu.com/post/rust/rust-with-rustup/#%E3%83%84%E3%83%BC%E3%83%AB%E3%83%81%E3%82%A7%E3%82%A4%E3%83%B3%E3%82%92%E5%9B%BA%E5%AE%9A%E3%81%99%E3%82%8B" target="_blank" rel="noopener"><code>rust-toolchain</code> ファイル</a> に書かれたバージョンと、 <code>.circleci/config.yml</code> に書かれた MSRV (Minimum Supported Rust Version) の2つでビルドしている。</li>
 </ul>
 </li>
 <li><code>cargo-readme</code> を使ってrustdocとREADMEを比較し、どちらかがメンテされていない場合にエラーにする（お好みで）。</li>
