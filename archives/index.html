@@ -76,26 +76,26 @@
       
   
     <article id="post-ぼくのかんがえたさいきょうの-Circle-CI-設定-for-Rust" class="post">
-	<footer class="entry-meta-header">
-		<span class="meta-elements date">
-			<a href="/2020/03/06/rust-circle-ci/" class="article-date">
+  <footer class="entry-meta-header">
+    <span class="meta-elements date">
+      <a href="/2020/03/06/rust-circle-ci/" class="article-date">
   <time datetime="2020-03-05T22:02:35.000Z" itemprop="datePublished">2020-03-06</time>
 </a>
-		</span>
-	</footer>
-	
-	<header class="entry-header">
-		
+    </span>
+  </footer>
+  
+  <header class="entry-header">
+    
   
     <h1 itemprop="name" class="entry-title">
       <a class="article-title" href="/2020/03/06/rust-circle-ci/">ぼくのかんがえたさいきょうの Circle CI 設定 for Rust</a>
     </h1>
   
 
-	</header>
-	<div class="entry-content">
-		
-			<p>あまり見ない気がするので書きました。特徴は、</p>
+  </header>
+  <div class="entry-content">
+    
+    <p>あまり見ない気がするので書きました。特徴は、</p>
 <ul>
 <li>lint, testなどの各ジョブが並列に動く（ジョブ実行数を多くしてないとdocker containerの立ち上げ分むしろ全体時間はロスになることもあるが…）。</li>
 <li><a href="https://docs.travis-ci.com/user/build-matrix/#matrix-expansion" target="_blank" rel="noopener">Travis CI のマトリクスビルド</a> に近いことを、 <code>parameters:</code> を使ってやっている。<ul>
@@ -106,113 +106,113 @@
 <li>キャッシュ使う。</li>
 </ul>
 <p>あたりです。見慣れなさそうなところはインラインコメント付けましたので参考にしてください 💁‍♀️</p>
-			
-				<p class="article-more-link">
-					<a href="/2020/03/06/rust-circle-ci/#more">続きを読む</a>
-				</p>
-      
     
-	</div>
-	<footer class="entry-footer">
-		<div class="entry-meta-footer">
-			<span class="category">
-				
-			</span>
-			<span class="tags">
-				
+    <p class="article-more-link">
+      <a href="/2020/03/06/rust-circle-ci/#more">続きを読む</a>
+    </p>
+    
+    
+  </div>
+  <footer class="entry-footer">
+    <div class="entry-meta-footer">
+      <span class="category">
+        
+      </span>
+      <span class="tags">
+        
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Rust/" rel="tag">Rust</a></li></ul>
 
-			</span>
-		</div>
-	</footer>
-    
-	
+      </span>
+    </div>
+  </footer>
+  
+  
 </article>
 
 
-	<hr class="article-devider">
+<hr class="article-devider">
 
 
 
 
   
     <article id="post-自作CPU-自作OSをやっていく4-macos-papilio-pro-lx9" class="post">
-	<footer class="entry-meta-header">
-		<span class="meta-elements date">
-			<a href="/2020/02/16/handcraft-cpu-os-4/" class="article-date">
+  <footer class="entry-meta-header">
+    <span class="meta-elements date">
+      <a href="/2020/02/16/handcraft-cpu-os-4/" class="article-date">
   <time datetime="2020-02-16T11:10:00.000Z" itemprop="datePublished">2020-02-16</time>
 </a>
-		</span>
-	</footer>
-	
-	<header class="entry-header">
-		
+    </span>
+  </footer>
+  
+  <header class="entry-header">
+    
   
     <h1 itemprop="name" class="entry-title">
       <a class="article-title" href="/2020/02/16/handcraft-cpu-os-4/">自作CPU &amp; 自作OSをやっていく (4) - macOSでPapilio Pro LX9のFPGAにBitstreamファイルを書き込む</a>
     </h1>
   
 
-	</header>
-	<div class="entry-content">
-		
-			<img src="/img/2020/02-16-papilio-pro-lx9.jpg" alt="Papilio Pro LX9" width="800">
+  </header>
+  <div class="entry-content">
+    
+    <img src="/img/2020/02-16-papilio-pro-lx9.jpg" alt="Papilio Pro LX9" width="800">
 
 <p>2020年1月から、趣味エンジニアリング活動として自作CPUと自作OSをやっていく。</p>
 <p>最終的にはFPGAに自作のCPUを書き込んでいくのだが、筆者はFPGAを使った経験がほとんどない。<br>CPUの回路設計はまだ手もつけていないが、不確実性を下げるために、先にFPGAを購入して普段遣いのmacOSからFPGA開発ができるように整えておく。</p>
 <p>最終的には、macOSから <code>papilio-prog</code> コマンドでBitstreamファイル (<code>.bit</code>) を <a href="http://akizukidenshi.com/catalog/g/gM-06926/" target="_blank" rel="noopener">Papilio Pro LX9</a> 評価ボードに書き込むことに成功したので、その記録を備忘として残しておく。</p>
 <p><a href="/tags/自作CPU-自作OS/">自作CPU &amp; 自作OS</a> タグで、この前後の進捗とか目指しているもの（初回記事）とかを追えるようにしている。</p>
-			
-				<p class="article-more-link">
-					<a href="/2020/02/16/handcraft-cpu-os-4/#more">続きを読む</a>
-				</p>
-      
     
-	</div>
-	<footer class="entry-footer">
-		<div class="entry-meta-footer">
-			<span class="category">
-				
-			</span>
-			<span class="tags">
-				
+    <p class="article-more-link">
+      <a href="/2020/02/16/handcraft-cpu-os-4/#more">続きを読む</a>
+    </p>
+    
+    
+  </div>
+  <footer class="entry-footer">
+    <div class="entry-meta-footer">
+      <span class="category">
+        
+      </span>
+      <span class="tags">
+        
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%87%AA%E4%BD%9CCPU-%E8%87%AA%E4%BD%9COS/" rel="tag">自作CPU & 自作OS</a></li></ul>
 
-			</span>
-		</div>
-	</footer>
-    
-	
+      </span>
+    </div>
+  </footer>
+  
+  
 </article>
 
 
-	<hr class="article-devider">
+<hr class="article-devider">
 
 
 
 
   
     <article id="post-自作CPU-自作OSをやっていく3-riscv-tests" class="post">
-	<footer class="entry-meta-header">
-		<span class="meta-elements date">
-			<a href="/2020/02/09/handcraft-cpu-os-3/" class="article-date">
+  <footer class="entry-meta-header">
+    <span class="meta-elements date">
+      <a href="/2020/02/09/handcraft-cpu-os-3/" class="article-date">
   <time datetime="2020-02-09T06:00:00.000Z" itemprop="datePublished">2020-02-09</time>
 </a>
-		</span>
-	</footer>
-	
-	<header class="entry-header">
-		
+    </span>
+  </footer>
+  
+  <header class="entry-header">
+    
   
     <h1 itemprop="name" class="entry-title">
       <a class="article-title" href="/2020/02/09/handcraft-cpu-os-3/">自作CPU &amp; 自作OSをやっていく (3) - riscv/riscv-tests の挙動を追う</a>
     </h1>
   
 
-	</header>
-	<div class="entry-content">
-		
-			<p>2020年1月から、趣味エンジニアリング活動として自作CPUと自作OSをやっていく。</p>
+  </header>
+  <div class="entry-content">
+    
+    <p>2020年1月から、趣味エンジニアリング活動として自作CPUと自作OSをやっていく。</p>
 <p>今回は、自作CPUのパフォーマンスベンチマークとして利用するつもりの <a href="https://github.com/riscv/riscv-tests" target="_blank" rel="noopener">riscv-tests</a> の挙動を追ってみる。<br>関心があるのは、命令セットやOSの機能をどこまで用意してあげればベンチマークが実行できるのかという点。とりわけ、以下の観点をチェックしていく。</p>
 <ul>
 <li>ISA (命令セット)<ul>
@@ -228,57 +228,57 @@
 </li>
 </ul>
 <p><a href="/tags/自作CPU-自作OS/">自作CPU &amp; 自作OS</a> タグで、この前後の進捗とか目指しているもの（初回記事）とかを追えるようにしている。</p>
-			
-				<p class="article-more-link">
-					<a href="/2020/02/09/handcraft-cpu-os-3/#more">続きを読む</a>
-				</p>
-      
     
-	</div>
-	<footer class="entry-footer">
-		<div class="entry-meta-footer">
-			<span class="category">
-				
-			</span>
-			<span class="tags">
-				
+    <p class="article-more-link">
+      <a href="/2020/02/09/handcraft-cpu-os-3/#more">続きを読む</a>
+    </p>
+    
+    
+  </div>
+  <footer class="entry-footer">
+    <div class="entry-meta-footer">
+      <span class="category">
+        
+      </span>
+      <span class="tags">
+        
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%87%AA%E4%BD%9CCPU-%E8%87%AA%E4%BD%9COS/" rel="tag">自作CPU & 自作OS</a></li></ul>
 
-			</span>
-		</div>
-	</footer>
-    
-	
+      </span>
+    </div>
+  </footer>
+  
+  
 </article>
 
 
-	<hr class="article-devider">
+<hr class="article-devider">
 
 
 
 
   
     <article id="post-自作CPU-自作OSをやっていく2-riscv64imac-hello-rs" class="post">
-	<footer class="entry-meta-header">
-		<span class="meta-elements date">
-			<a href="/2020/02/03/handcraft-cpu-os-2/" class="article-date">
+  <footer class="entry-meta-header">
+    <span class="meta-elements date">
+      <a href="/2020/02/03/handcraft-cpu-os-2/" class="article-date">
   <time datetime="2020-02-03T05:45:00.000Z" itemprop="datePublished">2020-02-03</time>
 </a>
-		</span>
-	</footer>
-	
-	<header class="entry-header">
-		
+    </span>
+  </footer>
+  
+  <header class="entry-header">
+    
   
     <h1 itemprop="name" class="entry-title">
       <a class="article-title" href="/2020/02/03/handcraft-cpu-os-2/">自作CPU &amp; 自作OSをやっていく (2) - 64ビットRISC-Vの &#34;Hello World&#34; をRustで作った</a>
     </h1>
   
 
-	</header>
-	<div class="entry-content">
-		
-			<div style="text-align: center">
+  </header>
+  <div class="entry-content">
+    
+    <div style="text-align: center">
   <div class="github-card"
     data-user="laysakura"
     data-repo="riscv64imac-hello-rs"
@@ -296,109 +296,109 @@
 <p>2020年1月から、趣味エンジニアリング活動として自作CPUと自作OSをやっていく。</p>
 <p>今回は、64ビットRISC-V (RV64I) の “Hello World” をRustで作ったので、そのリポジトリの紹介。</p>
 <p><a href="/tags/自作CPU-自作OS/">自作CPU &amp; 自作OS</a> タグで、この前後の進捗とか目指しているもの（初回記事）とかを追えるようにしている。</p>
-			
-				<p class="article-more-link">
-					<a href="/2020/02/03/handcraft-cpu-os-2/#more">続きを読む</a>
-				</p>
-      
     
-	</div>
-	<footer class="entry-footer">
-		<div class="entry-meta-footer">
-			<span class="category">
-				
-			</span>
-			<span class="tags">
-				
+    <p class="article-more-link">
+      <a href="/2020/02/03/handcraft-cpu-os-2/#more">続きを読む</a>
+    </p>
+    
+    
+  </div>
+  <footer class="entry-footer">
+    <div class="entry-meta-footer">
+      <span class="category">
+        
+      </span>
+      <span class="tags">
+        
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%87%AA%E4%BD%9CCPU-%E8%87%AA%E4%BD%9COS/" rel="tag">自作CPU & 自作OS</a></li></ul>
 
-			</span>
-		</div>
-	</footer>
-    
-	
+      </span>
+    </div>
+  </footer>
+  
+  
 </article>
 
 
-	<hr class="article-devider">
+<hr class="article-devider">
 
 
 
 
   
     <article id="post-自作CPU-自作OSをやっていく" class="post">
-	<footer class="entry-meta-header">
-		<span class="meta-elements date">
-			<a href="/2020/01/31/handcraft-cpu-os-1/" class="article-date">
+  <footer class="entry-meta-header">
+    <span class="meta-elements date">
+      <a href="/2020/01/31/handcraft-cpu-os-1/" class="article-date">
   <time datetime="2020-01-31T11:54:08.000Z" itemprop="datePublished">2020-01-31</time>
 </a>
-		</span>
-	</footer>
-	
-	<header class="entry-header">
-		
+    </span>
+  </footer>
+  
+  <header class="entry-header">
+    
   
     <h1 itemprop="name" class="entry-title">
       <a class="article-title" href="/2020/01/31/handcraft-cpu-os-1/">自作CPU &amp; 自作OSをやっていく (1) - 全体像（随時更新）</a>
     </h1>
   
 
-	</header>
-	<div class="entry-content">
-		
-			<p>2020年1月から、趣味エンジニアリング活動として自作CPUと自作OSをやっていく。</p>
-<p>第一回のこの記事では、目指してることとか、作りたい成果物とか、ロードマップとか、進捗とかを記録していく。インプットが増えたり手を動かしていくと色々と軌道修正があるだろうから、この記事は随時更新されていく。ChangeLogをご参考。<br>進捗報告は <a href="/tags/自作CPU-自作OS/">自作CPU &amp; 自作OS</a> タグで追えるようにしておく。</p>
-			
-				<p class="article-more-link">
-					<a href="/2020/01/31/handcraft-cpu-os-1/#more">続きを読む</a>
-				</p>
-      
+  </header>
+  <div class="entry-content">
     
-	</div>
-	<footer class="entry-footer">
-		<div class="entry-meta-footer">
-			<span class="category">
-				
-			</span>
-			<span class="tags">
-				
+    <p>2020年1月から、趣味エンジニアリング活動として自作CPUと自作OSをやっていく。</p>
+<p>第一回のこの記事では、目指してることとか、作りたい成果物とか、ロードマップとか、進捗とかを記録していく。インプットが増えたり手を動かしていくと色々と軌道修正があるだろうから、この記事は随時更新されていく。ChangeLogをご参考。<br>進捗報告は <a href="/tags/自作CPU-自作OS/">自作CPU &amp; 自作OS</a> タグで追えるようにしておく。</p>
+    
+    <p class="article-more-link">
+      <a href="/2020/01/31/handcraft-cpu-os-1/#more">続きを読む</a>
+    </p>
+    
+    
+  </div>
+  <footer class="entry-footer">
+    <div class="entry-meta-footer">
+      <span class="category">
+        
+      </span>
+      <span class="tags">
+        
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%87%AA%E4%BD%9CCPU-%E8%87%AA%E4%BD%9COS/" rel="tag">自作CPU & 自作OS</a></li></ul>
 
-			</span>
-		</div>
-	</footer>
-    
-	
+      </span>
+    </div>
+  </footer>
+  
+  
 </article>
 
 
-	<hr class="article-devider">
+<hr class="article-devider">
 
 
 
 
   
     <article id="post-『コンピュータの構成と設計-第5版』演習問題回答集-第4章" class="post">
-	<footer class="entry-meta-header">
-		<span class="meta-elements date">
-			<a href="/2020/01/28/Patterson-Hennessy-5th-Excersise04/" class="article-date">
+  <footer class="entry-meta-header">
+    <span class="meta-elements date">
+      <a href="/2020/01/28/Patterson-Hennessy-5th-Excersise04/" class="article-date">
   <time datetime="2020-01-28T00:40:00.000Z" itemprop="datePublished">2020-01-28</time>
 </a>
-		</span>
-	</footer>
-	
-	<header class="entry-header">
-		
+    </span>
+  </footer>
+  
+  <header class="entry-header">
+    
   
     <h1 itemprop="name" class="entry-title">
       <a class="article-title" href="/2020/01/28/Patterson-Hennessy-5th-Excersise04/">『コンピュータの構成と設計 第5版』演習問題解答集 第4章</a>
     </h1>
   
 
-	</header>
-	<div class="entry-content">
-		
-			<iframe style="width:120px;height:240px;display:block;margin:0px auto;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="https://rcm-fe.amazon-adsystem.com/e/cm?ref=qf_sp_asin_til&t=laysakura-22&m=amazon&o=9&p=8&l=as1&IS2=1&detail=1&asins=B01M5FMGDL&linkId=93bb4e3be4ca3abe7e74716873f1aec2&bc1=000000&lt1=_top&fc1=333333&lc1=0066c0&bg1=ffffff&f=ifr">
+  </header>
+  <div class="entry-content">
+    
+    <iframe style="width:120px;height:240px;display:block;margin:0px auto;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="https://rcm-fe.amazon-adsystem.com/e/cm?ref=qf_sp_asin_til&t=laysakura-22&m=amazon&o=9&p=8&l=as1&IS2=1&detail=1&asins=B01M5FMGDL&linkId=93bb4e3be4ca3abe7e74716873f1aec2&bc1=000000&lt1=_top&fc1=333333&lc1=0066c0&bg1=ffffff&f=ifr">
     </iframe>
 
 <p>“パタヘネ本” でおなじみの『コンピュータの構成と設計 第5版』の解答集です。読者は書籍を保有していることを前提として解答・解説を記載します。<br>訂正案などありましたら<a href="https://github.com/laysakura/laysakura.github.io/tree/ready/source/_posts" target="_blank" rel="noopener">本ブログ記事のリポジトリ</a> へPull-Requestくだされば幸いです😊</p>
@@ -411,57 +411,57 @@
 <li>『コンピュータの構成と設計 第5版』演習問題解答集 第5章 （執筆中）</li>
 <li>『コンピュータの構成と設計 第5版』演習問題解答集 第6章 （執筆中）</li>
 </ol>
-			
-				<p class="article-more-link">
-					<a href="/2020/01/28/Patterson-Hennessy-5th-Excersise04/#more">続きを読む</a>
-				</p>
-      
     
-	</div>
-	<footer class="entry-footer">
-		<div class="entry-meta-footer">
-			<span class="category">
-				
-			</span>
-			<span class="tags">
-				
+    <p class="article-more-link">
+      <a href="/2020/01/28/Patterson-Hennessy-5th-Excersise04/#more">続きを読む</a>
+    </p>
+    
+    
+  </div>
+  <footer class="entry-footer">
+    <div class="entry-meta-footer">
+      <span class="category">
+        
+      </span>
+      <span class="tags">
+        
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E3%80%8E%E3%82%B3%E3%83%B3%E3%83%94%E3%83%A5%E3%83%BC%E3%82%BF%E3%81%AE%E6%A7%8B%E6%88%90%E3%81%A8%E8%A8%AD%E8%A8%88%E3%80%8F/" rel="tag">『コンピュータの構成と設計』</a></li></ul>
 
-			</span>
-		</div>
-	</footer>
-    
-	
+      </span>
+    </div>
+  </footer>
+  
+  
 </article>
 
 
-	<hr class="article-devider">
+<hr class="article-devider">
 
 
 
 
   
     <article id="post-『コンピュータの構成と設計-第5版』演習問題回答集-第3章" class="post">
-	<footer class="entry-meta-header">
-		<span class="meta-elements date">
-			<a href="/2020/01/19/Patterson-Hennessy-5th-Excersise03/" class="article-date">
+  <footer class="entry-meta-header">
+    <span class="meta-elements date">
+      <a href="/2020/01/19/Patterson-Hennessy-5th-Excersise03/" class="article-date">
   <time datetime="2020-01-19T00:19:24.000Z" itemprop="datePublished">2020-01-19</time>
 </a>
-		</span>
-	</footer>
-	
-	<header class="entry-header">
-		
+    </span>
+  </footer>
+  
+  <header class="entry-header">
+    
   
     <h1 itemprop="name" class="entry-title">
       <a class="article-title" href="/2020/01/19/Patterson-Hennessy-5th-Excersise03/">『コンピュータの構成と設計 第5版』演習問題解答集 第3章</a>
     </h1>
   
 
-	</header>
-	<div class="entry-content">
-		
-			<iframe style="width:120px;height:240px;display:block;margin:0px auto;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="https://rcm-fe.amazon-adsystem.com/e/cm?ref=qf_sp_asin_til&t=laysakura-22&m=amazon&o=9&p=8&l=as1&IS2=1&detail=1&asins=B01M5FMGDL&linkId=93bb4e3be4ca3abe7e74716873f1aec2&bc1=000000&lt1=_top&fc1=333333&lc1=0066c0&bg1=ffffff&f=ifr">
+  </header>
+  <div class="entry-content">
+    
+    <iframe style="width:120px;height:240px;display:block;margin:0px auto;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="https://rcm-fe.amazon-adsystem.com/e/cm?ref=qf_sp_asin_til&t=laysakura-22&m=amazon&o=9&p=8&l=as1&IS2=1&detail=1&asins=B01M5FMGDL&linkId=93bb4e3be4ca3abe7e74716873f1aec2&bc1=000000&lt1=_top&fc1=333333&lc1=0066c0&bg1=ffffff&f=ifr">
     </iframe>
 
 <p>“パタヘネ本” でおなじみの『コンピュータの構成と設計 第5版』の解答集です。読者は書籍を保有していることを前提として解答・解説を記載します。<br>訂正案などありましたら<a href="https://github.com/laysakura/laysakura.github.io/tree/ready/source/_posts" target="_blank" rel="noopener">本ブログ記事のリポジトリ</a> へPull-Requestくだされば幸いです😊</p>
@@ -482,57 +482,57 @@
 <li>『コンピュータの構成と設計 第5版』演習問題解答集 第5章 （執筆中）</li>
 <li>『コンピュータの構成と設計 第5版』演習問題解答集 第6章 （執筆中）</li>
 </ol>
-			
-				<p class="article-more-link">
-					<a href="/2020/01/19/Patterson-Hennessy-5th-Excersise03/#more">続きを読む</a>
-				</p>
-      
     
-	</div>
-	<footer class="entry-footer">
-		<div class="entry-meta-footer">
-			<span class="category">
-				
-			</span>
-			<span class="tags">
-				
+    <p class="article-more-link">
+      <a href="/2020/01/19/Patterson-Hennessy-5th-Excersise03/#more">続きを読む</a>
+    </p>
+    
+    
+  </div>
+  <footer class="entry-footer">
+    <div class="entry-meta-footer">
+      <span class="category">
+        
+      </span>
+      <span class="tags">
+        
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E3%80%8E%E3%82%B3%E3%83%B3%E3%83%94%E3%83%A5%E3%83%BC%E3%82%BF%E3%81%AE%E6%A7%8B%E6%88%90%E3%81%A8%E8%A8%AD%E8%A8%88%E3%80%8F/" rel="tag">『コンピュータの構成と設計』</a></li></ul>
 
-			</span>
-		</div>
-	</footer>
-    
-	
+      </span>
+    </div>
+  </footer>
+  
+  
 </article>
 
 
-	<hr class="article-devider">
+<hr class="article-devider">
 
 
 
 
   
     <article id="post-『コンピュータの構成と設計-第5版』演習問題回答集-第2章" class="post">
-	<footer class="entry-meta-header">
-		<span class="meta-elements date">
-			<a href="/2020/01/13/Patterson-Hennessy-5th-Excersise02/" class="article-date">
+  <footer class="entry-meta-header">
+    <span class="meta-elements date">
+      <a href="/2020/01/13/Patterson-Hennessy-5th-Excersise02/" class="article-date">
   <time datetime="2020-01-13T06:25:41.000Z" itemprop="datePublished">2020-01-13</time>
 </a>
-		</span>
-	</footer>
-	
-	<header class="entry-header">
-		
+    </span>
+  </footer>
+  
+  <header class="entry-header">
+    
   
     <h1 itemprop="name" class="entry-title">
       <a class="article-title" href="/2020/01/13/Patterson-Hennessy-5th-Excersise02/">『コンピュータの構成と設計 第5版』演習問題解答集 第2章</a>
     </h1>
   
 
-	</header>
-	<div class="entry-content">
-		
-			<iframe style="width:120px;height:240px;display:block;margin:0px auto;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="https://rcm-fe.amazon-adsystem.com/e/cm?ref=qf_sp_asin_til&t=laysakura-22&m=amazon&o=9&p=8&l=as1&IS2=1&detail=1&asins=B01M5FMGDL&linkId=93bb4e3be4ca3abe7e74716873f1aec2&bc1=000000&lt1=_top&fc1=333333&lc1=0066c0&bg1=ffffff&f=ifr">
+  </header>
+  <div class="entry-content">
+    
+    <iframe style="width:120px;height:240px;display:block;margin:0px auto;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="https://rcm-fe.amazon-adsystem.com/e/cm?ref=qf_sp_asin_til&t=laysakura-22&m=amazon&o=9&p=8&l=as1&IS2=1&detail=1&asins=B01M5FMGDL&linkId=93bb4e3be4ca3abe7e74716873f1aec2&bc1=000000&lt1=_top&fc1=333333&lc1=0066c0&bg1=ffffff&f=ifr">
     </iframe>
 
 <p>“パタヘネ本” でおなじみの『コンピュータの構成と設計 第5版』の解答集です。読者は書籍を保有していることを前提として解答・解説を記載します。<br>訂正案などありましたら<a href="https://github.com/laysakura/laysakura.github.io/tree/ready/source/_posts" target="_blank" rel="noopener">本ブログ記事のリポジトリ</a> へPull-Requestくだされば幸いです😊</p>
@@ -545,113 +545,113 @@
 <li>『コンピュータの構成と設計 第5版』演習問題解答集 第5章 （執筆中）</li>
 <li>『コンピュータの構成と設計 第5版』演習問題解答集 第6章 （執筆中）</li>
 </ol>
-			
-				<p class="article-more-link">
-					<a href="/2020/01/13/Patterson-Hennessy-5th-Excersise02/#more">続きを読む</a>
-				</p>
-      
     
-	</div>
-	<footer class="entry-footer">
-		<div class="entry-meta-footer">
-			<span class="category">
-				
-			</span>
-			<span class="tags">
-				
+    <p class="article-more-link">
+      <a href="/2020/01/13/Patterson-Hennessy-5th-Excersise02/#more">続きを読む</a>
+    </p>
+    
+    
+  </div>
+  <footer class="entry-footer">
+    <div class="entry-meta-footer">
+      <span class="category">
+        
+      </span>
+      <span class="tags">
+        
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E3%80%8E%E3%82%B3%E3%83%B3%E3%83%94%E3%83%A5%E3%83%BC%E3%82%BF%E3%81%AE%E6%A7%8B%E6%88%90%E3%81%A8%E8%A8%AD%E8%A8%88%E3%80%8F/" rel="tag">『コンピュータの構成と設計』</a></li></ul>
 
-			</span>
-		</div>
-	</footer>
-    
-	
+      </span>
+    </div>
+  </footer>
+  
+  
 </article>
 
 
-	<hr class="article-devider">
+<hr class="article-devider">
 
 
 
 
   
     <article id="post-二分探索木-Rustで始めるデータ構造とアルゴリズム（第2回）" class="post">
-	<footer class="entry-meta-header">
-		<span class="meta-elements date">
-			<a href="/2019/12/25/rust-DataStructures-Algorithm-BinarySearchTree/" class="article-date">
+  <footer class="entry-meta-header">
+    <span class="meta-elements date">
+      <a href="/2019/12/25/rust-DataStructures-Algorithm-BinarySearchTree/" class="article-date">
   <time datetime="2019-12-25T00:47:32.000Z" itemprop="datePublished">2019-12-25</time>
 </a>
-		</span>
-	</footer>
-	
-	<header class="entry-header">
-		
+    </span>
+  </footer>
+  
+  <header class="entry-header">
+    
   
     <h1 itemprop="name" class="entry-title">
       <a class="article-title" href="/2019/12/25/rust-DataStructures-Algorithm-BinarySearchTree/">二分探索木 - Rustではじめるデータ構造とアルゴリズム（第2回）</a>
     </h1>
   
 
-	</header>
-	<div class="entry-content">
-		
-			<img src="/img/2019/12-25-le-ge.png" alt="簡単な二分探索木" width="800">
+  </header>
+  <div class="entry-content">
+    
+    <img src="/img/2019/12-25-le-ge.png" alt="簡単な二分探索木" width="800">
 
 <p>Rustの特徴のひとつは、所有権(ownership)・移動(move)・借用(borrow)の概念です。これらがコンパイル時に厳格にチェックされることにより、古くから未定義挙動でプログラマを悩ませてきたダングリングポインタなどの問題がなくなり、メモリ安全性がもたらされます。</p>
 <p>しかし一方で、自分で多少複雑なデータ構造を定義しようとする場合にはコンパイルを通すだけでもかなりの知識・力量が要求されます。</p>
 <p>この（不定期）連載では、 <strong>Rustではじめるデータ構造とアルゴリズム</strong> と題し、プログラミングコンテストなどでよく見かける基礎的なデータ構造とアルゴリズムを、できるだけシンプルにRustで実装していきます。 <code>&amp;</code>, <code>&amp;mut</code>, <code>Box</code>, <code>Rc</code>, <code>Cell</code>, <code>RefCell</code> などの使い分けや、なぜそれを使う必要があるかの解説を、実例を通して行います。</p>
 <p>今回第2回では、 <strong>二分探索木</strong> を取り扱います。値の大小に沿った構造を持つ二分木であり、単純なデータ構造でありながら、検索やソートなど実用性が高いです。第1回の二分木に少し制約を付け足した構造になるので、未読の方はぜひ第1回のほうからご覧ください。</p>
-			
-				<p class="article-more-link">
-					<a href="/2019/12/25/rust-DataStructures-Algorithm-BinarySearchTree/#more">続きを読む</a>
-				</p>
-      
     
-	</div>
-	<footer class="entry-footer">
-		<div class="entry-meta-footer">
-			<span class="category">
-				
-			</span>
-			<span class="tags">
-				
+    <p class="article-more-link">
+      <a href="/2019/12/25/rust-DataStructures-Algorithm-BinarySearchTree/#more">続きを読む</a>
+    </p>
+    
+    
+  </div>
+  <footer class="entry-footer">
+    <div class="entry-meta-footer">
+      <span class="category">
+        
+      </span>
+      <span class="tags">
+        
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Rust/" rel="tag">Rust</a></li></ul>
 
-			</span>
-		</div>
-	</footer>
-    
-	
+      </span>
+    </div>
+  </footer>
+  
+  
 </article>
 
 
-	<hr class="article-devider">
+<hr class="article-devider">
 
 
 
 
   
     <article id="post-二分木-Rustではじめるデータ構造とアルゴリズム（第1回）" class="post">
-	<footer class="entry-meta-header">
-		<span class="meta-elements date">
-			<a href="/2019/12/22/rust-DataStructures-Algorithm-BinaryTree/" class="article-date">
+  <footer class="entry-meta-header">
+    <span class="meta-elements date">
+      <a href="/2019/12/22/rust-DataStructures-Algorithm-BinaryTree/" class="article-date">
   <time datetime="2019-12-22T06:04:14.000Z" itemprop="datePublished">2019-12-22</time>
 </a>
-		</span>
-	</footer>
-	
-	<header class="entry-header">
-		
+    </span>
+  </footer>
+  
+  <header class="entry-header">
+    
   
     <h1 itemprop="name" class="entry-title">
       <a class="article-title" href="/2019/12/22/rust-DataStructures-Algorithm-BinaryTree/">二分木 - Rustではじめるデータ構造とアルゴリズム（第1回）</a>
     </h1>
   
 
-	</header>
-	<div class="entry-content">
-		
-			<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Binary_tree.svg/384px-Binary_tree.svg.png" alt="簡単な二分木（引用元: Wikipedia）" width="400" height="333">
+  </header>
+  <div class="entry-content">
+    
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Binary_tree.svg/384px-Binary_tree.svg.png" alt="簡単な二分木（引用元: Wikipedia）" width="400" height="333">
 
 <p>Rustの特徴のひとつは、所有権(ownership)・移動(move)・借用(borrow)の概念です。これらがコンパイル時に厳格にチェックされることにより、古くから未定義挙動でプログラマを悩ませてきたダングリングポインタなどの問題がなくなり、メモリ安全性がもたらされます。</p>
 <p>しかし一方で、自分で多少複雑なデータ構造を定義しようとする場合にはコンパイルを通すだけでもかなりの知識・力量が要求されます。</p>
@@ -663,31 +663,31 @@
 <li>関連するアルゴリズムの説明と、（汎用的に実装できる場合は）Rustでの実装</li>
 <li>定義したデータ構造とアルゴリズムを使って、プログラミングコンテストの問題を解いてみる</li>
 </ol>
-			
-				<p class="article-more-link">
-					<a href="/2019/12/22/rust-DataStructures-Algorithm-BinaryTree/#more">続きを読む</a>
-				</p>
-      
     
-	</div>
-	<footer class="entry-footer">
-		<div class="entry-meta-footer">
-			<span class="category">
-				
-			</span>
-			<span class="tags">
-				
+    <p class="article-more-link">
+      <a href="/2019/12/22/rust-DataStructures-Algorithm-BinaryTree/#more">続きを読む</a>
+    </p>
+    
+    
+  </div>
+  <footer class="entry-footer">
+    <div class="entry-meta-footer">
+      <span class="category">
+        
+      </span>
+      <span class="tags">
+        
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Rust/" rel="tag">Rust</a></li></ul>
 
-			</span>
-		</div>
-	</footer>
-    
-	
+      </span>
+    </div>
+  </footer>
+  
+  
 </article>
 
 
-	<hr class="article-devider">
+<hr class="article-devider">
 
 
 

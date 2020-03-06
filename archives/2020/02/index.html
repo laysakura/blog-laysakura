@@ -76,82 +76,82 @@
       
   
     <article id="post-自作CPU-自作OSをやっていく4-macos-papilio-pro-lx9" class="post">
-	<footer class="entry-meta-header">
-		<span class="meta-elements date">
-			<a href="/2020/02/16/handcraft-cpu-os-4/" class="article-date">
+  <footer class="entry-meta-header">
+    <span class="meta-elements date">
+      <a href="/2020/02/16/handcraft-cpu-os-4/" class="article-date">
   <time datetime="2020-02-16T11:10:00.000Z" itemprop="datePublished">2020-02-16</time>
 </a>
-		</span>
-	</footer>
-	
-	<header class="entry-header">
-		
+    </span>
+  </footer>
+  
+  <header class="entry-header">
+    
   
     <h1 itemprop="name" class="entry-title">
       <a class="article-title" href="/2020/02/16/handcraft-cpu-os-4/">自作CPU &amp; 自作OSをやっていく (4) - macOSでPapilio Pro LX9のFPGAにBitstreamファイルを書き込む</a>
     </h1>
   
 
-	</header>
-	<div class="entry-content">
-		
-			<img src="/img/2020/02-16-papilio-pro-lx9.jpg" alt="Papilio Pro LX9" width="800">
+  </header>
+  <div class="entry-content">
+    
+    <img src="/img/2020/02-16-papilio-pro-lx9.jpg" alt="Papilio Pro LX9" width="800">
 
 <p>2020年1月から、趣味エンジニアリング活動として自作CPUと自作OSをやっていく。</p>
 <p>最終的にはFPGAに自作のCPUを書き込んでいくのだが、筆者はFPGAを使った経験がほとんどない。<br>CPUの回路設計はまだ手もつけていないが、不確実性を下げるために、先にFPGAを購入して普段遣いのmacOSからFPGA開発ができるように整えておく。</p>
 <p>最終的には、macOSから <code>papilio-prog</code> コマンドでBitstreamファイル (<code>.bit</code>) を <a href="http://akizukidenshi.com/catalog/g/gM-06926/" target="_blank" rel="noopener">Papilio Pro LX9</a> 評価ボードに書き込むことに成功したので、その記録を備忘として残しておく。</p>
 <p><a href="/tags/自作CPU-自作OS/">自作CPU &amp; 自作OS</a> タグで、この前後の進捗とか目指しているもの（初回記事）とかを追えるようにしている。</p>
-			
-				<p class="article-more-link">
-					<a href="/2020/02/16/handcraft-cpu-os-4/#more">続きを読む</a>
-				</p>
-      
     
-	</div>
-	<footer class="entry-footer">
-		<div class="entry-meta-footer">
-			<span class="category">
-				
-			</span>
-			<span class="tags">
-				
+    <p class="article-more-link">
+      <a href="/2020/02/16/handcraft-cpu-os-4/#more">続きを読む</a>
+    </p>
+    
+    
+  </div>
+  <footer class="entry-footer">
+    <div class="entry-meta-footer">
+      <span class="category">
+        
+      </span>
+      <span class="tags">
+        
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%87%AA%E4%BD%9CCPU-%E8%87%AA%E4%BD%9COS/" rel="tag">自作CPU & 自作OS</a></li></ul>
 
-			</span>
-		</div>
-	</footer>
-    
-	
+      </span>
+    </div>
+  </footer>
+  
+  
 </article>
 
 
-	<hr class="article-devider">
+<hr class="article-devider">
 
 
 
 
   
     <article id="post-自作CPU-自作OSをやっていく3-riscv-tests" class="post">
-	<footer class="entry-meta-header">
-		<span class="meta-elements date">
-			<a href="/2020/02/09/handcraft-cpu-os-3/" class="article-date">
+  <footer class="entry-meta-header">
+    <span class="meta-elements date">
+      <a href="/2020/02/09/handcraft-cpu-os-3/" class="article-date">
   <time datetime="2020-02-09T06:00:00.000Z" itemprop="datePublished">2020-02-09</time>
 </a>
-		</span>
-	</footer>
-	
-	<header class="entry-header">
-		
+    </span>
+  </footer>
+  
+  <header class="entry-header">
+    
   
     <h1 itemprop="name" class="entry-title">
       <a class="article-title" href="/2020/02/09/handcraft-cpu-os-3/">自作CPU &amp; 自作OSをやっていく (3) - riscv/riscv-tests の挙動を追う</a>
     </h1>
   
 
-	</header>
-	<div class="entry-content">
-		
-			<p>2020年1月から、趣味エンジニアリング活動として自作CPUと自作OSをやっていく。</p>
+  </header>
+  <div class="entry-content">
+    
+    <p>2020年1月から、趣味エンジニアリング活動として自作CPUと自作OSをやっていく。</p>
 <p>今回は、自作CPUのパフォーマンスベンチマークとして利用するつもりの <a href="https://github.com/riscv/riscv-tests" target="_blank" rel="noopener">riscv-tests</a> の挙動を追ってみる。<br>関心があるのは、命令セットやOSの機能をどこまで用意してあげればベンチマークが実行できるのかという点。とりわけ、以下の観点をチェックしていく。</p>
 <ul>
 <li>ISA (命令セット)<ul>
@@ -167,57 +167,57 @@
 </li>
 </ul>
 <p><a href="/tags/自作CPU-自作OS/">自作CPU &amp; 自作OS</a> タグで、この前後の進捗とか目指しているもの（初回記事）とかを追えるようにしている。</p>
-			
-				<p class="article-more-link">
-					<a href="/2020/02/09/handcraft-cpu-os-3/#more">続きを読む</a>
-				</p>
-      
     
-	</div>
-	<footer class="entry-footer">
-		<div class="entry-meta-footer">
-			<span class="category">
-				
-			</span>
-			<span class="tags">
-				
+    <p class="article-more-link">
+      <a href="/2020/02/09/handcraft-cpu-os-3/#more">続きを読む</a>
+    </p>
+    
+    
+  </div>
+  <footer class="entry-footer">
+    <div class="entry-meta-footer">
+      <span class="category">
+        
+      </span>
+      <span class="tags">
+        
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%87%AA%E4%BD%9CCPU-%E8%87%AA%E4%BD%9COS/" rel="tag">自作CPU & 自作OS</a></li></ul>
 
-			</span>
-		</div>
-	</footer>
-    
-	
+      </span>
+    </div>
+  </footer>
+  
+  
 </article>
 
 
-	<hr class="article-devider">
+<hr class="article-devider">
 
 
 
 
   
     <article id="post-自作CPU-自作OSをやっていく2-riscv64imac-hello-rs" class="post">
-	<footer class="entry-meta-header">
-		<span class="meta-elements date">
-			<a href="/2020/02/03/handcraft-cpu-os-2/" class="article-date">
+  <footer class="entry-meta-header">
+    <span class="meta-elements date">
+      <a href="/2020/02/03/handcraft-cpu-os-2/" class="article-date">
   <time datetime="2020-02-03T05:45:00.000Z" itemprop="datePublished">2020-02-03</time>
 </a>
-		</span>
-	</footer>
-	
-	<header class="entry-header">
-		
+    </span>
+  </footer>
+  
+  <header class="entry-header">
+    
   
     <h1 itemprop="name" class="entry-title">
       <a class="article-title" href="/2020/02/03/handcraft-cpu-os-2/">自作CPU &amp; 自作OSをやっていく (2) - 64ビットRISC-Vの &#34;Hello World&#34; をRustで作った</a>
     </h1>
   
 
-	</header>
-	<div class="entry-content">
-		
-			<div style="text-align: center">
+  </header>
+  <div class="entry-content">
+    
+    <div style="text-align: center">
   <div class="github-card"
     data-user="laysakura"
     data-repo="riscv64imac-hello-rs"
@@ -235,31 +235,31 @@
 <p>2020年1月から、趣味エンジニアリング活動として自作CPUと自作OSをやっていく。</p>
 <p>今回は、64ビットRISC-V (RV64I) の “Hello World” をRustで作ったので、そのリポジトリの紹介。</p>
 <p><a href="/tags/自作CPU-自作OS/">自作CPU &amp; 自作OS</a> タグで、この前後の進捗とか目指しているもの（初回記事）とかを追えるようにしている。</p>
-			
-				<p class="article-more-link">
-					<a href="/2020/02/03/handcraft-cpu-os-2/#more">続きを読む</a>
-				</p>
-      
     
-	</div>
-	<footer class="entry-footer">
-		<div class="entry-meta-footer">
-			<span class="category">
-				
-			</span>
-			<span class="tags">
-				
+    <p class="article-more-link">
+      <a href="/2020/02/03/handcraft-cpu-os-2/#more">続きを読む</a>
+    </p>
+    
+    
+  </div>
+  <footer class="entry-footer">
+    <div class="entry-meta-footer">
+      <span class="category">
+        
+      </span>
+      <span class="tags">
+        
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%87%AA%E4%BD%9CCPU-%E8%87%AA%E4%BD%9COS/" rel="tag">自作CPU & 自作OS</a></li></ul>
 
-			</span>
-		</div>
-	</footer>
-    
-	
+      </span>
+    </div>
+  </footer>
+  
+  
 </article>
 
 
-	<hr class="article-devider">
+<hr class="article-devider">
 
 
 

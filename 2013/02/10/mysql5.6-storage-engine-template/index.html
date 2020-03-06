@@ -80,26 +80,26 @@
 </header>
     <div id="main">
       <article id="post-MySQL-5-6-で動くストレージエンジン・テンプレート" class="post">
-	<footer class="entry-meta-header">
-		<span class="meta-elements date">
-			<a href="/2013/02/10/mysql5.6-storage-engine-template/" class="article-date">
+  <footer class="entry-meta-header">
+    <span class="meta-elements date">
+      <a href="/2013/02/10/mysql5.6-storage-engine-template/" class="article-date">
   <time datetime="2013-02-10T00:59:08.000Z" itemprop="datePublished">2013-02-10</time>
 </a>
-		</span>
-	</footer>
-	
-	<header class="entry-header">
-		
+    </span>
+  </footer>
+  
+  <header class="entry-header">
+    
   
     <h1 class="article-title entry-title" itemprop="name">
       MySQL 5.6 で動くストレージエンジン・テンプレート
     </h1>
   
 
-	</header>
-	<div class="entry-content">
-		
-    	<p>MySQL 5.6 で動く Skeleton Engine, <strong>Yet Another Skeleton Engine</strong> を Github で公開してます．<br><a href="https://github.com/laysakura/mysql-YetAnotherSkeletonEngine" target="_blank" rel="noopener">https://github.com/laysakura/mysql-YetAnotherSkeletonEngine</a></p>
+  </header>
+  <div class="entry-content">
+    
+    <p>MySQL 5.6 で動く Skeleton Engine, <strong>Yet Another Skeleton Engine</strong> を Github で公開してます．<br><a href="https://github.com/laysakura/mysql-YetAnotherSkeletonEngine" target="_blank" rel="noopener">https://github.com/laysakura/mysql-YetAnotherSkeletonEngine</a></p>
 <p>Skeleton Engine は MySQL のストレージエンジンを作成するためのテンプレートです．<br>オリジナルのものは<br><a href="http://www.sourcefiles.org/Databases/Utilities/" target="_blank" rel="noopener">http://www.sourcefiles.org/Databases/Utilities/</a><br>の skeleton_engine-0.7.tar.gz でダウンロード可能でした(2013/02/10 現在)が，古いバージョンの MySQL を前提としており，MySQL 5.6 にオリジナルのままの Skeleton Engine を組込むことはできません．<br>オリジナルのものが MySQL 5.6 で使えない理由は最後の節に記載します．</p>
 <p>そこで Yet Another Skeleton Engine と名付けまして，MySQL 5.6 で動くストレージエンジンのテンプレートを公開しました．<br>本エントリでは，まず Yet Another Skeleton Engine の使い方を記し，次にメモ程度にリポジトリ作成作業のログを記します．</p>
 <a id="more"></a>
@@ -162,44 +162,47 @@
 <figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/perl</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">use</span> strict;</span><br><span class="line"><span class="keyword">use</span> warnings;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">use</span> DBI;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">my</span> $TEST_ROWS;</span><br><span class="line">BEGIN &#123;</span><br><span class="line">    $TEST_ROWS = $ENV<span class="string">&#123;TEST_ROWS&#125;</span> || <span class="number">1024</span>;</span><br><span class="line">&#125;;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">use</span> Test::More <span class="string">tests =&gt;</span> $TEST_ROWS * <span class="number">4</span> + <span class="number">2</span>;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">use</span> File::Basename;</span><br><span class="line"><span class="keyword">use</span> Cwd <span class="string">'realpath'</span>;</span><br><span class="line"><span class="keyword">my</span> $testdir = realpath(dirname(__FILE_<span class="number">_</span>));</span><br><span class="line"> </span><br><span class="line"><span class="keyword">my</span> $dbh = DBI-&gt;<span class="keyword">connect</span>(</span><br><span class="line">    $ENV<span class="string">&#123;DBI&#125;</span> || <span class="string">'dbi:mysql:database=test;host=localhost'</span>,</span><br><span class="line">    $ENV<span class="string">&#123;DBI_USER&#125;</span> || <span class="string">'root'</span>,</span><br><span class="line">    $ENV<span class="string">&#123;DBI_PASSWORD&#125;</span> || <span class="string">''</span>,</span><br><span class="line">) <span class="keyword">or</span> <span class="keyword">die</span> <span class="string">'connection failed:'</span>;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="comment">## Crash bug repro                                                                                                                                                                                                                  </span></span><br><span class="line">ok($dbh-&gt;<span class="keyword">do</span>(<span class="string">"drop table if exists t_example"</span>));</span><br><span class="line">ok($dbh-&gt;<span class="keyword">do</span>(<span class="string">"create table t_example (a INT) engine = ya_skeleton"</span>));</span><br><span class="line"> </span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">my</span> $i = <span class="number">0</span>; $i &lt; $TEST_ROWS; $i++) &#123;</span><br><span class="line">    ok($dbh-&gt;<span class="keyword">do</span>(<span class="string">"insert into t_example values (777),(333),(888)"</span>));</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">my</span> $i = <span class="number">0</span>; $i &lt; $TEST_ROWS; $i++) &#123;</span><br><span class="line">    ok($dbh-&gt;<span class="keyword">do</span>(<span class="string">"select * from t_example"</span>));</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">my</span> $i = <span class="number">0</span>; $i &lt; $TEST_ROWS; $i++) &#123;</span><br><span class="line">    ok($dbh-&gt;<span class="keyword">do</span>(<span class="string">"insert into t_example values (777),(333),(888)"</span>));</span><br><span class="line">    ok($dbh-&gt;<span class="keyword">do</span>(<span class="string">"select * from t_example"</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
     
-	</div>
-	<footer class="entry-footer">
-		<div class="entry-meta-footer">
-			<span class="category">
-				
-			</span>
-			<span class="tags">
-				
+  </div>
+  <footer class="entry-footer">
+    <div class="entry-meta-footer">
+      <span class="category">
+        
+      </span>
+      <span class="tags">
+        
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/MySQL/" rel="tag">MySQL</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E3%83%87%E3%83%BC%E3%82%BF%E3%83%99%E3%83%BC%E3%82%B9/" rel="tag">データベース</a></li></ul>
 
-			</span>
-		</div>
-	</footer>
-    
-    <footer class="author-info clearfix">
-      <img class="author-picture circle" src="https://www.gravatar.com/avatar/cb02a2b3f429b7c938d1fe2665e8e342">
-      <div class="author-content right">
-        <div class="author-caption">
-          <span class="label">author</span>
-          Sho Nakatani a.k.a. laysakura
-        </div>
-        <p class="author-description">
-          東京大学大学院 情報理工学系研究科 電子情報学専攻 修士課程で並列分散処理・ストリーム処理・データベースを研究。<br>
-          2014年4月に株式会社ディー・エヌ・エーにエンジニアスペシャリストとして入社し、ソーシャルゲームのサーバサイド共通基盤の開発に従事。<br>
-          2016年8月より、オンライン証券会社<a href="https://folio-sec.com" target="_blank" rel="noopener">株式会社FOLIO</a>に入社。バックエンドシステム開発・プロジェクトマネージメント・Engineering Managementに従事。<br>
-          2020年3月より<a href="https://idein.jp" target="_blank" rel="noopener">Idein株式会社</a>所属。<br>
-          随時副業募集中です: <a href="https://github.com/laysakura/resume-jp-for-side-job" target="_blank" rel="noopener">職務経歴書や募集職種</a>
-        </p>
-        <ul class="author-social-buttons">
-          <li class="author-social-button"><a class="fa fa-lg fa-twitter-square" href="https://twitter.com/laysakura" target="_blank" rel="noopener"></a></li>
-          <li class="author-social-button"><a class="fa fa-lg fa-github-square" href="https://github.com/laysakura" target="_blank" rel="noopener"></a></li>
-          <li class="author-social-button"><a class="fa fa-lg fa-facebook-square" href="https://www.facebook.com/lay.sakura" target="_blank" rel="noopener"></a></li>
-        </ul>
+      </span>
+    </div>
+  </footer>
+  
+  <footer class="author-info clearfix">
+    <img class="author-picture circle" src="https://www.gravatar.com/avatar/cb02a2b3f429b7c938d1fe2665e8e342">
+    <div class="author-content right">
+      <div class="author-caption">
+        <span class="label">author</span>
+        Sho Nakatani a.k.a. laysakura
       </div>
-    </footer>
-    
-	
-    
+      <p class="author-description">
+        東京大学大学院 情報理工学系研究科 電子情報学専攻 修士課程で並列分散処理・ストリーム処理・データベースを研究。<br>
+        2014年4月に株式会社ディー・エヌ・エーにエンジニアスペシャリストとして入社し、ソーシャルゲームのサーバサイド共通基盤の開発に従事。<br>
+        2016年8月より、オンライン証券会社<a href="https://folio-sec.com" target="_blank" rel="noopener">株式会社FOLIO</a>に入社。バックエンドシステム開発・プロジェクトマネージメント・Engineering
+        Managementに従事。<br>
+        2020年3月より<a href="https://idein.jp" target="_blank" rel="noopener">Idein株式会社</a>所属。デバイス・高性能計算関連の研究開発。<br>
+      </p>
+      <ul class="author-social-buttons">
+        <li class="author-social-button"><a class="fa fa-lg fa-twitter-square" href="https://twitter.com/laysakura" target="_blank" rel="noopener"></a>
+        </li>
+        <li class="author-social-button"><a class="fa fa-lg fa-github-square" href="https://github.com/laysakura" target="_blank" rel="noopener"></a>
+        </li>
+        <li class="author-social-button"><a class="fa fa-lg fa-facebook-square"
+            href="https://www.facebook.com/lay.sakura"></a></li>
+      </ul>
+    </div>
+  </footer>
+  
+  
+  
 <nav id="article-nav">
   
     <a href="/2013/10/11/perl-japanese-full-text-search/" id="article-nav-newer" class="article-nav-link-wrap">
@@ -232,27 +235,28 @@
 <section id="comments">
   <div id="disqus_thread">
 
-  <!-- comment service provided by disqus -->
-  <script>
-    /**
-     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
-     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
-     */
-    var disqus_config = function () {
+    <!-- comment service provided by disqus -->
+    <script>
+      /**
+       *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+       *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+       */
+      var disqus_config = function () {
         this.page.url = https://laysakura.github.io/2013/02/10/mysql5.6-storage-engine-template/;  // Replace PAGE_URL with your page's canonical URL variable
         this.page.identifier = https://laysakura.github.io/2013/02/10/mysql5.6-storage-engine-template/; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
-    };
-    (function() {  // DON'T EDIT BELOW THIS LINE
+      };
+      (function () {  // DON'T EDIT BELOW THIS LINE
         var d = document, s = d.createElement('script');
-        
+
         s.src = '//laysakura.disqus.com/embed.js';
-        
+
         s.setAttribute('data-timestamp', +new Date());
         (d.head || d.body).appendChild(s);
-    })();
-</script>
+      })();
+    </script>
 
-    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript" target="_blank" rel="noopener">comments powered by Disqus.</a></noscript>
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript" target="_blank" rel="noopener">comments powered by
+        Disqus.</a></noscript>
   </div>
 </section>
 

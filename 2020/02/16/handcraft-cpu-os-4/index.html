@@ -81,26 +81,26 @@
 </header>
     <div id="main">
       <article id="post-自作CPU-自作OSをやっていく4-macos-papilio-pro-lx9" class="post">
-	<footer class="entry-meta-header">
-		<span class="meta-elements date">
-			<a href="/2020/02/16/handcraft-cpu-os-4/" class="article-date">
+  <footer class="entry-meta-header">
+    <span class="meta-elements date">
+      <a href="/2020/02/16/handcraft-cpu-os-4/" class="article-date">
   <time datetime="2020-02-16T11:10:00.000Z" itemprop="datePublished">2020-02-16</time>
 </a>
-		</span>
-	</footer>
-	
-	<header class="entry-header">
-		
+    </span>
+  </footer>
+  
+  <header class="entry-header">
+    
   
     <h1 class="article-title entry-title" itemprop="name">
       自作CPU &amp; 自作OSをやっていく (4) - macOSでPapilio Pro LX9のFPGAにBitstreamファイルを書き込む
     </h1>
   
 
-	</header>
-	<div class="entry-content">
-		
-    	<img src="/img/2020/02-16-papilio-pro-lx9.jpg" alt="Papilio Pro LX9" width="800">
+  </header>
+  <div class="entry-content">
+    
+    <img src="/img/2020/02-16-papilio-pro-lx9.jpg" alt="Papilio Pro LX9" width="800">
 
 <p>2020年1月から、趣味エンジニアリング活動として自作CPUと自作OSをやっていく。</p>
 <p>最終的にはFPGAに自作のCPUを書き込んでいくのだが、筆者はFPGAを使った経験がほとんどない。<br>CPUの回路設計はまだ手もつけていないが、不確実性を下げるために、先にFPGAを購入して普段遣いのmacOSからFPGA開発ができるように整えておく。</p>
@@ -155,44 +155,47 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">papilio-prog -v -f /path/to/Quickstart-Papilio_Pro_LX9-v1.5.bit</span><br><span class="line">=&gt; Using built-in device list</span><br><span class="line">=&gt; JTAG chainpos: 0 Device IDCODE = 0x24001093     Desc: XC6SLX9</span><br><span class="line">=&gt; Created from NCD file: top_avr_core_v8.ncd;UserID=0xFFFFFFFF</span><br><span class="line">=&gt; Target device: 6slx9tqg144</span><br><span class="line">=&gt; Created: 2012/02/13 17:18:57</span><br><span class="line">=&gt; Bitstream length: 2724832 bits</span><br><span class="line">=&gt; </span><br><span class="line">=&gt; Uploading <span class="string">"/path/to/Quickstart-Papilio_Pro_LX9-v1.5.bit"</span>. DNA is 0x59655577c72e74fe</span><br><span class="line">=&gt; Done.</span><br><span class="line">=&gt; Programming time 587.0 ms</span><br><span class="line">=&gt; USB transactions: Write 176 <span class="built_in">read</span> 8 retries 6</span><br></pre></td></tr></table></figure>
 
     
-	</div>
-	<footer class="entry-footer">
-		<div class="entry-meta-footer">
-			<span class="category">
-				
-			</span>
-			<span class="tags">
-				
+  </div>
+  <footer class="entry-footer">
+    <div class="entry-meta-footer">
+      <span class="category">
+        
+      </span>
+      <span class="tags">
+        
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%87%AA%E4%BD%9CCPU-%E8%87%AA%E4%BD%9COS/" rel="tag">自作CPU & 自作OS</a></li></ul>
 
-			</span>
-		</div>
-	</footer>
-    
-    <footer class="author-info clearfix">
-      <img class="author-picture circle" src="https://www.gravatar.com/avatar/cb02a2b3f429b7c938d1fe2665e8e342">
-      <div class="author-content right">
-        <div class="author-caption">
-          <span class="label">author</span>
-          Sho Nakatani a.k.a. laysakura
-        </div>
-        <p class="author-description">
-          東京大学大学院 情報理工学系研究科 電子情報学専攻 修士課程で並列分散処理・ストリーム処理・データベースを研究。<br>
-          2014年4月に株式会社ディー・エヌ・エーにエンジニアスペシャリストとして入社し、ソーシャルゲームのサーバサイド共通基盤の開発に従事。<br>
-          2016年8月より、オンライン証券会社<a href="https://folio-sec.com" target="_blank" rel="noopener">株式会社FOLIO</a>に入社。バックエンドシステム開発・プロジェクトマネージメント・Engineering Managementに従事。<br>
-          2020年3月より<a href="https://idein.jp" target="_blank" rel="noopener">Idein株式会社</a>所属。<br>
-          随時副業募集中です: <a href="https://github.com/laysakura/resume-jp-for-side-job" target="_blank" rel="noopener">職務経歴書や募集職種</a>
-        </p>
-        <ul class="author-social-buttons">
-          <li class="author-social-button"><a class="fa fa-lg fa-twitter-square" href="https://twitter.com/laysakura" target="_blank" rel="noopener"></a></li>
-          <li class="author-social-button"><a class="fa fa-lg fa-github-square" href="https://github.com/laysakura" target="_blank" rel="noopener"></a></li>
-          <li class="author-social-button"><a class="fa fa-lg fa-facebook-square" href="https://www.facebook.com/lay.sakura" target="_blank" rel="noopener"></a></li>
-        </ul>
+      </span>
+    </div>
+  </footer>
+  
+  <footer class="author-info clearfix">
+    <img class="author-picture circle" src="https://www.gravatar.com/avatar/cb02a2b3f429b7c938d1fe2665e8e342">
+    <div class="author-content right">
+      <div class="author-caption">
+        <span class="label">author</span>
+        Sho Nakatani a.k.a. laysakura
       </div>
-    </footer>
-    
-	
-    
+      <p class="author-description">
+        東京大学大学院 情報理工学系研究科 電子情報学専攻 修士課程で並列分散処理・ストリーム処理・データベースを研究。<br>
+        2014年4月に株式会社ディー・エヌ・エーにエンジニアスペシャリストとして入社し、ソーシャルゲームのサーバサイド共通基盤の開発に従事。<br>
+        2016年8月より、オンライン証券会社<a href="https://folio-sec.com" target="_blank" rel="noopener">株式会社FOLIO</a>に入社。バックエンドシステム開発・プロジェクトマネージメント・Engineering
+        Managementに従事。<br>
+        2020年3月より<a href="https://idein.jp" target="_blank" rel="noopener">Idein株式会社</a>所属。デバイス・高性能計算関連の研究開発。<br>
+      </p>
+      <ul class="author-social-buttons">
+        <li class="author-social-button"><a class="fa fa-lg fa-twitter-square" href="https://twitter.com/laysakura" target="_blank" rel="noopener"></a>
+        </li>
+        <li class="author-social-button"><a class="fa fa-lg fa-github-square" href="https://github.com/laysakura" target="_blank" rel="noopener"></a>
+        </li>
+        <li class="author-social-button"><a class="fa fa-lg fa-facebook-square"
+            href="https://www.facebook.com/lay.sakura"></a></li>
+      </ul>
+    </div>
+  </footer>
+  
+  
+  
 <nav id="article-nav">
   
     <a href="/2020/03/06/rust-circle-ci/" id="article-nav-newer" class="article-nav-link-wrap">
@@ -225,27 +228,28 @@
 <section id="comments">
   <div id="disqus_thread">
 
-  <!-- comment service provided by disqus -->
-  <script>
-    /**
-     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
-     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
-     */
-    var disqus_config = function () {
+    <!-- comment service provided by disqus -->
+    <script>
+      /**
+       *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+       *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+       */
+      var disqus_config = function () {
         this.page.url = https://laysakura.github.io/2020/02/16/handcraft-cpu-os-4/;  // Replace PAGE_URL with your page's canonical URL variable
         this.page.identifier = https://laysakura.github.io/2020/02/16/handcraft-cpu-os-4/; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
-    };
-    (function() {  // DON'T EDIT BELOW THIS LINE
+      };
+      (function () {  // DON'T EDIT BELOW THIS LINE
         var d = document, s = d.createElement('script');
-        
+
         s.src = '//laysakura.disqus.com/embed.js';
-        
+
         s.setAttribute('data-timestamp', +new Date());
         (d.head || d.body).appendChild(s);
-    })();
-</script>
+      })();
+    </script>
 
-    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript" target="_blank" rel="noopener">comments powered by Disqus.</a></noscript>
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript" target="_blank" rel="noopener">comments powered by
+        Disqus.</a></noscript>
   </div>
 </section>
 

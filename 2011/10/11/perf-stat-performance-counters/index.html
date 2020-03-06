@@ -81,26 +81,26 @@
 </header>
     <div id="main">
       <article id="post-perf-stat-でパフォーマンスカウンタの値を直接指定し表示" class="post">
-	<footer class="entry-meta-header">
-		<span class="meta-elements date">
-			<a href="/2011/10/11/perf-stat-performance-counters/" class="article-date">
+  <footer class="entry-meta-header">
+    <span class="meta-elements date">
+      <a href="/2011/10/11/perf-stat-performance-counters/" class="article-date">
   <time datetime="2011-10-11T04:13:30.000Z" itemprop="datePublished">2011-10-11</time>
 </a>
-		</span>
-	</footer>
-	
-	<header class="entry-header">
-		
+    </span>
+  </footer>
+  
+  <header class="entry-header">
+    
   
     <h1 class="article-title entry-title" itemprop="name">
       perf stat でパフォーマンスカウンタの値を直接指定し表示
     </h1>
   
 
-	</header>
-	<div class="entry-content">
-		
-    	<h2><span id="perfについて少し">perfについて少し</span></h2><p>最近のLinuxでは，perfという便利なパフォーマンス解析ツールが使えます．<br>aptやyumなどのパッケージ管理ツールで入れられると思いますが(Debian系だとlinux-tools*って名前のパッケージのはず)，詳しい使い方はここでは解説しません．</p>
+  </header>
+  <div class="entry-content">
+    
+    <h2><span id="perfについて少し">perfについて少し</span></h2><p>最近のLinuxでは，perfという便利なパフォーマンス解析ツールが使えます．<br>aptやyumなどのパッケージ管理ツールで入れられると思いますが(Debian系だとlinux-tools*って名前のパッケージのはず)，詳しい使い方はここでは解説しません．</p>
 <p>さて，このperfには色々な使い方がありますが，中でもperf statはプログラム実行中に起こるハードウェア的なイベントを取得できるものです．<br>使用例はこんな感じ．</p>
 <a id="more"></a>
 
@@ -154,44 +154,47 @@
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python                                                                                                                                                                                                                        </span></span><br><span class="line"> </span><br><span class="line"><span class="comment"># This script is written referring to                                                                                                                                                                                                        </span></span><br><span class="line"><span class="comment">#   Basic Performance Measurements for AMD Athlon 64,                                                                                                                                                                                        </span></span><br><span class="line"><span class="comment">#   AMD Opteron and AMD Phenom Processors                                                                                                                                                                                                    </span></span><br><span class="line"><span class="comment">#   http://developer.amd.com/Assets/intro_to_ca_v3_final.pdf                                                                                                                                                                                 </span></span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">import</span> re</span><br><span class="line"><span class="keyword">import</span> subprocess</span><br><span class="line"> </span><br><span class="line"><span class="comment"># Modify this list as you like.                                                                                                                                                                                                              </span></span><br><span class="line"><span class="comment"># The format of each element is:                                                                                                                                                                                                             </span></span><br><span class="line"><span class="comment">#   select: `NNN' for "perf stat -e rNNN"                                                                                                                                                                                                    </span></span><br><span class="line"><span class="comment">#   name:   Event name used in output                                                                                                                                                                                                        </span></span><br><span class="line">events = [</span><br><span class="line">    &#123;<span class="string">"select"</span>: <span class="string">"c0"</span>, <span class="string">"name"</span>: <span class="string">"Retired Instructions"</span>&#125;,</span><br><span class="line">    &#123;<span class="string">"select"</span>: <span class="string">"40"</span>, <span class="string">"name"</span>: <span class="string">"Data Cache Accesses"</span>&#125;,</span><br><span class="line">    &#123;<span class="string">"select"</span>: <span class="string">"1e42"</span>, <span class="string">"name"</span>: <span class="string">"Data Cache Refills from L2"</span>&#125;,</span><br><span class="line">    &#123;<span class="string">"select"</span>: <span class="string">"1e43"</span>, <span class="string">"name"</span>: <span class="string">"Data Cache Refills from System (Northbridge)"</span>&#125;</span><br><span class="line">    ]</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">event_list</span><span class="params">()</span>:</span></span><br><span class="line">    ret = <span class="string">""</span></span><br><span class="line">    <span class="keyword">for</span> event <span class="keyword">in</span> events:</span><br><span class="line">        ret += <span class="string">"-e r"</span> + event[<span class="string">"select"</span>] + <span class="string">"   "</span></span><br><span class="line">    <span class="keyword">return</span> ret</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">store_count_to_events</span><span class="params">(fd_perf_output)</span>:</span></span><br><span class="line">    <span class="comment"># Sample perf-stat output line</span></span><br><span class="line">    <span class="comment">#        1565650  raw 0xc0                 #      0.000 M/sec</span></span><br><span class="line">    pat = re.compile(<span class="string">"^ *([0-9]+).*"</span>)</span><br><span class="line"></span><br><span class="line">    lines = fd_perf_output.readlines()</span><br><span class="line">    <span class="keyword">for</span> event <span class="keyword">in</span> events:</span><br><span class="line">        search_str = <span class="string">"raw 0x"</span> + event[<span class="string">"select"</span>]</span><br><span class="line">        event_line = [line <span class="keyword">for</span> line <span class="keyword">in</span> lines <span class="keyword">if</span> line.find(search_str) != <span class="number">-1</span>]</span><br><span class="line">        mat = pat.match(<span class="string">""</span>.join(event_line))</span><br><span class="line">        event[<span class="string">"count"</span>] = int(mat.group(<span class="number">1</span>))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">print_events</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">for</span> event <span class="keyword">in</span> events:</span><br><span class="line">        <span class="keyword">print</span> <span class="string">"%10s   %s"</span> % (str(event[<span class="string">"count"</span>]), event[<span class="string">"name"</span>])</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">()</span>:</span></span><br><span class="line">    command = <span class="string">"perf stat "</span> + event_list() + <span class="string">" "</span>.join(sys.argv[<span class="number">1</span>:])</span><br><span class="line">    p = subprocess.Popen(command, shell=<span class="literal">True</span>,</span><br><span class="line">                         stderr=subprocess.PIPE)</span><br><span class="line">    fd_perf_output = p.stderr</span><br><span class="line">    store_count_to_events(fd_perf_output)</span><br><span class="line">    print_events()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
 
     
-	</div>
-	<footer class="entry-footer">
-		<div class="entry-meta-footer">
-			<span class="category">
-				
-			</span>
-			<span class="tags">
-				
+  </div>
+  <footer class="entry-footer">
+    <div class="entry-meta-footer">
+      <span class="category">
+        
+      </span>
+      <span class="tags">
+        
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/High-Performance-Computing/" rel="tag">High Performance Computing</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux-Kernel/" rel="tag">Linux Kernel</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux%E3%82%AA%E3%83%9A%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3/" rel="tag">Linuxオペレーション</a></li></ul>
 
-			</span>
-		</div>
-	</footer>
-    
-    <footer class="author-info clearfix">
-      <img class="author-picture circle" src="https://www.gravatar.com/avatar/cb02a2b3f429b7c938d1fe2665e8e342">
-      <div class="author-content right">
-        <div class="author-caption">
-          <span class="label">author</span>
-          Sho Nakatani a.k.a. laysakura
-        </div>
-        <p class="author-description">
-          東京大学大学院 情報理工学系研究科 電子情報学専攻 修士課程で並列分散処理・ストリーム処理・データベースを研究。<br>
-          2014年4月に株式会社ディー・エヌ・エーにエンジニアスペシャリストとして入社し、ソーシャルゲームのサーバサイド共通基盤の開発に従事。<br>
-          2016年8月より、オンライン証券会社<a href="https://folio-sec.com" target="_blank" rel="noopener">株式会社FOLIO</a>に入社。バックエンドシステム開発・プロジェクトマネージメント・Engineering Managementに従事。<br>
-          2020年3月より<a href="https://idein.jp" target="_blank" rel="noopener">Idein株式会社</a>所属。<br>
-          随時副業募集中です: <a href="https://github.com/laysakura/resume-jp-for-side-job" target="_blank" rel="noopener">職務経歴書や募集職種</a>
-        </p>
-        <ul class="author-social-buttons">
-          <li class="author-social-button"><a class="fa fa-lg fa-twitter-square" href="https://twitter.com/laysakura" target="_blank" rel="noopener"></a></li>
-          <li class="author-social-button"><a class="fa fa-lg fa-github-square" href="https://github.com/laysakura" target="_blank" rel="noopener"></a></li>
-          <li class="author-social-button"><a class="fa fa-lg fa-facebook-square" href="https://www.facebook.com/lay.sakura" target="_blank" rel="noopener"></a></li>
-        </ul>
+      </span>
+    </div>
+  </footer>
+  
+  <footer class="author-info clearfix">
+    <img class="author-picture circle" src="https://www.gravatar.com/avatar/cb02a2b3f429b7c938d1fe2665e8e342">
+    <div class="author-content right">
+      <div class="author-caption">
+        <span class="label">author</span>
+        Sho Nakatani a.k.a. laysakura
       </div>
-    </footer>
-    
-	
-    
+      <p class="author-description">
+        東京大学大学院 情報理工学系研究科 電子情報学専攻 修士課程で並列分散処理・ストリーム処理・データベースを研究。<br>
+        2014年4月に株式会社ディー・エヌ・エーにエンジニアスペシャリストとして入社し、ソーシャルゲームのサーバサイド共通基盤の開発に従事。<br>
+        2016年8月より、オンライン証券会社<a href="https://folio-sec.com" target="_blank" rel="noopener">株式会社FOLIO</a>に入社。バックエンドシステム開発・プロジェクトマネージメント・Engineering
+        Managementに従事。<br>
+        2020年3月より<a href="https://idein.jp" target="_blank" rel="noopener">Idein株式会社</a>所属。デバイス・高性能計算関連の研究開発。<br>
+      </p>
+      <ul class="author-social-buttons">
+        <li class="author-social-button"><a class="fa fa-lg fa-twitter-square" href="https://twitter.com/laysakura" target="_blank" rel="noopener"></a>
+        </li>
+        <li class="author-social-button"><a class="fa fa-lg fa-github-square" href="https://github.com/laysakura" target="_blank" rel="noopener"></a>
+        </li>
+        <li class="author-social-button"><a class="fa fa-lg fa-facebook-square"
+            href="https://www.facebook.com/lay.sakura"></a></li>
+      </ul>
+    </div>
+  </footer>
+  
+  
+  
 <nav id="article-nav">
   
     <a href="/2011/10/15/perf-stat-L1-L2-L3-cache-miss/" id="article-nav-newer" class="article-nav-link-wrap">
@@ -224,27 +227,28 @@
 <section id="comments">
   <div id="disqus_thread">
 
-  <!-- comment service provided by disqus -->
-  <script>
-    /**
-     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
-     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
-     */
-    var disqus_config = function () {
+    <!-- comment service provided by disqus -->
+    <script>
+      /**
+       *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+       *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+       */
+      var disqus_config = function () {
         this.page.url = https://laysakura.github.io/2011/10/11/perf-stat-performance-counters/;  // Replace PAGE_URL with your page's canonical URL variable
         this.page.identifier = https://laysakura.github.io/2011/10/11/perf-stat-performance-counters/; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
-    };
-    (function() {  // DON'T EDIT BELOW THIS LINE
+      };
+      (function () {  // DON'T EDIT BELOW THIS LINE
         var d = document, s = d.createElement('script');
-        
+
         s.src = '//laysakura.disqus.com/embed.js';
-        
+
         s.setAttribute('data-timestamp', +new Date());
         (d.head || d.body).appendChild(s);
-    })();
-</script>
+      })();
+    </script>
 
-    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript" target="_blank" rel="noopener">comments powered by Disqus.</a></noscript>
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript" target="_blank" rel="noopener">comments powered by
+        Disqus.</a></noscript>
   </div>
 </section>
 

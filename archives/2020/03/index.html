@@ -76,26 +76,26 @@
       
   
     <article id="post-ぼくのかんがえたさいきょうの-Circle-CI-設定-for-Rust" class="post">
-	<footer class="entry-meta-header">
-		<span class="meta-elements date">
-			<a href="/2020/03/06/rust-circle-ci/" class="article-date">
+  <footer class="entry-meta-header">
+    <span class="meta-elements date">
+      <a href="/2020/03/06/rust-circle-ci/" class="article-date">
   <time datetime="2020-03-05T22:02:35.000Z" itemprop="datePublished">2020-03-06</time>
 </a>
-		</span>
-	</footer>
-	
-	<header class="entry-header">
-		
+    </span>
+  </footer>
+  
+  <header class="entry-header">
+    
   
     <h1 itemprop="name" class="entry-title">
       <a class="article-title" href="/2020/03/06/rust-circle-ci/">ぼくのかんがえたさいきょうの Circle CI 設定 for Rust</a>
     </h1>
   
 
-	</header>
-	<div class="entry-content">
-		
-			<p>あまり見ない気がするので書きました。特徴は、</p>
+  </header>
+  <div class="entry-content">
+    
+    <p>あまり見ない気がするので書きました。特徴は、</p>
 <ul>
 <li>lint, testなどの各ジョブが並列に動く（ジョブ実行数を多くしてないとdocker containerの立ち上げ分むしろ全体時間はロスになることもあるが…）。</li>
 <li><a href="https://docs.travis-ci.com/user/build-matrix/#matrix-expansion" target="_blank" rel="noopener">Travis CI のマトリクスビルド</a> に近いことを、 <code>parameters:</code> を使ってやっている。<ul>
@@ -106,31 +106,31 @@
 <li>キャッシュ使う。</li>
 </ul>
 <p>あたりです。見慣れなさそうなところはインラインコメント付けましたので参考にしてください 💁‍♀️</p>
-			
-				<p class="article-more-link">
-					<a href="/2020/03/06/rust-circle-ci/#more">続きを読む</a>
-				</p>
-      
     
-	</div>
-	<footer class="entry-footer">
-		<div class="entry-meta-footer">
-			<span class="category">
-				
-			</span>
-			<span class="tags">
-				
+    <p class="article-more-link">
+      <a href="/2020/03/06/rust-circle-ci/#more">続きを読む</a>
+    </p>
+    
+    
+  </div>
+  <footer class="entry-footer">
+    <div class="entry-meta-footer">
+      <span class="category">
+        
+      </span>
+      <span class="tags">
+        
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Rust/" rel="tag">Rust</a></li></ul>
 
-			</span>
-		</div>
-	</footer>
-    
-	
+      </span>
+    </div>
+  </footer>
+  
+  
 </article>
 
 
-	<hr class="article-devider">
+<hr class="article-devider">
 
 
 
