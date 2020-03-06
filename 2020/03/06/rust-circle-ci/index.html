@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>ぼくのかんがえたさいきょうの Circle CI 設定 for Rust | 俺とお前とlaysakura</title>
+  
+  <link rel="canonical" href="https://laysakura.github.io/2020/03/06/rust-circle-ci/"/>
+  <meta name="viewport" content="width=device-width">
+  <meta name="description" content="あまり見ない気がするので書きました。特徴は、  lint, testなどの各ジョブが並列に動く（ジョブ実行数を多くしてないとdocker containerの立ち上げ分むしろ全体時間はロスになることもあるが…）。 Travis CI のマトリクスビルド に近いことを、 parameters: を使ってやっている。 rust-toolchain ファイルに書かれたバージョンと、 .circleci&#x2F;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ぼくのかんがえたさいきょうの Circle CI 設定 for Rust">
+<meta property="og:url" content="https://laysakura.github.io/2020/03/06/rust-circle-ci/index.html">
+<meta property="og:site_name" content="俺とお前とlaysakura">
+<meta property="og:description" content="あまり見ない気がするので書きました。特徴は、  lint, testなどの各ジョブが並列に動く（ジョブ実行数を多くしてないとdocker containerの立ち上げ分むしろ全体時間はロスになることもあるが…）。 Travis CI のマトリクスビルド に近いことを、 parameters: を使ってやっている。 rust-toolchain ファイルに書かれたバージョンと、 .circleci&#x2F;">
+<meta property="og:locale" content="ja_JP">
+<meta property="article:published_time" content="2020-03-05T22:02:35.000Z">
+<meta property="article:modified_time" content="2020-03-06T00:11:29.000Z">
+<meta property="article:author" content="Sho Nakatani a.k.a. laysakura">
+<meta property="article:tag" content="Rust">
+<meta name="twitter:card" content="summary">
+
+  <!-- favicon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+  <link rel="icon" href="/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+  <link rel="manifest" href="/favicon/site.webmanifest">
+  <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#5bbad5">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="theme-color" content="#ffffff">
+
+  
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-22289437-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+  <!-- MathJax -->
+  <script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+  <div id="container">
+    <div class="mobile-nav-panel">
+	<i class="icon-reorder icon-large"></i>
+</div>
+<header id="header">
+	<h1 class="blog-title">
+		<a href="/">俺とお前とlaysakura</a>
+	</h1>
+	<nav class="nav">
+		<ul>
+			<li><a href="/archives">過去の投稿</a></li>
+			<li><a id="nav-search-btn" class="nav-icon" title="Search"></a></li>
+			<li><a href="http://cloud.feedly.com/#subscription%2Ffeed%2Fhttps%3A%2F%2Flaysakura.github.io%2Fatom.xml" target="_blank" rel="noopener" id="nav-rss-link" class="nav-icon" title="RSS Feed"></a></li>
+		</ul>
+	</nav>
+	<div id="search-form-wrap">
+		<form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://laysakura.github.io"></form>
+	</div>
+</header>
+    <div id="main">
+      <article id="post-ぼくのかんがえたさいきょうの-Circle-CI-設定-for-Rust" class="post">
+	<footer class="entry-meta-header">
+		<span class="meta-elements date">
+			<a href="/2020/03/06/rust-circle-ci/" class="article-date">
+  <time datetime="2020-03-05T22:02:35.000Z" itemprop="datePublished">2020-03-06</time>
+</a>
+		</span>
+	</footer>
+	
+	<header class="entry-header">
+		
+  
+    <h1 class="article-title entry-title" itemprop="name">
+      ぼくのかんがえたさいきょうの Circle CI 設定 for Rust
+    </h1>
+  
+
+	</header>
+	<div class="entry-content">
+		
+    	<p>あまり見ない気がするので書きました。特徴は、</p>
+<ul>
+<li>lint, testなどの各ジョブが並列に動く（ジョブ実行数を多くしてないとdocker containerの立ち上げ分むしろ全体時間はロスになることもあるが…）。</li>
+<li><a href="https://docs.travis-ci.com/user/build-matrix/#matrix-expansion" target="_blank" rel="noopener">Travis CI のマトリクスビルド</a> に近いことを、 <code>parameters:</code> を使ってやっている。<ul>
+<li><code>rust-toolchain</code> ファイルに書かれたバージョンと、 <code>.circleci/config.yml</code> に書かれた MSRV (Minimum Supported Rust Version) の2つでビルドしている。</li>
+</ul>
+</li>
+<li><code>cargo-readme</code> を使ってrustdocとREADMEを比較し、どちらかがメンテされていない場合にエラーにする（お好みで）。</li>
+<li>キャッシュ使う。</li>
+</ul>
+<p>あたりです。見慣れなさそうなところはインラインコメント付けましたので参考にしてください 💁‍♀️</p>
+<a id="more"></a>
+
+<figure class="highlight yml"><figcaption><span>.circleci/config.yml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">version:</span> <span class="number">2.1</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># こうすると各ジョブの中で</span></span><br><span class="line"><span class="comment">#   executor:</span></span><br><span class="line"><span class="comment">#     name: default</span></span><br><span class="line"><span class="comment"># と指定できて便利。</span></span><br><span class="line"><span class="attr">executors:</span></span><br><span class="line">  <span class="attr">default:</span></span><br><span class="line">    <span class="attr">docker:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">image:</span> <span class="string">circleci/rust:latest</span></span><br><span class="line">    <span class="attr">working_directory:</span> <span class="string">~/app</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># YAMLのアンカー</span></span><br><span class="line"><span class="comment"># (See: https://magazine.rubyist.net/articles/0009/0009-YAML.html#%E3%82%A2%E3%83%B3%E3%82%AB%E3%83%BC%E3%81%A8%E3%82%A8%E3%82%A4%E3%83%AA%E3%82%A2%E3%82%B9 )</span></span><br><span class="line"><span class="comment"># を用いて、共通で使うコマンドやキャッシュキーを定義する。</span></span><br><span class="line"><span class="attr">references:</span></span><br><span class="line">  <span class="attr">commands:</span></span><br><span class="line">    <span class="attr">build_dep:</span> <span class="meta">&amp;build_dep</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">Record</span> <span class="string">build</span> <span class="string">environment</span> <span class="string">to</span> <span class="string">use</span> <span class="string">as</span> <span class="string">cache</span> <span class="string">key</span></span><br><span class="line">      <span class="attr">command:</span> <span class="string">|</span></span><br><span class="line">        <span class="string">echo</span> <span class="string">$OS_VERSION</span> <span class="string">|</span> <span class="string">tee</span> <span class="string">/tmp/build-dep</span></span><br><span class="line">        <span class="string">rustc</span> <span class="string">--version</span> <span class="string">|</span> <span class="string">tee</span> <span class="string">/tmp/build-dep</span></span><br><span class="line">        <span class="string">cat</span> <span class="string">Cargo.lock</span> <span class="string">&gt;&gt;</span> <span class="string">/tmp/build-dep</span></span><br><span class="line"></span><br><span class="line">    <span class="attr">cache-key:</span> <span class="string">&amp;cache-key</span> <span class="string">v1-cache-cargo-target-&#123;&#123;</span> <span class="string">.Environment.CIRCLE_JOB</span> <span class="string">&#125;&#125;-&#123;&#123;</span> <span class="string">.Environment.CIRCLECI_CACHE_VERSION</span> <span class="string">&#125;&#125;-&#123;&#123;</span> <span class="string">checksum</span> <span class="string">"/tmp/build-dep"</span> <span class="string">&#125;&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">lint:</span></span><br><span class="line">    <span class="attr">executor:</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">default</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">checkout</span></span><br><span class="line"></span><br><span class="line">      <span class="comment"># 環境情報からキャッシュキーを構築し、キャッシュをrestore</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">run:</span> <span class="meta">*build_dep</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">restore_cache:</span></span><br><span class="line">          <span class="attr">key:</span> <span class="string">*cache-key</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">run:</span></span><br><span class="line">          <span class="attr">name:</span> <span class="string">rustup</span> <span class="string">component</span> <span class="string">add</span></span><br><span class="line">          <span class="attr">command:</span> <span class="string">rustup</span> <span class="string">component</span> <span class="string">add</span> <span class="string">clippy</span> <span class="string">rustfmt</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">run:</span></span><br><span class="line">          <span class="attr">name:</span> <span class="string">fmt</span></span><br><span class="line">          <span class="attr">command:</span> <span class="string">cargo</span> <span class="string">fmt</span> <span class="string">--all</span> <span class="string">--</span> <span class="string">--check</span></span><br><span class="line"></span><br><span class="line">      <span class="comment"># clippyのwarningも全て CI fail にする。お好みで。</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">run:</span></span><br><span class="line">          <span class="attr">name:</span> <span class="string">clippy</span></span><br><span class="line">          <span class="attr">command:</span> <span class="string">cargo</span> <span class="string">clippy</span> <span class="string">--all-targets</span> <span class="string">--all-features</span> <span class="string">--</span> <span class="string">-D</span> <span class="string">warnings</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">save_cache:</span></span><br><span class="line">          <span class="attr">key:</span> <span class="string">*cache-key</span></span><br><span class="line">          <span class="attr">paths:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">~/.cargo</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># rustdocとREADMEを比較の比較。お好みで。</span></span><br><span class="line">  <span class="attr">readme:</span></span><br><span class="line">    <span class="attr">executor:</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">default</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">checkout</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">run:</span> <span class="meta">*build_dep</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">restore_cache:</span></span><br><span class="line">          <span class="attr">key:</span> <span class="string">*cache-key</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">run:</span></span><br><span class="line">          <span class="attr">name:</span> <span class="string">Install</span> <span class="string">cargo-readme</span></span><br><span class="line">          <span class="attr">command:</span> <span class="string">cargo</span> <span class="string">install</span> <span class="string">cargo-readme</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">run:</span></span><br><span class="line">          <span class="attr">name:</span> <span class="string">Check</span> <span class="string">diff</span> <span class="string">between</span> <span class="string">rustdoc</span> <span class="string">&amp;</span> <span class="string">README</span></span><br><span class="line">          <span class="attr">command:</span> <span class="string">|</span></span><br><span class="line">            <span class="string">cargo</span> <span class="string">readme</span> <span class="string">|</span> <span class="string">tee</span> <span class="string">/tmp/README.md</span></span><br><span class="line">            <span class="string">diff</span> <span class="string">/tmp/README.md</span> <span class="string">README.md</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">save_cache:</span></span><br><span class="line">          <span class="attr">key:</span> <span class="string">*cache-key</span></span><br><span class="line">          <span class="attr">paths:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">~/.cargo</span></span><br><span class="line"></span><br><span class="line">  <span class="attr">test:</span></span><br><span class="line">    <span class="comment"># マトリクスビルドもどきを実現するためのパラメータ定義。パラメータを与えて呼び出しているのは最下部の `workflows: -&gt; test: -&gt; jobs: -&gt; test:` の箇所。</span></span><br><span class="line">    <span class="attr">parameters:</span></span><br><span class="line">      <span class="attr">rust_version:</span></span><br><span class="line">        <span class="attr">type:</span> <span class="string">string</span></span><br><span class="line">        <span class="attr">default:</span> <span class="string">""</span></span><br><span class="line"></span><br><span class="line">    <span class="attr">executor:</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">default</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">checkout</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">run:</span></span><br><span class="line">          <span class="attr">name:</span> <span class="string">rustup</span> <span class="string">version</span></span><br><span class="line">          <span class="attr">command:</span> <span class="string">rustup</span> <span class="string">--version</span></span><br><span class="line"></span><br><span class="line">      <span class="comment"># rust_version パラメータが与えられている場合に限り、そのバージョンの rustc をインストールし、 `rust override set` する。</span></span><br><span class="line">      <span class="comment"># そうでなければ何もしないので、後続の `cargo` コマンド実行時に `rust-toolchain` ファイルに記載された rustc が勝手にインストールされて使用される。</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">when:</span></span><br><span class="line">          <span class="attr">condition:</span> <span class="string">&lt;&lt;</span> <span class="string">parameters.rust_version</span> <span class="string">&gt;&gt;</span></span><br><span class="line">          <span class="attr">steps:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">run:</span></span><br><span class="line">                <span class="attr">name:</span> <span class="string">Install</span> <span class="string">&amp;</span> <span class="string">select</span> <span class="string">$rust_version</span> <span class="string">if</span> <span class="string">specified</span></span><br><span class="line">                <span class="attr">command:</span> <span class="string">|</span></span><br><span class="line">                  <span class="string">rustup</span> <span class="string">install</span> <span class="string">&lt;&lt;</span> <span class="string">parameters.rust_version</span> <span class="string">&gt;&gt;</span></span><br><span class="line">                  <span class="string">rustup</span> <span class="string">override</span> <span class="string">set</span> <span class="string">&lt;&lt;</span> <span class="string">parameters.rust_version</span> <span class="string">&gt;&gt;</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">run:</span> <span class="meta">*build_dep</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">restore_cache:</span></span><br><span class="line">          <span class="attr">key:</span> <span class="string">*cache-key</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">run:</span></span><br><span class="line">          <span class="attr">name:</span> <span class="string">build</span> <span class="string">&amp;</span> <span class="string">test</span></span><br><span class="line">          <span class="attr">command:</span> <span class="string">RUST_BACKTRACE=1</span> <span class="string">cargo</span> <span class="string">test</span> <span class="string">--verbose</span> <span class="string">--all</span> <span class="string">--</span> <span class="string">--nocapture</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">save_cache:</span></span><br><span class="line">          <span class="attr">key:</span> <span class="string">*cache-key</span></span><br><span class="line">          <span class="attr">paths:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">~/.cargo</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">target</span></span><br><span class="line"></span><br><span class="line"><span class="attr">workflows:</span></span><br><span class="line">  <span class="attr">version:</span> <span class="number">2</span></span><br><span class="line">  <span class="attr">test:</span></span><br><span class="line">    <span class="attr">jobs:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">readme</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">lint</span></span><br><span class="line"></span><br><span class="line">      <span class="comment"># パラメータでMSRVを指定</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">test:</span></span><br><span class="line">          <span class="attr">name:</span> <span class="string">MSRV</span> <span class="string">(Minimum</span> <span class="string">Supported</span> <span class="string">Rust</span> <span class="string">Version)</span></span><br><span class="line">          <span class="attr">rust_version:</span> <span class="number">1.40</span><span class="number">.0</span></span><br><span class="line"></span><br><span class="line">      <span class="comment"># パラメータ指定なしなので、 rust-toolchain に記載のバージョンが使われる</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">test:</span></span><br><span class="line">          <span class="attr">name:</span> <span class="string">Rust</span> <span class="string">Version</span> <span class="string">from</span> <span class="string">`rust-toolchain`</span></span><br></pre></td></tr></table></figure>
+
+    
+	</div>
+	<footer class="entry-footer">
+		<div class="entry-meta-footer">
+			<span class="category">
+				
+			</span>
+			<span class="tags">
+				
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Rust/" rel="tag">Rust</a></li></ul>
+
+			</span>
+		</div>
+	</footer>
+    
+    <footer class="author-info clearfix">
+      <img class="author-picture circle" src="https://www.gravatar.com/avatar/cb02a2b3f429b7c938d1fe2665e8e342">
+      <div class="author-content right">
+        <div class="author-caption">
+          <span class="label">author</span>
+          Sho Nakatani a.k.a. laysakura
+        </div>
+        <p class="author-description">
+          東京大学大学院 情報理工学系研究科 電子情報学専攻 修士課程で並列分散処理・ストリーム処理・データベースを研究。<br>
+          2014年4月に株式会社ディー・エヌ・エーにエンジニアスペシャリストとして入社し、ソーシャルゲームのサーバサイド共通基盤の開発に従事。<br>
+          2016年8月より、オンライン証券会社<a href="https://folio-sec.com" target="_blank" rel="noopener">株式会社FOLIO</a>に入社。バックエンドシステム開発・プロジェクトマネージメント・Engineering Managementに従事。<br>
+          2020年3月より<a href="https://idein.jp" target="_blank" rel="noopener">Idein株式会社</a>所属。<br>
+          随時副業募集中です: <a href="https://github.com/laysakura/resume-jp-for-side-job" target="_blank" rel="noopener">職務経歴書や募集職種</a>
+        </p>
+        <ul class="author-social-buttons">
+          <li class="author-social-button"><a class="fa fa-lg fa-twitter-square" href="https://twitter.com/laysakura" target="_blank" rel="noopener"></a></li>
+          <li class="author-social-button"><a class="fa fa-lg fa-github-square" href="https://github.com/laysakura" target="_blank" rel="noopener"></a></li>
+          <li class="author-social-button"><a class="fa fa-lg fa-facebook-square" href="https://www.facebook.com/lay.sakura" target="_blank" rel="noopener"></a></li>
+        </ul>
+      </div>
+    </footer>
+    
+	
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2020/02/16/handcraft-cpu-os-4/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          自作CPU &amp; 自作OSをやっていく (4) - macOSでPapilio Pro LX9のFPGAにBitstreamファイルを書き込む
+        
+      </div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+
+
+<section id="comments">
+  <div id="disqus_thread">
+
+  <!-- comment service provided by disqus -->
+  <script>
+    /**
+     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+     */
+    var disqus_config = function () {
+        this.page.url = https://laysakura.github.io/2020/03/06/rust-circle-ci/;  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = https://laysakura.github.io/2020/03/06/rust-circle-ci/; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    (function() {  // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        
+        s.src = '//laysakura.disqus.com/embed.js';
+        
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript" target="_blank" rel="noopener">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+    </div>
+    <div class="mb-search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:laysakura.github.io">
+  </form>
+</div>
+<footer id="footer">
+	<h1 class="footer-blog-title">
+		<a href="/">俺とお前とlaysakura</a>
+	</h1>
+	<span class="copyright">
+		&copy; 2020 Sho Nakatani a.k.a. laysakura<br>
+		Modify from <a href="https://sanographix.github.io/tumblr/apollo/" target="_blank">Apollo</a> theme, designed by <a href="https://www.sanographix.net/" target="_blank">SANOGRAPHIX.NET</a><br>
+		Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+	</span>
+</footer>
+
+    
+<script>
+  var disqus_shortname = 'laysakura';
+  
+  var disqus_url = 'https://laysakura.github.io/2020/03/06/rust-circle-ci/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+
+  <!-- https://github.com/vfeskov/vanilla-back-to-top -->
+  <script src="https://unpkg.com/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js"></script>
+  <script>addBackToTop({
+    diameter: 50,
+    backgroundColor: '#33a6b880',
+    textColor: '#fff'
+  })</script>
+
+</body>
+</html>
