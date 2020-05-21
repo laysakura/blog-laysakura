@@ -75,6 +75,68 @@
     <div id="main">
       
   
+    <article id="post-二分木-Rustではじめるデータ構造とアルゴリズム（第1回）" class="post">
+  <footer class="entry-meta-header">
+    <span class="meta-elements date">
+      <a href="/2019/12/22/rust-DataStructures-Algorithm-BinaryTree/" class="article-date">
+  <time datetime="2019-12-22T06:04:14.000Z" itemprop="datePublished">2019-12-22</time>
+</a>
+    </span>
+  </footer>
+  
+  <header class="entry-header">
+    
+  
+    <h1 itemprop="name" class="entry-title">
+      <a class="article-title" href="/2019/12/22/rust-DataStructures-Algorithm-BinaryTree/">二分木 - Rustではじめるデータ構造とアルゴリズム（第1回）</a>
+    </h1>
+  
+
+  </header>
+  <div class="entry-content">
+    
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Binary_tree.svg/384px-Binary_tree.svg.png" alt="簡単な二分木（引用元: Wikipedia）" width="400" height="333">
+
+<p>Rustの特徴のひとつは、所有権(ownership)・移動(move)・借用(borrow)の概念です。これらがコンパイル時に厳格にチェックされることにより、古くから未定義挙動でプログラマを悩ませてきたダングリングポインタなどの問題がなくなり、メモリ安全性がもたらされます。</p>
+<p>しかし一方で、自分で多少複雑なデータ構造を定義しようとする場合にはコンパイルを通すだけでもかなりの知識・力量が要求されます。</p>
+<p>この（不定期）連載では、 <strong>Rustではじめるデータ構造とアルゴリズム</strong> と題し、プログラミングコンテストなどでよく見かける基礎的なデータ構造とアルゴリズムを、できるだけシンプルにRustで実装していきます。 <code>&amp;</code>, <code>&amp;mut</code>, <code>Box</code>, <code>Rc</code>, <code>Cell</code>, <code>RefCell</code> などの使い分けや、なぜそれを使う必要があるかの解説を、実例を通して行います。</p>
+<p>第1回は、最もシンプルな木構造である <strong>二分木</strong> を取り扱います。基礎的な木構造なので、再帰・深さ優先探索・幅優先探索のエッセンスを集中的に理解することが期待できます。</p>
+<p>各回共通し、以下のような構成を予定しています。</p>
+<ol>
+<li>データ構造の説明と、Rustでの定義</li>
+<li>関連するアルゴリズムの説明と、（汎用的に実装できる場合は）Rustでの実装</li>
+<li>定義したデータ構造とアルゴリズムを使って、プログラミングコンテストの問題を解いてみる</li>
+</ol>
+    
+    <p class="article-more-link">
+      <a href="/2019/12/22/rust-DataStructures-Algorithm-BinaryTree/#more">続きを読む</a>
+    </p>
+    
+    
+  </div>
+  <footer class="entry-footer">
+    <div class="entry-meta-footer">
+      <span class="category">
+        
+      </span>
+      <span class="tags">
+        
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Rust/" rel="tag">Rust</a></li></ul>
+
+      </span>
+    </div>
+  </footer>
+  
+  
+</article>
+
+
+<hr class="article-devider">
+
+
+
+
+  
     <article id="post-プレイイングマネージャーのポテンシャルエナジー理論" class="post">
   <footer class="entry-meta-header">
     <span class="meta-elements date">
@@ -593,59 +655,6 @@
       <span class="tags">
         
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E3%83%87%E3%83%BC%E3%82%BF%E3%83%99%E3%83%BC%E3%82%B9/" rel="tag">データベース</a></li></ul>
-
-      </span>
-    </div>
-  </footer>
-  
-  
-</article>
-
-
-<hr class="article-devider">
-
-
-
-
-  
-    <article id="post-MySQL-5-6-で動くストレージエンジン・テンプレート" class="post">
-  <footer class="entry-meta-header">
-    <span class="meta-elements date">
-      <a href="/2013/02/10/mysql5.6-storage-engine-template/" class="article-date">
-  <time datetime="2013-02-10T00:59:08.000Z" itemprop="datePublished">2013-02-10</time>
-</a>
-    </span>
-  </footer>
-  
-  <header class="entry-header">
-    
-  
-    <h1 itemprop="name" class="entry-title">
-      <a class="article-title" href="/2013/02/10/mysql5.6-storage-engine-template/">MySQL 5.6 で動くストレージエンジン・テンプレート</a>
-    </h1>
-  
-
-  </header>
-  <div class="entry-content">
-    
-    <p>MySQL 5.6 で動く Skeleton Engine, <strong>Yet Another Skeleton Engine</strong> を Github で公開してます．<br><a href="https://github.com/laysakura/mysql-YetAnotherSkeletonEngine" target="_blank" rel="noopener">https://github.com/laysakura/mysql-YetAnotherSkeletonEngine</a></p>
-<p>Skeleton Engine は MySQL のストレージエンジンを作成するためのテンプレートです．<br>オリジナルのものは<br><a href="http://www.sourcefiles.org/Databases/Utilities/" target="_blank" rel="noopener">http://www.sourcefiles.org/Databases/Utilities/</a><br>の skeleton_engine-0.7.tar.gz でダウンロード可能でした(2013/02/10 現在)が，古いバージョンの MySQL を前提としており，MySQL 5.6 にオリジナルのままの Skeleton Engine を組込むことはできません．<br>オリジナルのものが MySQL 5.6 で使えない理由は最後の節に記載します．</p>
-<p>そこで Yet Another Skeleton Engine と名付けまして，MySQL 5.6 で動くストレージエンジンのテンプレートを公開しました．<br>本エントリでは，まず Yet Another Skeleton Engine の使い方を記し，次にメモ程度にリポジトリ作成作業のログを記します．</p>
-    
-    <p class="article-more-link">
-      <a href="/2013/02/10/mysql5.6-storage-engine-template/#more">続きを読む</a>
-    </p>
-    
-    
-  </div>
-  <footer class="entry-footer">
-    <div class="entry-meta-footer">
-      <span class="category">
-        
-      </span>
-      <span class="tags">
-        
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/MySQL/" rel="tag">MySQL</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E3%83%87%E3%83%BC%E3%82%BF%E3%83%99%E3%83%BC%E3%82%B9/" rel="tag">データベース</a></li></ul>
 
       </span>
     </div>

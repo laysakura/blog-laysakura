@@ -75,6 +75,72 @@
     <div id="main">
       
   
+    <article id="post-Rustの2種類のstatic" class="post">
+  <footer class="entry-meta-header">
+    <span class="meta-elements date">
+      <a href="/2020/05/21/rust-static-lifetime-and-static-bounds/" class="article-date">
+  <time datetime="2020-05-21T08:19:56.000Z" itemprop="datePublished">2020-05-21</time>
+</a>
+    </span>
+  </footer>
+  
+  <header class="entry-header">
+    
+  
+    <h1 itemprop="name" class="entry-title">
+      <a class="article-title" href="/2020/05/21/rust-static-lifetime-and-static-bounds/">Rustの2種類の &#39;static</a>
+    </h1>
+  
+
+  </header>
+  <div class="entry-content">
+    
+    <img src="/img/2020-05-21-19-04-46.png" alt="2種類の 'static" width="auto" height="auto">
+
+<p>Rustの <code>&#39;static</code> 、難しいですよね。</p>
+<p>「プログラム中ずっと生き残るライフタイムでしょ？簡単簡単」</p>
+<p>なるほど。では次の2つの <code>&#39;static</code> の違いがわかるでしょうか？</p>
+<figure class="highlight rust"><figcaption><span>1つめ</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> x: &amp;<span class="symbol">'static</span> <span class="built_in">str</span> = <span class="string">"Hello, world."</span>;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight rust"><figcaption><span>2つめ</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// Returns some reference to the boxed value if it is of type `T`, or</span></span><br><span class="line"><span class="comment">/// `None` if it isn't.</span></span><br><span class="line"><span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">downcast_ref</span></span>&lt;T: Error + <span class="symbol">'static</span>&gt;(&amp;<span class="keyword">self</span>) -&gt; <span class="built_in">Option</span>&lt;&amp;T&gt; &#123; ... &#125;</span><br></pre></td></tr></table></figure>
+
+<p>「・・・2つめのなんだっけ？」<br>という人はぜひ読んでみてください🦀</p>
+<p>この記事では、Rustの2種類の <code>&#39;static</code> 、</p>
+<ul>
+<li><code>&#39;static</code> ライフタイム</li>
+<li><code>&#39;static</code> ライフタイム <strong>境界</strong></li>
+</ul>
+<p>を解説します。</p>
+    
+    <p class="article-more-link">
+      <a href="/2020/05/21/rust-static-lifetime-and-static-bounds/#more">続きを読む</a>
+    </p>
+    
+    
+  </div>
+  <footer class="entry-footer">
+    <div class="entry-meta-footer">
+      <span class="category">
+        
+      </span>
+      <span class="tags">
+        
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Rust/" rel="tag">Rust</a></li></ul>
+
+      </span>
+    </div>
+  </footer>
+  
+  
+</article>
+
+
+<hr class="article-devider">
+
+
+
+
+  
     <article id="post-ぼくのかんがえたさいきょうの-Circle-CI-設定-for-Rust" class="post">
   <footer class="entry-meta-header">
     <span class="meta-elements date">

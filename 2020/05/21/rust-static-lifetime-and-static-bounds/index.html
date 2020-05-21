@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Rustの2種類の &#39;static | 俺とお前とlaysakura</title>
+  
+  <link rel="canonical" href="https://laysakura.github.io/2020/05/21/rust-static-lifetime-and-static-bounds/"/>
+  <meta name="viewport" content="width=device-width">
+  <meta name="description" content="Rustの &#39;static 、難しいですよね。 「プログラム中ずっと生き残るライフタイムでしょ？簡単簡単」 なるほど。では次の2つの &#39;static の違いがわかるでしょうか？ 1つめ1let x: &amp;&#39;static str &#x3D; &quot;Hello, world.&quot;;  2つめ123&#x2F;&#x2F;&#x2F; Returns some reference to the boxed value i">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Rustの2種類の &#39;static">
+<meta property="og:url" content="https://laysakura.github.io/2020/05/21/rust-static-lifetime-and-static-bounds/index.html">
+<meta property="og:site_name" content="俺とお前とlaysakura">
+<meta property="og:description" content="Rustの &#39;static 、難しいですよね。 「プログラム中ずっと生き残るライフタイムでしょ？簡単簡単」 なるほど。では次の2つの &#39;static の違いがわかるでしょうか？ 1つめ1let x: &amp;&#39;static str &#x3D; &quot;Hello, world.&quot;;  2つめ123&#x2F;&#x2F;&#x2F; Returns some reference to the boxed value i">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:image" content="https://laysakura.github.io/img/2020-05-21-19-04-46.png">
+<meta property="og:image" content="https://laysakura.github.io/img/2020-05-21-17-45-05.png">
+<meta property="og:image" content="https://laysakura.github.io/img/2020-05-21-17-45-47.png">
+<meta property="article:published_time" content="2020-05-21T08:19:56.000Z">
+<meta property="article:modified_time" content="2020-05-21T10:09:35.000Z">
+<meta property="article:author" content="Sho Nakatani a.k.a. laysakura">
+<meta property="article:tag" content="Rust">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://laysakura.github.io/img/2020-05-21-19-04-46.png">
+
+  <!-- favicon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+  <link rel="icon" href="/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+  <link rel="manifest" href="/favicon/site.webmanifest">
+  <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#5bbad5">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="theme-color" content="#ffffff">
+
+  
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-22289437-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+  <!-- MathJax -->
+  <script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+  <div id="container">
+    <div class="mobile-nav-panel">
+	<i class="icon-reorder icon-large"></i>
+</div>
+<header id="header">
+	<h1 class="blog-title">
+		<a href="/">俺とお前とlaysakura</a>
+	</h1>
+	<nav class="nav">
+		<ul>
+			<li><a href="/archives">過去の投稿</a></li>
+			<li><a id="nav-search-btn" class="nav-icon" title="Search"></a></li>
+			<li><a href="http://cloud.feedly.com/#subscription%2Ffeed%2Fhttps%3A%2F%2Flaysakura.github.io%2Fatom.xml" target="_blank" rel="noopener" id="nav-rss-link" class="nav-icon" title="RSS Feed"></a></li>
+		</ul>
+	</nav>
+	<div id="search-form-wrap">
+		<form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://laysakura.github.io"></form>
+	</div>
+</header>
+    <div id="main">
+      <article id="post-Rustの2種類のstatic" class="post">
+  <footer class="entry-meta-header">
+    <span class="meta-elements date">
+      <a href="/2020/05/21/rust-static-lifetime-and-static-bounds/" class="article-date">
+  <time datetime="2020-05-21T08:19:56.000Z" itemprop="datePublished">2020-05-21</time>
+</a>
+    </span>
+  </footer>
+  
+  <header class="entry-header">
+    
+  
+    <h1 class="article-title entry-title" itemprop="name">
+      Rustの2種類の &#39;static
+    </h1>
+  
+
+  </header>
+  <div class="entry-content">
+    
+    <img src="/img/2020-05-21-19-04-46.png" alt="2種類の 'static" width="auto" height="auto">
+
+<p>Rustの <code>&#39;static</code> 、難しいですよね。</p>
+<p>「プログラム中ずっと生き残るライフタイムでしょ？簡単簡単」</p>
+<p>なるほど。では次の2つの <code>&#39;static</code> の違いがわかるでしょうか？</p>
+<figure class="highlight rust"><figcaption><span>1つめ</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> x: &amp;<span class="symbol">'static</span> <span class="built_in">str</span> = <span class="string">"Hello, world."</span>;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight rust"><figcaption><span>2つめ</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// Returns some reference to the boxed value if it is of type `T`, or</span></span><br><span class="line"><span class="comment">/// `None` if it isn't.</span></span><br><span class="line"><span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">downcast_ref</span></span>&lt;T: Error + <span class="symbol">'static</span>&gt;(&amp;<span class="keyword">self</span>) -&gt; <span class="built_in">Option</span>&lt;&amp;T&gt; &#123; ... &#125;</span><br></pre></td></tr></table></figure>
+
+<p>「・・・2つめのなんだっけ？」<br>という人はぜひ読んでみてください🦀</p>
+<p>この記事では、Rustの2種類の <code>&#39;static</code> 、</p>
+<ul>
+<li><code>&#39;static</code> ライフタイム</li>
+<li><code>&#39;static</code> ライフタイム <strong>境界</strong></li>
+</ul>
+<p>を解説します。</p>
+<a id="more"></a>
+
+<h2><span id="目次">目次</span></h2><!-- toc -->
+
+<ul>
+<li><a href="#static-ライフタイム"><code>&#39;static</code> ライフタイム</a></li>
+<li><a href="#static-ライフタイム-境界"><code>&#39;static</code> ライフタイム <strong>境界</strong></a><ul>
+<li><a href="#おまけ-static-じゃないライフタイム境界">おまけ: <code>&#39;static</code> じゃないライフタイム境界</a></li>
+</ul>
+</li>
+<li><a href="#記事を書いた背景">記事を書いた背景</a></li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="39static-ライフタイム"><code>&#39;static</code> ライフタイム</span></h2><p>あまり難しくないです。<br><code>&#39;static</code> ライフタイムは、 <strong>プログラムが走っている間ずっと有効な値への参照に対してつけられる、最大のライフタイム</strong> です。<br>“プログラムが走っている間ずっと有効な値” の例としては、</p>
+<ul>
+<li>リテラル (<code>1</code>, <code>&quot;abc&quot;</code>)</li>
+<li>定数 ( <code>const N: i32 = 5;</code> )</li>
+<li>グローバル変数 ( <code>static N: i32 = 5;</code> )</li>
+</ul>
+<p>などがあります。</p>
+<p>冒頭にも出した例は、文字列リテラルへの <code>&#39;static</code> ライフタイムを持つ参照です。</p>
+<figure class="highlight rust"><figcaption><span>'static ライフタイム</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> x: &amp;<span class="symbol">'static</span> <span class="built_in">str</span> = <span class="string">"Hello, world."</span>;</span><br></pre></td></tr></table></figure>
+
+<p>“プログラムが走っている間ずっと有効な値” への参照だからといって、 <code>&#39;static</code> ライフタイムを使う必要はありません。より短いライフタイムをつけることもできます（ <code>&#39;static</code> よりも長いライフタイムはありません）。</p>
+<figure class="highlight rust"><figcaption><span>リテラルの参照のライフタイムに、関数の引数のライフタイムと同じものを使う例</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">f</span></span>&lt;<span class="symbol">'a</span>&gt;(v: &amp;<span class="symbol">'a</span> <span class="built_in">u32</span>) &#123;</span><br><span class="line">    <span class="keyword">let</span> x: &amp;<span class="symbol">'a</span> <span class="built_in">str</span> = <span class="string">"Hello, world."</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2><span id="39static-ライフタイム-境界"><code>&#39;static</code> ライフタイム <strong>境界</strong></span></h2><p>こちらは比較的難しいです。</p>
+<p>ジェネリクスにトレイト境界がつくことありますよね。 <code>T: Ord + Debug</code> だと、「 <code>T</code> という型は何でもいいんだけど、 <code>Ord</code> トレイトと <code>Debug</code> トレイトだけは実装された型じゃないと受け付けない」という制約を表します。</p>
+<p>トレイト境界と同様に、型に対してライフタイム境界を指定することもできます。 <code>T: &#39;a</code> や <code>T: &#39;static</code> といった指定ですね。後者は <code>T</code> に対して <code>&#39;static</code> ライフタイム境界がついています。</p>
+<p>まずは厳密な話よりも実用上重要なポイントを述べます。 <strong>型 <code>T</code> に <code>&#39;static</code> ライフタイム境界がついているならば、 <code>T</code> が struct や enum であった場合、そのフィールドには参照を含まないことを要請する。</strong> という使い方が大半です。<br>もう少し厳密にいうと、 <code>T: &#39;static</code> ならば、型 <code>T</code> のフィールドに参照を含んでいても良いが、含むならばその参照は <code>&amp;&#39;static</code> である (<code>&#39;static</code> ライフタイムを持つ)、です。<br>自分はstructやenumに <code>&#39;static</code> ライフタイムな参照を含めたくなったケースがない（その場合は値そのものをフィールドにする）ので、太字の考え方をしています。</p>
+<p>ここまで知ってしまえば意外と簡単に思えてきますね。</p>
+<p>ではここで理解度クイズです。(1)~(4)でコンパイルエラーを引き起こす呼び出しを全て挙げてください。</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 'static ライフタイム境界を満たす型Tなら何でも受け付ける</span></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">i_need_static_bound_type</span></span>&lt;T: <span class="symbol">'static</span>&gt;(v: T) &#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 参照を含まない</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">IHaveValue</span></span>(<span class="built_in">String</span>);</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">IHaveStaticRef</span></span>(&amp;<span class="symbol">'static</span> <span class="built_in">str</span>);</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">IHaveNonStaticRef</span></span>&lt;<span class="symbol">'a</span>&gt;(&amp;<span class="symbol">'a</span> <span class="built_in">str</span>);</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">main</span></span>() &#123;</span><br><span class="line">    i_need_static_bound_type(IHaveValue(<span class="string">"abc"</span>.to_string())); <span class="comment">// (1)</span></span><br><span class="line">    i_need_static_bound_type(IHaveStaticRef(<span class="string">"abc"</span>)); <span class="comment">// (2)</span></span><br><span class="line">    i_need_static_bound_type(IHaveNonStaticRef(<span class="string">"abc"</span>)); <span class="comment">// (3)</span></span><br><span class="line"></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">let</span> local_string: <span class="built_in">String</span> = <span class="built_in">format!</span>(<span class="string">"abc"</span>);</span><br><span class="line">        i_need_static_bound_type(IHaveNonStaticRef(&amp;local_string)); <span class="comment">// (4)</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>わかりましたか？正解は…</p>
+<p>🦀<br>ミ🦀<br>🦀彡<br>ミ🦀<br>🦀彡<br>ミ🦀<br>🦀彡<br>ミ🦀<br>🦀彡<br>ミ🦀<br>🦀彡<br>ミミ🦀<br>🦀彡彡</p>
+<p><strong><em>(4) だけです！</em></strong></p>
+<p>(1)(2)が <code>i_need_static_bound_type</code> への <code>T</code> として受け入れられるのはわかりますね。前者は値だけを持ったstructを渡していて、後者は <code>&#39;static</code> ライフタイムな参照だけを持ったstructを渡しています。<br>(3) がコンパイルエラーにならないのは少々意外かもしれません。関数呼び出し時に渡す引数の参照のライフタイムを指定していない場合は、可能な限り最大のライフタイムが割り当てられます。この場合は <code>&quot;abc&quot;</code> というリテラルを指定しているので、プログラムが走っている間はずっと値が生きています。なので最大の <code>&#39;static</code> ライフタイムが割り当てられます。<br>(4) は <code>local_string</code> という、内側の <code>{}</code> に囲まれたスコープで死んでしまう値の参照を渡しています。この参照のライフタイムは <code>&#39;static</code> ライフタイムより短いので、 <code>T: &#39;static</code> で <code>&#39;static</code> ライフタイム境界を要請している <code>i_need_static_bound_type</code> には渡せなかったわけですね。</p>
+<h3><span id="おまけ-39static-じゃないライフタイム境界">おまけ: <code>&#39;static</code> じゃないライフタイム境界</span></h3><p>ライフタイム境界には、 <code>T: &#39;a</code> のように、 <code>&#39;static</code> ではないライフタイムも指定できます。この場合も <code>&#39;static</code> ライフタイムと同様、<br><strong><code>T</code> （自体やそのフィールド）には参照が含まれていない。または参照が含まれていたら、その参照のライフタイムは全て <code>&#39;a</code> 以上。</strong> という制約を表します。</p>
+<p>まず <code>&#39;static</code> ライフタイムをしっかり身につけてからだと、すんなり理解できると思います。ここまで理解できたら、是非 <a href="https://doc.rust-jp.rs/book/second-edition/ch19-02-advanced-lifetimes.html" target="_blank" rel="noopener">高度なライフタイム</a> も読んでみてください。</p>
+<h2><span id="記事を書いた背景">記事を書いた背景</span></h2><p><a href="https://rust-jp.rs/" target="_blank" rel="noopener">rust-jp Slackチーム</a> に、 <a href="https://rust-jp.slack.com/archives/C0562JBPY/p1580988202180800" target="_blank" rel="noopener"><code>&#39;static</code> に関する一連の投稿</a> がありました。</p>
+<img src="/img/2020-05-21-17-45-05.png" alt="slack1" width="auto" height="auto">
+<img src="/img/2020-05-21-17-45-47.png" alt="slack2" width="auto" height="auto">
+
+<p>※内容が主題なので投稿者はぼかしてます。</p>
+<p>正直当初はまるでわからなかったのですが、紆余曲折を経てわかるようになったので記事にしました。</p>
+<p>わからないことがわかるようになるのは嬉しいですね。</p>
+
+    
+  </div>
+  <footer class="entry-footer">
+    <div class="entry-meta-footer">
+      <span class="category">
+        
+      </span>
+      <span class="tags">
+        
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Rust/" rel="tag">Rust</a></li></ul>
+
+      </span>
+    </div>
+  </footer>
+  
+  <footer class="author-info clearfix">
+    <img class="author-picture circle" src="https://www.gravatar.com/avatar/cb02a2b3f429b7c938d1fe2665e8e342">
+    <div class="author-content right">
+      <div class="author-caption">
+        <span class="label">author</span>
+        Sho Nakatani a.k.a. laysakura
+      </div>
+      <p class="author-description">
+        東京大学大学院 情報理工学系研究科 電子情報学専攻 修士課程で並列分散処理・ストリーム処理・データベースを研究。<br>
+        2014年4月に株式会社ディー・エヌ・エーにエンジニアスペシャリストとして入社し、ソーシャルゲームのサーバサイド共通基盤の開発に従事。<br>
+        2016年8月より、オンライン証券会社<a href="https://folio-sec.com" target="_blank" rel="noopener">株式会社FOLIO</a>に入社。バックエンドシステム開発・プロジェクトマネージメント・Engineering
+        Managementに従事。<br>
+        2020年3月より<a href="https://idein.jp" target="_blank" rel="noopener">Idein株式会社</a>所属。デバイス・高性能計算関連の研究開発。<br>
+      </p>
+      <ul class="author-social-buttons">
+        <li class="author-social-button"><a class="fa fa-lg fa-twitter-square" href="https://twitter.com/laysakura" target="_blank" rel="noopener"></a>
+        </li>
+        <li class="author-social-button"><a class="fa fa-lg fa-github-square" href="https://github.com/laysakura" target="_blank" rel="noopener"></a>
+        </li>
+        <li class="author-social-button"><a class="fa fa-lg fa-facebook-square"
+            href="https://www.facebook.com/lay.sakura"></a></li>
+      </ul>
+    </div>
+  </footer>
+  
+  
+  
+<nav id="article-nav">
+  
+  
+    <a href="/2020/03/06/rust-circle-ci/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          ぼくのかんがえたさいきょうの CircleCI 設定 for Rust
+        
+      </div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+
+
+<section id="comments">
+  <div id="disqus_thread">
+
+    <!-- comment service provided by disqus -->
+    <script>
+      /**
+       *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+       *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+       */
+      var disqus_config = function () {
+        this.page.url = https://laysakura.github.io/2020/05/21/rust-static-lifetime-and-static-bounds/;  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = https://laysakura.github.io/2020/05/21/rust-static-lifetime-and-static-bounds/; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+      };
+      (function () {  // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+
+        s.src = '//laysakura.disqus.com/embed.js';
+
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript" target="_blank" rel="noopener">comments powered by
+        Disqus.</a></noscript>
+  </div>
+</section>
+
+
+    </div>
+    <div class="mb-search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:laysakura.github.io">
+  </form>
+</div>
+<footer id="footer">
+	<h1 class="footer-blog-title">
+		<a href="/">俺とお前とlaysakura</a>
+	</h1>
+	<span class="copyright">
+		&copy; 2020 Sho Nakatani a.k.a. laysakura<br>
+		Modify from <a href="https://sanographix.github.io/tumblr/apollo/" target="_blank">Apollo</a> theme, designed by <a href="https://www.sanographix.net/" target="_blank">SANOGRAPHIX.NET</a><br>
+		Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+	</span>
+</footer>
+
+    
+<script>
+  var disqus_shortname = 'laysakura';
+  
+  var disqus_url = 'https://laysakura.github.io/2020/05/21/rust-static-lifetime-and-static-bounds/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+
+  <!-- https://github.com/vfeskov/vanilla-back-to-top -->
+  <script src="https://unpkg.com/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js"></script>
+  <script>addBackToTop({
+    diameter: 50,
+    backgroundColor: '#33a6b880',
+    textColor: '#fff'
+  })</script>
+
+</body>
+</html>
